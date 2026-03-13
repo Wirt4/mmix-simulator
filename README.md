@@ -31,7 +31,7 @@ Localhosting
   # Shell into the rails-app container                                                                    
   docker compose -f .devcontainer/compose.yaml exec rails-app bash                                        
                   
-# Inside the container                                                                                  
-  cd /workspaces/mmix-simulator
-  bin/setup --skip-server
-  bin/rails server -b 0.0.0.0
+# Inside the container
+  * cd /workspaces/mmix-simulator
+  * bin/setup --skip-server
+  * bin/rails server -b 0.0.0.0
