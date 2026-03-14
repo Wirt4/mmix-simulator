@@ -8,3 +8,104 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+:root {
+  --editor-bg: #1e1e1e;
+  --editor-fg: #d4d4d4;
+  --editor-gutter: #2d2d2d;
+  --editor-gutter-fg: #858585;
+  --editor-border: #3c3c3c;
+  --editor-header-bg: #252526;
+  --editor-selection: #264f78;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #1a1a1a;
+  color: var(--editor-fg);
+  font-family: system-ui, -apple-system, sans-serif;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editor-container {
+  width: min(90vw, 900px);
+  height: 70vh;
+  border: 1px solid var(--editor-border);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.editor-header {
+  background: var(--editor-header-bg);
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--editor-border);
+  font-size: 13px;
+  color: var(--editor-gutter-fg);
+}
+
+.editor-title {
+  font-weight: 500;
+}
+
+.editor-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  background: var(--editor-bg);
+}
+
+.line-numbers {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  background: var(--editor-gutter);
+  color: var(--editor-gutter-fg);
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", "Menlo", "Consolas", monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: right;
+  user-select: none;
+  overflow: hidden;
+  min-width: 50px;
+  border-right: 1px solid var(--editor-border);
+}
+
+.line-numbers span {
+  display: block;
+  padding: 0 12px 0 8px;
+}
+
+.editor-textarea {
+  flex: 1;
+  background: var(--editor-bg);
+  color: var(--editor-fg);
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", "Menlo", "Consolas", monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 8px 12px;
+  border: none;
+  outline: none;
+  resize: none;
+  overflow-y: auto;
+  tab-size: 2;
+  white-space: pre;
+}
+
+.editor-textarea::placeholder {
+  color: var(--editor-gutter-fg);
+}
+
+.editor-textarea::selection {
+  background: var(--editor-selection);
+}
