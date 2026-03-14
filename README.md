@@ -35,3 +35,7 @@ Localhosting
   * cd /workspaces/mmix-simulator
   * bin/setup --skip-server
   * bin/rails server -b 0.0.0.0
+
+# Testing
+  With the container running and working from inside `workspaces/mmix-simulator`,
+`bin/rails test`
