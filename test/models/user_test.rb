@@ -8,5 +8,9 @@ class UserTest < ActiveSupport::TestCase
   test "name must not be blank" do
     user= User.new(user_name: "    ")
     assert !user.valid?
- end
+  end
+  test "name must not be nil" do
+    user = User.new(user_name: nil)
+    assert !user.valid?
+  end
 end
