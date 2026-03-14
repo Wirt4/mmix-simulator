@@ -1,12 +1,21 @@
 import { describe, it, expect, beforeEach } from "vitest"
 import Editor from "../../app/javascript/editor"
 
+/**
+ * Creates a textarea DOM element with an optional initial value.
+ * @param {string} [value=""] - The initial text content.
+ * @returns {HTMLTextAreaElement} The created textarea element.
+ */
 function createTextarea(value = "") {
   const textarea = document.createElement("textarea")
   textarea.value = value
   return textarea
 }
 
+/**
+ * Creates a div element to serve as the line number gutter.
+ * @returns {HTMLDivElement} The created div element.
+ */
 function createLineNumbers() {
   return document.createElement("div")
 }
