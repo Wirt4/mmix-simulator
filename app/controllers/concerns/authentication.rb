@@ -1,3 +1,8 @@
+# Provides authentication behavior for controllers.
+#
+# When included, requires authentication for all actions by default.
+# Controllers can opt out of authentication for specific actions using
+# allow_unauthenticated_access.
 module Authentication
   extend ActiveSupport::Concern
 
@@ -5,14 +10,22 @@ module Authentication
     before_action :require_authentication
     helper_method :authenticated?
   end
-
+  # Public: Skips authentication for specific actions in a controller.
+  #
+  # options - Hash of options passed to skip_before_action (e.g. only:,
+  #           except:).
+  #
+  # Examples
+  #
+  #   allow_unauthenticated_access only: [:index, :show]
+  #
+  # Returns nothing.
   class_methods do
     def allow_unauthenticated_access(**options)
       skip_before_action :require_authentication, **options
     end
   end
 
-=begin
   private
     def authenticated?
       resume_session
@@ -50,5 +63,4 @@ module Authentication
       Current.session.destroy
       cookies.delete(:session_id)
     end
-=end
 end
