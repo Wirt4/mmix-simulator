@@ -18,7 +18,9 @@ export default class Editor {
   }
 
   handleKeydown(event) {
-    this.textarea.value = "he  llo"
+    //    this.textarea.value = "he  llo"
+    this.textarea.value = this.textarea.value.substring(0, 2) + "  " + this.textarea.value.substring(2)
+
     /*
     if (event.key === "Tab") {
       event.preventDefault()
