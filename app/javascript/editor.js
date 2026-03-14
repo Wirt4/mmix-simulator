@@ -5,12 +5,8 @@ export default class Editor {
   }
 
   updateLineNumbers() {
-    const lines = this.textarea.value.split("\n").length
-    const numbers = []
-    for (let i = 1; i <= lines; i++) {
-      numbers.push(`<span>${i}</span>`)
-    }
-    this.lineNumbers.innerHTML = numbers.join("")
+    const numLines = this.textarea.value.split("\n").length
+    this.lineNumbers.innerHTML = this._generateLineNumbers(numLines)
   }
 
   syncScroll() {
@@ -18,18 +14,31 @@ export default class Editor {
   }
 
   handleKeydown(event) {
-    //    this.textarea.value = "he  llo"
-    this.textarea.value = this.textarea.value.substring(0, 2) + "  " + this.textarea.value.substring(2)
-
-    /*
     if (event.key === "Tab") {
+      const numSpaces = 2
       event.preventDefault()
-      const start = this.textarea.selectionStart
-      const end = this.textarea.selectionEnd
-      this.textarea.value = this.textarea.value.substring(0, start) + "  " + this.textarea.value.substring(end)
-      this.textarea.selectionStart = this.textarea.selectionEnd = start + 2
+      const selection = { start: this.textarea.selectionStart, end: this.textarea.selectionEnd }
+      this._insertChars(selection, numSpaces, " ")
+      this._advanceSelection(selection.start, numSpaces)
       this.updateLineNumbers()
     }
-    */
+  }
+
+  _generateLineNumbers(numLines) {
+    const numbers = []
+    for (let i = 1; i <= numLines; i++) {
+      numbers.push(`<span>${i}</span>`)
+    }
+    return numbers.join("")
+  }
+
+  _insertChars({ start, end }, delimiterCount, char) {
+    const { value } = this.textarea
+    const space = char.repeat(delimiterCount)
+    const newValue = value.substring(0, start) + space + value.substring(end)
+    this.textarea.value = newValue
+  }
+  _advanceSelection(start, numChars) {
+    this.textarea.selectionStart = this.textarea.selectionEnd = start + numChars
   }
 }
