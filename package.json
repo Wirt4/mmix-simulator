@@ -1,0 +1,30 @@
+{
+  "name": "mmix-simulator",
+  "version": "1.0.0",
+  "description": "This README would normally document whatever steps are necessary to get the application up and running.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wirt4/mmix-simulator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Wirt4/mmix-simulator/issues"
+  },
+  "homepage": "https://github.com/Wirt4/mmix-simulator#readme",
+  "devDependencies": {
+    "@hotwired/stimulus": "^3.2.2",
+    "jsdom": "^28.1.0",
+    "vitest": "^4.1.0"
+  }
+}
