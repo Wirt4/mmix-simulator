@@ -6,7 +6,7 @@ class UserTest < ActiveSupport::TestCase
     assert user.valid?
   end
   test "name must not be blank" do
-    user= User.new(name: "    ")
+    user= User.new(username: "    ")
     assert !user.valid?
  end
 end
