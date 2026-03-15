@@ -9,6 +9,6 @@ namespace :javascript do
   end
 end
 
-Rake::Task["test"].enhance(["javascript:test"]) do
+Rake::Task["test"].enhance([ "javascript:test" ]) do
   exit 1 if @javascript_failed
 end
