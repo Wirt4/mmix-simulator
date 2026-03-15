@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import Editor from "../editor"
+import Editor from "editor"
 
 export default class extends Controller {
   static targets = ["textarea", "lineNumbers"]
