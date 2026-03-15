@@ -1,13 +1,19 @@
 require "test_helper"
 
+# Public: Integration tests for SessionsController. Verifies login form
+# rendering, authentication with valid and invalid credentials, and
+# session destruction.
 class SessionsControllerTest < ActionDispatch::IntegrationTest
   setup { @user = User.take }
 
+  # Public: Verifies the login form renders successfully.
   test "new" do
     get new_session_path
     assert_response :success
   end
 
+  # Public: Verifies that valid credentials start a session and redirect
+  # to the root path.
   test "create with valid credentials" do
     post session_path, params: { email_address: @user.email_address, password: "password" }
 
@@ -15,6 +21,8 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert cookies[:session_id]
   end
 
+  # Public: Verifies that invalid credentials redirect back to the login
+  # form without setting a session cookie.
   test "create with invalid credentials" do
     post session_path, params: { email_address: @user.email_address, password: "wrong" }
 
@@ -22,6 +30,8 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_nil cookies[:session_id]
   end
 
+  # Public: Verifies that destroying a session clears the session cookie
+  # and redirects to the login form.
   test "destroy" do
     sign_in_as(User.take)
 
