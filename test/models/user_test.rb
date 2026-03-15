@@ -1,16 +1,11 @@
 require "test_helper"
 
+# Public: Tests for the User model.
 class UserTest < ActiveSupport::TestCase
-  test "name must be present" do
-    user = User.new(user_name: "name")
-    assert user.valid?
-  end
-  test "name must not be blank" do
-    user= User.new(user_name: "    ")
-    assert !user.valid?
-  end
-  test "name must not be nil" do
-    user = User.new(user_name: nil)
-    assert !user.valid?
+  # Public: Verify that email normalization strips leading/trailing
+  # whitespace and downcases the address.
+  test "downcases and strips email_address" do
+    user = User.new(email_address: " DOWNCASED@EXAMPLE.COM ")
+    assert_equal("downcased@example.com", user.email_address)
   end
 end

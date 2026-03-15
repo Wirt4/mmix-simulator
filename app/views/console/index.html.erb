@@ -1,0 +1,24 @@
+<% content_for(:title, "MMIX Simulator") %>
+
+<div class="editor-container" data-controller="editor">
+  <div class="editor-header">
+    <span class="editor-title">MMIX Assembly</span>
+  </div>
+  <div class="editor-body">
+    <!-- note the data-editor target: line numbers is manipulated by the js editor-->
+    <div class="line-numbers" data-editor-target="lineNumbers">
+      <span>1</span>
+    </div>
+       <!-- the editor also adjusts the text area: currently for tab logic -->
+    <textarea
+      class="editor-textarea"
+      data-editor-target="textarea"
+      data-action="input->editor#updateLineNumbers scroll->editor#syncScroll keydown->editor#handleKeydown"
+      spellcheck="false"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      placeholder="Enter MMIX assembly here..."
+    ></textarea>
+  </div>
+</div>

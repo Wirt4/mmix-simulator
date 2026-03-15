@@ -33,9 +33,14 @@ Localhosting
                   
 # Inside the container
   * cd /workspaces/mmix-simulator
-  * bin/setup --skip-server
-  * bin/rails server -b 0.0.0.0
+  * bin/rails server
 
 # Testing
-  With the container running and working from inside `workspaces/mmix-simulator`,
-`bin/rails test`
+## All
+With the container running and working from inside `workspaces/mmix-simulator`,
+`bin/rake test`
+## Ruby only
+Inside the container, run `bin/rails test`
+## JS only (verbose)
+(requires npm)
+run `npx vitest run` to get verbose output
