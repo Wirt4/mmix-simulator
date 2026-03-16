@@ -1,78 +1,67 @@
-# User Auth Features: Registration, Profile Management, Role-Based Access Control
+# User Auth Features: Registration, Role-Based Access Control, Admin User Management
 
 ## Context
 
-Rails 8.1 app (SQLite, Importmap, Hotwire, Minitest). Authentication is already fully implemented via Rails 8 generator: `User` model with `has_secure_password`, `Session` model, `Authentication` concern (cookie-based sessions), `SessionsController`, `PasswordsController`, password reset mailer. The `users` table has `email_address`, `password_digest`, `user_name`. The `ConsoleController` (root route) allows unauthenticated access. There is no `UsersController`, no registration flow, no role system, and no profile editing.
+Rails 8.1 app (SQLite, Importmap, Hotwire, Minitest). Authentication is already fully implemented via Rails 8 generator: `User` model with `has_secure_password`, `Session` model, `Authentication` concern (cookie-based sessions), `SessionsController`, `PasswordsController`, password reset mailer. The `users` table has `email_address`, `password_digest`, `user_name`, and `role` (integer, default 1, not null). The `ConsoleController` (root route) allows unauthenticated access. There is no `UsersController`, no registration flow, and no role system.
 
-Existing test patterns: Minitest, integration tests with `ActionDispatch::IntegrationTest`, `SessionTestHelper` for `sign_in_as`/`sign_out`, fixtures in `test/fixtures/users.yml` with bcrypt passwords.
+The `role` column migration has already been applied. The schema has `role` with `default: 1, null: false` and a unique index on `email_address`.
+
+Existing test patterns: Minitest, controller tests with `ActionDispatch::IntegrationTest`, `SessionTestHelper` for `sign_in_as`/`sign_out`, fixtures in `test/fixtures/users.yml` with bcrypt passwords.
 
 ## Architecture Decisions
 
-**Roles**: Integer enum on `users` table (`guest: 0, user: 1, admin: 2`). No join tables, no gems. Three fixed roles do not warrant more complexity.
+**Guest concept**: "Guest" is an unauthenticated visitor (`Current.user.nil?`), not a database role. There is no guest enum value. Guests can use the console (edit and run code) but cannot save work. The guest concept exists to lower friction — anyone can use the app immediately without account creation.
 
-**Authorization**: A new `Authorization` concern in `app/controllers/concerns/` providing `require_role` and `admin?`/`user?`/`guest?` helper methods. No Pundit/CanCanCan -- overkill for three roles.
+**Roles**: Integer enum on `users` table with two values: `user: 1, admin: 2`. No join tables, no gems. The numbering starts at 1 (not 0) because there is no guest role in the database. Default is `user` (1). This must be documented in the enum definition, the README, and tested in specs.
 
-**Registration**: Open signup. New users default to `user` role. No email verification (add later if needed).
+**Authorization**: A new `Authorization` concern in `app/controllers/concerns/` providing a reusable `require_role` class method. No Pundit/CanCanCan — overkill for two roles. Included in `ApplicationController` as scaffolding for future role gating across controllers.
 
-**Profile**: Users edit their own account via a singular `resource :profile` route backed by a `ProfilesController`. This avoids conflating admin user-management (`resources :users`) with self-service profile editing.
+**Registration**: Open signup. New users default to `user` role. No email verification (add later if needed). The intent is to tie saved programs to user accounts (save feature is future scope).
 
-**Admin user management**: The existing `resources :users` route gets a `UsersController` restricted to admins, for listing/editing/deleting users and assigning roles.
+**Profile management**: Deferred to a future iteration. Not needed until there is a visible feature that benefits from it.
 
-**Password changes on profile**: Require current password to set a new one (via `update_password` action on `ProfilesController`, or inline in `update`).
+**Admin user management**: A `UsersController` restricted to admins for viewing users, editing roles, and deleting users.
+
+**Deleted user with stale cookie**: Treated the same as "never logged in" — redirect to login page. No special "account deleted" message in this iteration.
+
+**`user_name` uniqueness**: Case-insensitive, normalized (strip + downcase), with both model validation and database unique index.
+
+**No UI changes to console or layout**: No nav bar, no username display. The console page remains unchanged. These are future scope.
 
 ## Database Migration
 
-One migration: `AddRoleToUsers`
+Already applied. The `users` table has:
 
 ```ruby
-add_column :users, :role, :integer, default: 1, null: false
-# default: 1 = "user" role
+t.integer "role", default: 1, null: false
 ```
 
-Update fixtures to include `role` values (admin fixture needed for testing).
+- `1` = `user` role (default)
+- `2` = `admin` role
+
+**Additional migration needed**: Add a unique index on `user_name` (case-insensitive). Add normalization in the model (`normalizes :user_name, with: ->(n) { n.strip.downcase }`, matching the existing `email_address` pattern).
 
 ## Feature 1: User Registration
 
 ### Files to create
-- `app/views/registrations/new.html.erb` -- signup form (user_name, email_address, password, password_confirmation)
-
-### Files to modify
-- `config/routes.rb` -- add `resource :registration, only: [:new, :create]`
-- `app/controllers/registrations_controller.rb` -- new controller:
+- `app/controllers/registrations_controller.rb` — new controller:
   - `allow_unauthenticated_access`
   - `new`: renders form
-  - `create`: builds User with `user` role, calls `start_new_session_for` on success, redirects to root; re-renders form on failure
+  - `create`: builds User with default `user` role, calls `start_new_session_for` on success, redirects to root; re-renders form on failure
   - Rate-limit `create` (10 per 3 minutes, matching existing pattern)
-- `app/views/sessions/new.html.erb` -- add "Sign up" link
+  - TomDoc on all public methods
+- `app/views/registrations/new.html.erb` — signup form (user_name, email_address, password, password_confirmation)
+
+### Files to modify
+- `config/routes.rb` — add `resource :registration, only: [:new, :create]`
+- `app/views/sessions/new.html.erb` — add "Sign up" link
 
 ### Security
 - Strong params: permit only `user_name`, `email_address`, `password`, `password_confirmation`. Never permit `role`.
 - `has_secure_password` handles bcrypt. Max password length 72 (bcrypt limit) already enforced in existing views.
 - Rate limiting on create to prevent mass account creation.
 
-## Feature 2: Profile Management
-
-### Files to create
-- `app/controllers/profiles_controller.rb` -- singular resource controller:
-  - `show`: display current user's profile
-  - `edit`: render edit form
-  - `update`: update user_name, email_address; if password fields present, require `current_password` and update password
-  - All actions require authentication (default behavior, no opt-out needed)
-  - Operates on `Current.user` only -- no `params[:id]`, no authorization bypass
-- `app/views/profiles/show.html.erb`
-- `app/views/profiles/edit.html.erb`
-
-### Files to modify
-- `config/routes.rb` -- add `resource :profile, only: [:show, :edit, :update]`
-- `app/views/layouts/application.html.erb` -- add nav with profile link, logout link (when authenticated), login/signup links (when not)
-- `app/models/user.rb` -- add validations: `validates :email_address, presence: true, uniqueness: true` and `validates :user_name, presence: true` (currently no validations beyond `has_secure_password`)
-
-### Security
-- Password change requires `current_password` param verified via `User.authenticate_by` before allowing update.
-- Strong params: never permit `role` in profile updates.
-- Operates on `Current.user` exclusively -- no IDOR possible.
-
-## Feature 3: Role-Based Access Control
+## Feature 2: Role-Based Access Control
 
 ### Files to create
 - `app/controllers/concerns/authorization.rb`:
@@ -89,43 +78,62 @@ Update fixtures to include `role` values (admin fixture needed for testing).
         end
       end
     end
-
-    private
-
-    def authorize_admin!
-      redirect_to root_path, alert: "Not authorized." unless Current.user&.admin?
-    end
   end
   ```
-- `app/controllers/users_controller.rb` -- admin-only CRUD:
-  - `require_role :admin`
-  - `index`, `edit`, `update` (including role assignment), `destroy`
-  - No `new`/`create` (registration handles user creation; admin can promote/demote via edit)
-- `app/views/users/index.html.erb` -- user list with roles
-- `app/views/users/edit.html.erb` -- edit form with role dropdown
+  TomDoc on the module and `require_role` method.
 
 ### Files to modify
-- `app/models/user.rb` -- add enum:
-  ```ruby
-  enum :role, { guest: 0, user: 1, admin: 2 }, default: :user, validate: true
-  ```
-- `app/controllers/application_controller.rb` -- include `Authorization`
-- `config/routes.rb` -- `resources :users` already exists; just needs the controller
-- `app/controllers/console_controller.rb` -- remains open (unauthenticated access). If guest role should restrict certain features, add that later.
-- `app/views/layouts/application.html.erb` -- show "Admin" link in nav for admin users
+- `app/models/user.rb` — add:
+  - `enum :role, { user: 1, admin: 2 }, default: :user, validate: true`
+  - `validates :email_address, presence: true, uniqueness: true`
+  - `validates :user_name, presence: true, uniqueness: true`
+  - `normalizes :user_name, with: ->(n) { n.strip.downcase }`
+  - TomDoc on the class explaining the role system
+- `app/controllers/application_controller.rb` — include `Authorization`
+- `app/controllers/console_controller.rb` — remains open (unauthenticated access), no changes needed
 
 ### Security
-- `require_role` runs after `require_authentication`, so role checks always have a valid `Current.user`.
-- Admin cannot delete themselves (guard in `UsersController#destroy`).
-- Role param permitted only in `UsersController` (admin context), never in registration or profile.
-- Seed an initial admin user in `db/seeds.rb` (no admin registration path).
+- `require_role` runs after `require_authentication` (which is a `before_action` from `Authentication`), so role checks always have a valid `Current.user`.
+- Role param never permitted in registration.
+
+## Feature 3: Admin User Management
+
+### Files to create
+- `app/controllers/users_controller.rb` — admin-only controller:
+  - `require_role :admin`
+  - `index`: list all users with their roles
+  - `edit`: render edit form with role dropdown
+  - `update`: update user role. Controller-level guard: cannot demote the last admin
+  - `destroy`: delete a user. Controller-level guards: cannot delete self, cannot delete the last admin
+  - TomDoc on all public methods
+- `app/views/users/index.html.erb` — user list with roles
+- `app/views/users/edit.html.erb` — edit form with role dropdown
+
+### Files to modify
+- `config/routes.rb` — change `resources :users` to `resources :users, only: [:index, :edit, :update, :destroy]`
+
+### Security
+- All actions require admin role via `require_role :admin`.
+- Admin cannot delete themselves (controller-level guard in `destroy`).
+- Admin cannot demote the last remaining admin (controller-level guard in `update`).
+- Last-admin guards are controller-level only — `rails console` retains full power for developers.
+- Role param permitted only in `UsersController` (admin context), never in registration.
+
+### Seeds (`db/seeds.rb`)
+Create a default admin account:
+```ruby
+User.find_or_create_by!(email_address: "admin@example.com") do |u|
+  u.user_name = "admin"
+  u.password = "changeme123"
+  u.role = :admin
+end
+```
 
 ## Route Summary (final state)
 
 ```ruby
 resource :session
 resource :registration, only: [:new, :create]
-resource :profile, only: [:show, :edit, :update]
 resources :passwords, param: :token
 resources :users, only: [:index, :edit, :update, :destroy]  # admin only
 root "console#index"
@@ -140,62 +148,77 @@ Add role values and an admin fixture:
 one:
   email_address: one@example.com
   password_digest: <%= password_digest %>
-  user_name: User One
+  user_name: userone
+  role: 1
+
+two:
+  email_address: two@example.com
+  password_digest: <%= password_digest %>
+  user_name: usertwo
   role: 1
 
 admin:
   email_address: admin@example.com
   password_digest: <%= password_digest %>
-  user_name: Admin User
+  user_name: adminuser
   role: 2
-
-guest:
-  email_address: guest@example.com
-  password_digest: <%= password_digest %>
-  user_name: Guest User
-  role: 0
 ```
 
 ### Test files to create
+
+- `test/models/user_test.rb` (extend existing):
+  - Role enum: `.admin?` and `.user?` predicates work correctly
+  - Default role is `user` (integer value 1)
+  - Enum rejects invalid role values
+  - Validations: `email_address` presence and uniqueness
+  - Validations: `user_name` presence and uniqueness (case-insensitive)
+  - `user_name` normalization: strip and downcase
+
 - `test/controllers/registrations_controller_test.rb`:
   - GET new renders form
   - POST create with valid params creates user, sets session, redirects to root
   - POST create with invalid params re-renders form, does not create user
   - POST create does not allow setting role via params
-- `test/controllers/profiles_controller_test.rb`:
-  - Requires authentication for all actions
-  - GET show displays current user info
-  - PATCH update changes user_name/email
-  - PATCH update with password fields requires current_password
-  - PATCH update rejects incorrect current_password
+  - New user defaults to `user` role
+
 - `test/controllers/users_controller_test.rb`:
   - All actions require admin role
-  - Non-admin gets redirected with alert
-  - Admin can list, edit, update role, destroy users
+  - Non-admin gets redirected with "Not authorized." alert
+  - Admin can list users
+  - Admin can edit and update a user's role
   - Admin cannot destroy themselves
-- `test/models/user_test.rb` (extend existing):
-  - Role enum works (`.admin?`, `.user?`, `.guest?`)
-  - Validations on email_address and user_name
-  - Default role is `user`
+  - Admin cannot destroy the last admin
+  - Admin cannot demote the last admin via update
+  - Admin can destroy a non-admin user
+
 - `test/controllers/concerns/authorization_test.rb`:
   - `require_role` blocks unauthorized roles
   - `require_role` allows authorized roles
 
-### Seeds (`db/seeds.rb`)
-Create a default admin account:
-```ruby
-User.find_or_create_by!(email_address: "admin@example.com") do |u|
-  u.user_name = "Admin"
-  u.password = "changeme123"
-  u.role = :admin
-end
-```
+### No integration tests this iteration
+Integration tests will be added when there is a more complete feature to integrate (e.g., save/load programs). This iteration focuses on model-level and controller-level tests only.
+
+## Documentation
+
+- **TomDoc**: All new public methods and classes must have TomDoc annotations. This includes `RegistrationsController`, `UsersController`, `Authorization` concern, and any new model methods.
+- **README**: Add a section explaining:
+  - The role system (two roles: `user` and `admin`; guest = unauthenticated)
+  - How to seed an admin account (`db/seeds.rb`)
+  - What each role can do (guest: use console; user: use console + future save; admin: manage users)
+  - The enum integer mapping (`user: 1, admin: 2`) and why there is no `0`
 
 ## Non-Goals / Out of Scope
+- Profile management (edit username, email, password) — deferred
+- Nav bar / layout changes — deferred
+- Username display in UI — deferred
+- Saving/loading programs — deferred (the motivating feature for user accounts)
 - Email verification on signup
 - OAuth / social login
-- Granular permissions beyond three roles
+- Granular permissions beyond two roles
 - User avatar / profile picture
 - Account deletion by user (admin-only for now)
 - API authentication (this is session/cookie only)
 - Styling beyond matching existing minimal patterns
+- "Account deleted" messaging for stale sessions
+- Model-level last-admin guards (controller-level only)
+- Integration tests
