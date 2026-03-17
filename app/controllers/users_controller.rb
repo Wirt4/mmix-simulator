@@ -2,6 +2,7 @@
 
 class UsersController< ApplicationController
   def index
+    return head :forbidden unless Current&.session&.user&.role == "admin"
     head :ok
   end
 end
