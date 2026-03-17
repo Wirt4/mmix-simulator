@@ -12,6 +12,74 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "GET new renders a user_name field" do
+    get new_registration_path
+    assert_select "input[name='user[user_name]']"
+  end
+
+  test "GET new renders an email_address field" do
+    get new_registration_path
+    assert_select "input[name='user[email_address]']"
+  end
+
+  test "GET new renders a password field" do
+    get new_registration_path
+    assert_select "input[name='user[password]'][type='password']"
+  end
+
+  test "GET new renders a password_confirmation field" do
+    get new_registration_path
+    assert_select "input[name='user[password_confirmation]'][type='password']"
+  end
+
+  test "GET new renders a submit button" do
+    get new_registration_path
+    assert_select "input[type='submit'], button[type='submit']"
+  end
+
+  test "GET new form posts to registration_path" do
+    get new_registration_path
+    assert_select "form[action='#{registration_path}'][method='post']"
+  end
+
+  test "GET new does not render a role field" do
+    get new_registration_path
+    assert_select "input[name='user[role]']", count: 0
+    assert_select "select[name='user[role]']", count: 0
+  end
+
+  test "POST create with invalid params re-renders form with fields intact" do
+    post registration_path, params: {
+      user: {
+        user_name: "",
+        email_address: "",
+        password: "securepassword",
+        password_confirmation: "securepassword"
+      }
+    }
+
+    assert_response :unprocessable_entity
+    assert_select "input[name='user[user_name]']"
+    assert_select "input[name='user[email_address]']"
+    assert_select "input[name='user[password]']"
+    assert_select "input[name='user[password_confirmation]']"
+  end
+
+  test "POST create with mismatched passwords does not create a user" do
+    assert_no_difference "User.count" do
+      post registration_path, params: {
+        user: {
+          user_name: "newuser",
+          email_address: "newuser@example.com",
+          password: "securepassword",
+          password_confirmation: "differentpassword"
+        }
+      }
+    end
+
+    assert_response :unprocessable_entity
+  end
+
   # Public: Verifies that valid registration params create a user, start a
   # session, and redirect to the root path.
   test "POST create with valid params creates a user and redirects to root" do
