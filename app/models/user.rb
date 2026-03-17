@@ -10,7 +10,6 @@ class User < ApplicationRecord
 
   validates :email_address, presence: true
 
-  # Internal: Normalize email_address by stripping whitespace and
-  # downcasing before storage.
+  # Internal: Normalize email_address by stripping whitespace and downcasing before storage.
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 end
