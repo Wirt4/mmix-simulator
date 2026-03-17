@@ -8,9 +8,7 @@ class User < ApplicationRecord
 
   enum :role, { admin: 0, user: 1 }
 
-  validates :email_address, presence: true, uniqueness: true
-  validates :user_name, presence: true, uniqueness: true
+  validates :email_address, :user_name, presence: true, uniqueness: true
 
-  normalizes :email_address, with: ->(e) { e.strip.downcase }
-  normalizes :user_name, with: ->(e) { e.strip.downcase }
+  normalizes :email_address, :user_name, with: ->(e) { e.strip.downcase }
 end
