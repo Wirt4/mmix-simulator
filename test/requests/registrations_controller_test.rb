@@ -94,7 +94,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
   end
-=begin
+
   # Public: Verifies that a duplicate email address does not create a user
   # and re-renders the form.
   test "POST create with a duplicate email address does not create a user" do
@@ -114,6 +114,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+=begin
   # Public: Verifies that a duplicate user_name does not create a user and
   # re-renders the form.
   test "POST create with a duplicate user_name does not create a user" do
