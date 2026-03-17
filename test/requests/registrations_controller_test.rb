@@ -114,7 +114,6 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
-=begin
   # Public: Verifies that a duplicate user_name does not create a user and
   # re-renders the form.
   test "POST create with a duplicate user_name does not create a user" do
@@ -133,6 +132,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
   end
+=begin
 
   # Public: Verifies that invalid registration does not set a session cookie.
   test "POST create with invalid params does not start a session" do
