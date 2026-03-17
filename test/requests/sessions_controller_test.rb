@@ -12,6 +12,12 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  # Public: Verifies the login form includes a link to the sign-up page.
+  test "new includes sign up link" do
+    get new_session_path
+    assert_select "a[href=?]", new_registration_path, text: /sign up/i
+  end
+
   # Public: Verifies that valid credentials start a session and redirect
   # to the root path.
   test "create with valid credentials" do
