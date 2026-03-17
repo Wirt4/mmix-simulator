@@ -132,20 +132,4 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
   end
-=begin
-
-  # Public: Verifies that invalid registration does not set a session cookie.
-  test "POST create with invalid params does not start a session" do
-    post registration_path, params: {
-      user: {
-        user_name: "",
-        email_address: "",
-        password: "securepassword",
-        password_confirmation: "securepassword"
-      }
-    }
-
-    assert_nil cookies[:session_id], "Expected no session cookie on failed registration"
-  end
-=end
 end
