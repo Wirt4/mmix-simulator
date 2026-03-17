@@ -31,12 +31,12 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     get new_registration_path
     assert_select "input[name='user[password_confirmation]'][type='password']"
   end
-=begin
+
   test "GET new renders a submit button" do
     get new_registration_path
     assert_select "input[type='submit'], button[type='submit']"
   end
-
+=begin
   test "GET new form posts to registration_path" do
     get new_registration_path
     assert_select "form[action='#{registration_path}'][method='post']"
