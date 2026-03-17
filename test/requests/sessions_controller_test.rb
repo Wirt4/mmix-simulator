@@ -36,6 +36,15 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_nil cookies[:session_id]
   end
 
+  # Regression: Verifies that the login endpoint enforces rate limiting after
+  # 10 requests within 3 minutes, redirecting with an appropriate alert.
+  test "create is rate limited after 10 requests" do
+    11.times { post session_path, params: { email_address: @user.email_address, password: "wrong" } }
+
+    assert_redirected_to new_session_path
+    assert_equal "Try again later.", flash[:alert]
+  end
+
   # Public: Verifies that destroying a session clears the session cookie
   # and redirects to the login form.
   test "destroy" do
