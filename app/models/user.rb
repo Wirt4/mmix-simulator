@@ -8,7 +8,7 @@ class User < ApplicationRecord
 
   enum :role, { admin: 0, user: 1 }
 
-  validates :email_address, presence: true
+  validates :email_address, presence: true, uniqueness: true
   validates :user_name, presence: true
 
   # Internal: Normalize email_address by stripping whitespace and downcasing before storage.
