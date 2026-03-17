@@ -77,60 +77,6 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert created_user.user?, "Expected new user to have the `user` role"
     assert_equal 1, created_user.role_before_type_cast
   end
-=begin
-  # Public: Verifies that passing a `role` param during registration is ignored
-  # and cannot be used to create an admin account.
-  test "POST create ignores role param and does not allow self-promotion to admin" do
-    post registration_path, params: {
-      user: {
-        user_name: "newuser",
-        email_address: "newuser@example.com",
-        password: "securepassword",
-        password_confirmation: "securepassword",
-        role: :admin
-      }
-    }
-
-    created_user = User.find_by(email_address: "newuser@example.com")
-    assert_not_nil created_user
-    assert created_user.user?, "Expected role param to be ignored; user should not be admin"
-  end
-
-  # Public: Verifies that passing a raw integer role value is also rejected.
-  test "POST create ignores integer role param" do
-    post registration_path, params: {
-      user: {
-        user_name: "newuser",
-        email_address: "newuser@example.com",
-        password: "securepassword",
-        password_confirmation: "securepassword",
-        role: 2
-      }
-    }
-
-    created_user = User.find_by(email_address: "newuser@example.com")
-    assert_not_nil created_user
-    assert created_user.user?, "Expected integer role param to be stripped; user should not be admin"
-  end
-
-
-
-  # Public: Verifies that mismatched password confirmation does not create
-  # a user and re-renders the form.
-  test "POST create with mismatched password confirmation does not create a user" do
-    assert_no_difference "User.count" do
-      post registration_path, params: {
-        user: {
-          user_name: "newuser",
-          email_address: "newuser@example.com",
-          password: "securepassword",
-          password_confirmation: "differentpassword"
-        }
-      }
-    end
-
-    assert_response :unprocessable_entity
-  end
 
   # Public: Verifies that a missing user_name does not create a user and
   # re-renders the form.
@@ -148,7 +94,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
   end
-
+=begin
   # Public: Verifies that a duplicate email address does not create a user
   # and re-renders the form.
   test "POST create with a duplicate email address does not create a user" do
