@@ -53,7 +53,6 @@ class AuthorizationTest < ActiveSupport::TestCase
     assert_equal "Not authorized.", controller.redirect_alert
   end
 
-=begin
   test "require_role does not redirect when user role is in allowed roles" do
     klass = Class.new(FakeController) do
       require_role :admin
@@ -70,6 +69,7 @@ class AuthorizationTest < ActiveSupport::TestCase
     assert_nil controller.redirected_to
   end
 
+=begin
   test "require_role accepts multiple roles" do
     klass = Class.new(FakeController) do
       require_role :user, :admin
