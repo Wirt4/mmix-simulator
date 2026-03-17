@@ -6,6 +6,8 @@ class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
 
+  validates :email_address, presence: true
+
   # Internal: Normalize email_address by stripping whitespace and
   # downcasing before storage.
   normalizes :email_address, with: ->(e) { e.strip.downcase }
