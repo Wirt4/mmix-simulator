@@ -68,36 +68,4 @@ class AuthorizationTest < ActiveSupport::TestCase
 
     assert_nil controller.redirected_to
   end
-
-=begin
-  test "require_role accepts multiple roles" do
-    klass = Class.new(FakeController) do
-      require_role :user, :admin
-    end
-
-    controller = klass.new
-    user = users(:one)
-
-    Current.set(session: user.sessions.create!) do
-      controller.instance_exec(&klass.before_actions.first[:block])
-    end
-
-    assert_nil controller.redirected_to
-  end
-
-  test "require_role allows admin when multiple roles specified" do
-    klass = Class.new(FakeController) do
-      require_role :user, :admin
-    end
-
-    controller = klass.new
-    admin = users(:admin)
-
-    Current.set(session: admin.sessions.create!) do
-      controller.instance_exec(&klass.before_actions.first[:block])
-    end
-
-    assert_nil controller.redirected_to
-  end
-=end
 end
