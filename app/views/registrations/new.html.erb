@@ -1,3 +1,4 @@
 <%= form_with url: registration_path, model: @user || User.new do |f| %>
+  <div>username</div>
   <%= f.text_field :user_name %>
 <% end %>
