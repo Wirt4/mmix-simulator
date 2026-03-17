@@ -12,7 +12,9 @@ Existing test patterns: Minitest, controller tests with `ActionDispatch::Integra
 
 **Guest concept**: "Guest" is an unauthenticated visitor (`Current.user.nil?`), not a database role. There is no guest enum value. Guests can use the console (edit and run code) but cannot save work. The guest concept exists to lower friction — anyone can use the app immediately without account creation.
 
-**Roles**: Integer enum on `users` table with two values: `user: 1, admin: 2`. No join tables, no gems. The numbering starts at 1 (not 0) because there is no guest role in the database. Default is `user` (1). This must be documented in the enum definition, the README, and tested in specs.
+**Roles**: Integer enum on `users` table with two values: `admin: 0, user: 1`. No join tables, no gems. Default is `user` (1). Admin is `0` — Rails enum convention starts at 0 for the first defined value. The database column default is `1` (user), so new records are regular users unless explicitly set otherwise. This must be documented in the enum definition, the README, and tested in specs.
+
+> **Caution**: The current enum declaration (`enum :role, { admin: 0, user: 1 }`) omits `validate: true`. Without it, assigning an invalid role raises an `ArgumentError` at the Ruby level rather than a validation error. This is acceptable for now since role is never user-assignable, but should be revisited if role assignment surfaces in more contexts.
 
 **Authorization**: A new `Authorization` concern in `app/controllers/concerns/` providing a reusable `require_role` class method. No Pundit/CanCanCan — overkill for two roles. Included in `ApplicationController` as scaffolding for future role gating across controllers.
 
@@ -36,8 +38,8 @@ Already applied. The `users` table has:
 t.integer "role", default: 1, null: false
 ```
 
+- `0` = `admin` role
 - `1` = `user` role (default)
-- `2` = `admin` role
 
 **Additional migration needed**: Add a unique index on `user_name` (case-insensitive). Add normalization in the model (`normalizes :user_name, with: ->(n) { n.strip.downcase }`, matching the existing `email_address` pattern).
 
@@ -84,7 +86,7 @@ t.integer "role", default: 1, null: false
 
 ### Files to modify
 - `app/models/user.rb` — add:
-  - `enum :role, { user: 1, admin: 2 }, default: :user, validate: true`
+  - `enum :role, { admin: 0, user: 1 }`
   - `validates :email_address, presence: true, uniqueness: true`
   - `validates :user_name, presence: true, uniqueness: true`
   - `normalizes :user_name, with: ->(n) { n.strip.downcase }`
@@ -99,28 +101,28 @@ t.integer "role", default: 1, null: false
 ## Feature 3: Admin User Management
 
 ### Files to create
-- `app/controllers/users_controller.rb` — admin-only controller:
-  - `require_role :admin`
-  - `index`: list all users with their roles
-  - `edit`: render edit form with role dropdown
-  - `update`: update user role. Controller-level guard: cannot demote the last admin
-  - `destroy`: delete a user. Controller-level guards: cannot delete self, cannot delete the last admin
-  - TomDoc on all public methods
-- `app/views/users/index.html.erb` — user list with roles
-- `app/views/users/edit.html.erb` — edit form with role dropdown
 
-### Files to modify
-- `config/routes.rb` — change `resources :users` to `resources :users, only: [:index, :edit, :update, :destroy]`
+#### `app/controllers/users_controller.rb`
+Admin-only controller for managing user accounts. TomDoc on all public methods.
+- `require_role :admin` — gate all actions to admin users
+- `index` — list all users with their roles
+- `edit` — render edit form for a single user with role dropdown
+- `update` — update user role via strong params (permit only `role`)
+  - Controller-level guard: if the target user is the last admin, reject demotion with a redirect and alert
+- `destroy` — delete a user
+  - Controller-level guard: cannot delete self (redirect with alert)
+  - Controller-level guard: cannot delete the last remaining admin (redirect with alert)
+- Private `set_user` before_action for edit/update/destroy
+- Private `user_params` permitting only `role`
 
-### Security
-- All actions require admin role via `require_role :admin`.
-- Admin cannot delete themselves (controller-level guard in `destroy`).
-- Admin cannot demote the last remaining admin (controller-level guard in `update`).
-- Last-admin guards are controller-level only — `rails console` retains full power for developers.
-- Role param permitted only in `UsersController` (admin context), never in registration.
+#### `app/views/users/index.html.erb`
+Table listing all users: user_name, email_address, role, edit link, delete button. Minimal styling matching existing views.
 
-### Seeds (`db/seeds.rb`)
-Create a default admin account:
+#### `app/views/users/edit.html.erb`
+Form with a role dropdown (`select` tag) populated from `User.roles.keys`. Submit button. Back link to users index.
+
+#### `db/seeds.rb`
+Create a default admin account (idempotent):
 ```ruby
 User.find_or_create_by!(email_address: "admin@example.com") do |u|
   u.user_name = "admin"
@@ -128,6 +130,42 @@ User.find_or_create_by!(email_address: "admin@example.com") do |u|
   u.role = :admin
 end
 ```
+
+#### `test/requests/users_controller_test.rb`
+Controller tests using `ActionDispatch::IntegrationTest` and `SessionTestHelper`:
+- Unauthenticated user is redirected to login for all actions
+- Authenticated non-admin is redirected to root with "Not authorized." alert for all actions
+- Admin can GET index and sees user list
+- Admin can GET edit for a user
+- Admin can PATCH update to change a user's role
+- Admin cannot PATCH update to demote the last remaining admin (redirects with alert, role unchanged)
+- Admin can DELETE destroy a non-admin user (user count decreases)
+- Admin cannot DELETE destroy themselves (redirects with alert, user count unchanged)
+- Admin cannot DELETE destroy the last remaining admin (redirects with alert, user count unchanged)
+
+#### `test/fixtures/users.yml` (modify existing)
+Add a second admin fixture for last-admin guard tests:
+```yaml
+admin_two:
+  email_address: admin_two@example.com
+  password_digest: <%= password_digest %>
+  user_name: admin_two
+  role: 0
+```
+
+### Files to modify
+
+#### `config/routes.rb`
+Change `resources :users` to `resources :users, only: [:index, :edit, :update, :destroy]`.
+
+> **Caution**: Until this route change is applied, `resources :users` exposes `new`, `create`, and `show` routes with no backing controller actions. These return errors rather than security holes (no controller exists yet), but the routes should be restricted as part of this feature to avoid confusion.
+
+### Security
+- All actions require admin role via `require_role :admin`.
+- Admin cannot delete themselves (controller-level guard in `destroy`).
+- Admin cannot demote the last remaining admin (controller-level guard in `update`).
+- Last-admin guards are controller-level only — `rails console` retains full power for developers.
+- Role param permitted only in `UsersController` (admin context), never in registration.
 
 ## Route Summary (final state)
 
@@ -142,26 +180,32 @@ root "console#index"
 ## Testing Approach
 
 ### Fixtures (`test/fixtures/users.yml`)
-Add role values and an admin fixture:
+Add role values and admin fixtures. Role integers match `admin: 0, user: 1`:
 ```yaml
 <% password_digest = BCrypt::Password.create("password") %>
 one:
   email_address: one@example.com
   password_digest: <%= password_digest %>
-  user_name: userone
+  user_name: user_one
   role: 1
 
 two:
   email_address: two@example.com
   password_digest: <%= password_digest %>
-  user_name: usertwo
+  user_name: user_two
   role: 1
 
 admin:
   email_address: admin@example.com
   password_digest: <%= password_digest %>
-  user_name: adminuser
-  role: 2
+  user_name: admin_user
+  role: 0
+
+admin_two:
+  email_address: admin_two@example.com
+  password_digest: <%= password_digest %>
+  user_name: admin_two
+  role: 0
 ```
 
 ### Test files to create
