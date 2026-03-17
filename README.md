@@ -23,42 +23,6 @@ Things you may want to cover:
 
 * ...
 
-## Role System
-
-There are two roles in the database and one implicit "guest" concept:
-
-- **Guest** — an unauthenticated visitor (`Current.user.nil?`). Not stored in the database. Guests can use the console (write and run MMIX assembly) but cannot save work.
-- **User** (integer `1`, default) — a registered, authenticated user. Can use the console; future: save and load programs.
-- **Admin** (integer `2`) — can manage users via the admin user management interface (`/users`).
-
-The enum starts at `1` (not `0`) because there is no guest role in the database — guest is purely a runtime concept.
-
-### Seeding an admin account
-
-```sh
-bin/rails db:seed
-```
-
-This creates `admin@example.com` with password `changeme123` and the admin role. The seed is idempotent — safe to run multiple times.
-
-### What each role can do
-
-| Action | Guest | User | Admin |
-|---|---|---|---|
-| Use the MMIX console | ✓ | ✓ | ✓ |
-| Save/load programs | — | future | future |
-| Manage users | — | — | ✓ |
-
-### Enum integer mapping
-
-```ruby
-enum :role, { user: 1, admin: 2 }
-```
-
-`0` is intentionally unused. There is no guest role in the database.
-
----
-
 Localhosting
 
 # Build and start the containers                       
