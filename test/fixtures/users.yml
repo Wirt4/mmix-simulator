@@ -3,9 +3,9 @@
 one:
   email_address: one@example.com
   password_digest: <%= password_digest %>
-  user_name: thingone
+  user_name: thing_one
 
 two:
   email_address: two@example.com
   password_digest: <%= password_digest %>
-  user_name: thingtwo
+  user_name: thing_two
