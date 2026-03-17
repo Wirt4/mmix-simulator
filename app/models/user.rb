@@ -6,6 +6,8 @@ class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
 
+  enum :role, { admin: 0, user: 1 }
+
   validates :email_address, presence: true
 
   # Internal: Normalize email_address by stripping whitespace and
