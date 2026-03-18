@@ -26,8 +26,9 @@ class SessionsController < ApplicationController
 
   def destroy
     if request.delete?
-      return redirect_to new_session_path unless authenticated?
-      terminate_session
+      if authenticated?
+        terminate_session
+      end
       redirect_to new_session_path
     else
       render :logout
