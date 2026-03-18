@@ -4,10 +4,10 @@
   </div>
   <div>
 <%= form_with model: @user do |f| %>
-  username: <%= @user.user_name %>, email: <%= @user.email_address %>, role: <%= f.select :role, User.roles.keys %>
+  username: <%= @user.user_name %>, email: <%= @user.email_address %>, role: <%= f.select :role, User.roles.keys %> <button type="submit">Submit</button> 
 <% end %>
   </div>
   <div>  
-    <button type="submit">Submit</button> <%= link_to "Back", users_path %>
+<%= link_to "Back", users_path %>
   </div>
 </div>
