@@ -12,8 +12,7 @@
         <td><%= user.user_name %></td>
         <td><%= user.email_address %></td>
         <td><%= user.role %></td>
-        <td><button>Edit</button><%= link_to "Edit", edit_user_path(user) 
-  %></td>
+        <td><%= button_to "Edit", edit_user_path(user), method: :get %></td>
       </tr>
     <% end %>
   </tbody>

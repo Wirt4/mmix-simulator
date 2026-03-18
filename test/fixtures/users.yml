@@ -17,3 +17,9 @@ admin:
   password_digest: <%= password_digest %>
   user_name: admin_user
   role: 0
+
+admin_two:
+  email_address: admin_two@example.com
+  password_digest: <%= password_digest %>
+  user_name: admin_two
+  role: 0
