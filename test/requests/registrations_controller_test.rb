@@ -36,4 +36,20 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     get new_registration_path
     assert_select "input[type='submit'], button[type='submit']"
   end
+
+  test "create is rate limited after 10 requests" do
+    11.times do |i|
+      post registration_path, params: {
+        user: {
+          user_name: "user#{i}",
+          email_address: "user#{i}@example.com",
+          password: "password",
+          password_confirmation: "password"
+        }
+      }
+    end
+
+    assert_redirected_to new_registration_path
+    assert_equal "Try again later.", flash[:alert]
+  end
 end
