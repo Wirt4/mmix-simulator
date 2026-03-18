@@ -54,17 +54,17 @@ class AuthenticationIntegrationTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_url
   end
 
-  # Verifies that logging out destroys the Session record in the database
-  # and clears the session cookie.
-  #
-  # Tests: terminate_session destroys session record and clears cookie
-  # test "logout destroys session record" do
-  #   sign_in_as @user
-  #   session_record = Current.session
-  #
-  #   delete session_url
-  #   assert_nil Session.find_by(id: session_record.id)
-  # end
+   # Verifies that logging out destroys the Session record in the database
+   # and clears the session cookie.
+   #
+   # Tests: terminate_session destroys session record and clears cookie
+   test "logout destroys session record" do
+     sign_in_as @user
+     session_record = Current.session
+
+     delete session_url
+     assert_nil Session.find_by(id: session_record.id)
+   end
 
   # Verifies the full authentication lifecycle: login redirects to root,
   # logout redirects to login, and subsequent requests remain
