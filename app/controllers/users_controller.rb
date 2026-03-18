@@ -14,7 +14,7 @@ class UsersController< ApplicationController
 
   # Public: updates the role of a given user
   def update
-    @user = User.find(params[:id])
+    edit
     new_role = params.dig(:user, :role)
 
     if is_removing_last_admin?(@user, new_role)
