@@ -7,3 +7,10 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+# seed the database
+User.find_or_create_by!(email_address: "admin@example.com") do |u|
+  u.user_name = "admin"
+  u.password = "changeme123"
+  u.role = :admin
+end

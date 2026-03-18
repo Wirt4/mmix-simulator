@@ -100,6 +100,20 @@ body {
   white-space: pre;
 }
 
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+a {
+  color: #6cb6ff;
+}
+
+a:visited {
+  color: #b392f0;
+}
+
 .editor-textarea::placeholder {
   color: var(--editor-gutter-fg);
 }

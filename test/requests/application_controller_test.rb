@@ -5,9 +5,11 @@ require "test_helper"
 # Verifies that the base controller includes the expected concerns
 # and behaviors inherited by all other controllers.
 class ApplicationControllerTest < ActiveSupport::TestCase
-  # Public: Verify that the Authentication concern is mixed into
-  # ApplicationController, ensuring all controllers enforce authentication.
   test "includes Authentication concern" do
     assert ApplicationController.ancestors.include?(Authentication)
+  end
+
+  test "includes Authorization concern" do
+    assert ApplicationController.ancestors.include?(Authorization)
   end
 end

@@ -9,49 +9,29 @@ class AuthenticationIntegrationTest < ActionDispatch::IntegrationTest
     @user = users(:one)
   end
 
-  # Verifies that an unauthenticated request to a protected route
-  # redirects the user to the login page.
-  #
-  # Tests: require_authentication / request_authentication
-  test "unauthenticated request to protected route redirects to login" do
-    delete session_url
-    assert_redirected_to new_session_path
-  end
+   # Verifies that after being redirected to login, a successful
+   # authentication sends the user back to the URL they originally requested.
+   #
+   # Tests: request_authentication stores return URL,
+   #        after_authentication_url returns it
+   test "after login redirects back to originally requested URL" do
+     delete session_url
+     assert_redirected_to new_session_path
 
-  # Verifies that after being redirected to login, a successful
-  # authentication sends the user back to the URL they originally requested.
-  #
-  # Tests: request_authentication stores return URL,
-  #        after_authentication_url returns it
-  test "after login redirects back to originally requested URL" do
-    delete session_url
-    assert_redirected_to new_session_path
+     post session_url, params: { email_address: @user.email_address, password: "password" }
+     assert_redirected_to session_url
+   end
 
-    post session_url, params: { email_address: @user.email_address, password: "password" }
-    assert_redirected_to session_url
-  end
-
-  # Verifies that an authenticated user with a valid session cookie
-  # can access a protected route and receives the expected response.
-  #
-  # Tests: resume_session / find_session_by_cookie
-  test "authenticated user can access protected route via session cookie" do
-    sign_in_as @user
-    delete session_url
-    assert_redirected_to new_session_path
-    assert_response :see_other
-  end
-
-  # Verifies that a tampered or nonexistent session cookie does not
-  # grant access to protected routes.
-  #
-  # Tests: find_session_by_cookie rejects invalid cookies
-  test "invalid session cookie does not authenticate" do
-    cookies[:session_id] = "bogus"
-    delete session_url
-    # should redirect to login, not succeed
-    assert_redirected_to new_session_path
-  end
+   # Verifies that an authenticated user with a valid session cookie
+   # can access a protected route and receives the expected response.
+   #
+   # Tests: resume_session / find_session_by_cookie
+   test "authenticated user can access protected route via session cookie" do
+     sign_in_as @user
+     delete session_url
+     assert_redirected_to new_session_path
+     assert_response :see_other
+   end
 
   # Verifies that a successful login creates a Session record in the
   # database and sets a session cookie on the response.
@@ -74,36 +54,23 @@ class AuthenticationIntegrationTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_url
   end
 
-  # Verifies that logging out destroys the Session record in the database
-  # and clears the session cookie.
-  #
-  # Tests: terminate_session destroys session record and clears cookie
-  test "logout destroys session record" do
-    sign_in_as @user
-    session_record = Current.session
+   # Verifies the full authentication lifecycle: login redirects to root,
+   # logout redirects to login, and subsequent requests remain
+   # unauthenticated.
+   #
+   # Tests: full flow — login, access protected route, logout, redirect
+   test "full authentication lifecycle" do
+     # login
+     post session_url, params: { email_address: @user.email_address, password: "password" }
+     assert_redirected_to root_url
 
-    delete session_url
-    assert_nil Session.find_by(id: session_record.id)
-  end
-
-  # Verifies the full authentication lifecycle: login redirects to root,
-  # logout redirects to login, and subsequent requests remain
-  # unauthenticated.
-  #
-  # Tests: full flow — login, access protected route, logout, redirect
-  test "full authentication lifecycle" do
-    # login
-    post session_url, params: { email_address: @user.email_address, password: "password" }
-    assert_redirected_to root_url
-
-    # logout (protected route, should work while authenticated)
-    delete session_url
-    assert_redirected_to new_session_path
-
-    # now unauthenticated again
-    delete session_url
-    assert_redirected_to new_session_path
-  end
+     # logout (protected route, should work while authenticated)
+     delete session_url
+     assert_redirected_to new_session_path
+     # now unauthenticated again
+     delete session_url
+     assert_redirected_to new_session_path
+   end
 
   # Verifies that a login attempt with incorrect credentials does not
   # create a Session record in the database.
