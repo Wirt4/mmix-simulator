@@ -19,10 +19,10 @@ class UsersController< ApplicationController
 
     if is_removing_last_admin?(@user, new_role)
       flash[:alert] = "Cannot demote the last admin."
-      return redirect_to users_url
+    else
+      @user.update(role: new_role)
     end
 
-    @user.update(role: new_role)
     redirect_to users_url
   end
 
