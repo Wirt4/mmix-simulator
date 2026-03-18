@@ -23,6 +23,7 @@ class UsersController< ApplicationController
     redirect_to users_url
   end
 
+  # Public: deletes selected user. Editing user may not delete themself
   def destroy
     @user = User.find(params[:id])
     if @user == Current.session.user
