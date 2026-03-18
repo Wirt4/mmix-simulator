@@ -15,7 +15,7 @@ class UsersController< ApplicationController
   # Public: updates the role of a given user
   def update
     edit
-    new_role = params.dig(:user, :role)
+    new_role = params.require(:user).permit(:role)[:role]
 
     if is_removing_last_admin?(@user, new_role)
       flash[:alert] = "Cannot demote the last admin."
