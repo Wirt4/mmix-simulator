@@ -49,7 +49,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     get edit_user_url(@user)
     assert_response :success
   end
-=begin
+
   test "edit: form has a role select tag populated from User.roles.keys" do
     sign_in_as(@admin)
     get edit_user_url(@user)
@@ -60,6 +60,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+=begin
   test "edit: form has a submit button" do
     sign_in_as(@admin)
     get edit_user_url(@user)
