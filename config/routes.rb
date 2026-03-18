@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   resource :session, only: [ :new, :create, :destroy ]
-  get "session/logout", to: "sessions#logout", as: :logout
+  get "logout", to: "sessions#logout", as: :logout
 
   resource :registration, only: [ :new, :create ]
   resources :passwords, param: :token
