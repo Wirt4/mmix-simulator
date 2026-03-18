@@ -74,6 +74,14 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+test "index: Delete button for each user" do
+  sign_in_as(@admin)
+  get users_url
+  assert_select "form[action=?][method=post]", user_path(@user) do
+    assert_select "button[type=submit]", text: "Delete"
+  end
+end
+
   test "edit: has a back link to users index" do
     sign_in_as(@admin)
     get edit_user_url(@user)
