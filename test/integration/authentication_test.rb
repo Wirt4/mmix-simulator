@@ -22,16 +22,16 @@ class AuthenticationIntegrationTest < ActionDispatch::IntegrationTest
      assert_redirected_to session_url
    end
 
-  # Verifies that an authenticated user with a valid session cookie
-  # can access a protected route and receives the expected response.
-  #
-  # Tests: resume_session / find_session_by_cookie
-  # test "authenticated user can access protected route via session cookie" do
-  #   sign_in_as @user
-  #   delete session_url
-  #   assert_redirected_to new_session_path
-  #   assert_response :see_other
-  # end
+   # Verifies that an authenticated user with a valid session cookie
+   # can access a protected route and receives the expected response.
+   #
+   # Tests: resume_session / find_session_by_cookie
+   test "authenticated user can access protected route via session cookie" do
+     sign_in_as @user
+     delete session_url
+     assert_redirected_to new_session_path
+     assert_response :see_other
+   end
 
   # Verifies that a tampered or nonexistent session cookie does not
   # grant access to protected routes.
