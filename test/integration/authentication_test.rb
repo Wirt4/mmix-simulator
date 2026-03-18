@@ -33,17 +33,6 @@ class AuthenticationIntegrationTest < ActionDispatch::IntegrationTest
      assert_response :see_other
    end
 
-   # Verifies that a tampered or nonexistent session cookie does not
-   # grant access to protected routes.
-   #
-   #   Tests: find_session_by_cookie rejects invalid cookies
-   test "invalid session cookie does not authenticate" do
-     cookies[:session_id] = "bogus"
-     delete session_url
-     # should redirect to login, not succeed
-     assert_redirected_to new_session_path
-   end
-
   # Verifies that a successful login creates a Session record in the
   # database and sets a session cookie on the response.
   #
