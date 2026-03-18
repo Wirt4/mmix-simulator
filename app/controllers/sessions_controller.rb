@@ -24,9 +24,6 @@ class SessionsController < ApplicationController
     end
   end
 
-  def logout
-  end
-
   # Public: Terminates the current session and redirects to the login form.
   def destroy
     terminate_session
