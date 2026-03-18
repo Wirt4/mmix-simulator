@@ -25,6 +25,8 @@ class UsersController< ApplicationController
 
   # Public: deletes selected user. Editing user may not delete themself
   def destroy
+    return head :forbidden unless current_is_admin?
+
     @user = User.find(params[:id])
     if @user == Current.session.user
       flash[:alert] = "Cannot delete yourself."
