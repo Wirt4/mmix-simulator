@@ -6,7 +6,6 @@ class RegistrationsController < ApplicationController
     only: :create,
     with: -> { redirect_to new_registration_path, alert: "Try again later." }
 
-
   def new
   end
 
@@ -14,10 +13,10 @@ class RegistrationsController < ApplicationController
     @user = User.new(registration_params)
     if @user.save
       start_new_session_for @user
-      redirect_to root_path
-    else
-      render :new, status: :unprocessable_entity
+      return redirect_to root_path
     end
+
+    render :new, status: :unprocessable_entity
   end
 
   private
