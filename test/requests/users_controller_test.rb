@@ -68,4 +68,41 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
     assert_equal "user", @user.reload.role
   end
+
+  test "destroy: admin can delete a non-admin user" do
+    sign_in_as(@admin)
+    assert_difference("User.count", -1) do
+      delete user_url(@user)
+    end
+    assert_redirected_to users_url
+  end
+
+  test "destroy: admin cannot delete themselves" do
+    sign_in_as(@admin)
+    assert_no_difference("User.count") do
+      delete user_url(@admin)
+    end
+    assert_redirected_to users_url
+    assert_equal "Cannot delete yourself.", flash[:alert]
+  end
+
+  test "destroy: admin cannot delete the last remaining admin" do
+    sign_in_as(@admin)
+    @admin_two.destroy
+    assert_equal 1, User.where(role: :admin).count
+
+    assert_no_difference("User.count") do
+      delete user_url(@admin)
+    end
+    assert_redirected_to users_url
+    assert_equal "Cannot delete the last admin.", flash[:alert]
+  end
+
+  test "destroy: non-admin cannot delete users" do
+    sign_in_as(@user)
+    assert_no_difference("User.count") do
+      delete user_url(@admin)
+    end
+    assert_response :forbidden
+  end
 end
