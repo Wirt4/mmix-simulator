@@ -53,6 +53,7 @@ class AuthenticationIntegrationTest < ActionDispatch::IntegrationTest
     post session_url, params: { email_address: @user.email_address, password: "password" }
     assert_redirected_to root_url
   end
+
    # Verifies the full authentication lifecycle: login redirects to root,
    # logout redirects to login, and subsequent requests remain
    # unauthenticated.
@@ -63,11 +64,10 @@ class AuthenticationIntegrationTest < ActionDispatch::IntegrationTest
      post session_url, params: { email_address: @user.email_address, password: "password" }
      assert_redirected_to root_url
 
-     #   # logout (protected route, should work while authenticated)
+     # logout (protected route, should work while authenticated)
      delete session_url
      assert_redirected_to new_session_path
-     #
-     #   # now unauthenticated again
+     # now unauthenticated again
      delete session_url
      assert_redirected_to new_session_path
    end
