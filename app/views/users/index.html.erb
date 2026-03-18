@@ -12,7 +12,8 @@
         <td><%= user.user_name %></td>
         <td><%= user.email_address %></td>
         <td><%= user.role %></td>
-        <td><button>Edit</button></td>
+        <td><button>Edit</button><%= link_to "Edit", edit_user_path(user) 
+  %></td>
       </tr>
     <% end %>
   </tbody>
