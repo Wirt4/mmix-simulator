@@ -24,7 +24,12 @@ class UsersController< ApplicationController
   end
 
   def destroy
-    User.find(params[:id]).destroy
+    @user = User.find(params[:id])
+    if @user == Current.session.user
+      flash[:alert] = "Cannot delete yourself."
+    else
+      @user.destroy
+    end
     redirect_to users_url
   end
 
