@@ -50,15 +50,6 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to users_url
     assert_equal "admin", @user.reload.role
   end
-=begin
-  test "update: only permits role param" do
-    sign_in_as(@admin)
-    original_name = @user.user_name
-    patch user_url(@user), params: { user: { role: "admin", user_name: "hacked" } }
-    @user.reload
-    assert_equal "admin", @user.role
-    assert_equal original_name, @user.user_name
-  end
 
   test "update: cannot demote the last remaining admin" do
     sign_in_as(@admin)
@@ -71,6 +62,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Cannot demote the last admin.", flash[:alert]
   end
 
+=begin
   test "update: can demote an admin when another admin exists" do
     sign_in_as(@admin)
     assert User.where(role: :admin).count >= 2
