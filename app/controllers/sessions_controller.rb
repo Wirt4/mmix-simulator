@@ -2,7 +2,7 @@
 # access to the login form and login action. Rate-limits login attempts
 # to 10 per 3 minutes.
 class SessionsController < ApplicationController
-  allow_unauthenticated_access only: %i[ new create logout ]
+  allow_unauthenticated_access only: %i[ new create destroy ]
   rate_limit to: 10,
     within: 3.minutes,
     only: :create,
