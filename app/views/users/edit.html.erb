@@ -6,5 +6,6 @@
 <%= form_with model: @user do |f| %>
   username: <%= @user.user_name %>, email: <%= @user.email_address %>, role: <%= f.select :role, User.roles.keys %>
 <% end %>
-</div>
+  </div>
+  <div><button type="submit">Submit</button></div>
 </div>
