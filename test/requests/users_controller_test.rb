@@ -2,14 +2,8 @@ require "test_helper"
 
 class UsersControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @admin = User.create!(email_address: "admin@test.com",
-                          user_name: "administrator",
-                          password: "password",
-                          role: "admin")
-    @user = User.create!(email_address: "user@test.com",
-                         user_name: "average user",
-                         password: "password",
-                         role: "user")
+    @admin = users(:admin)
+    @user = users(:one)
   end
 
   test "should allow admin to access index" do
@@ -25,12 +19,19 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index: list all users with their roles" do
-    sign_in_as(@admin)
+ sign_in_as(@admin)
     get users_url
     assert_response :success
-    assert_select "button", text: "Edit", count: 2
+    assert_select "td", text: @admin.user_name
+    assert_select "td", text: @user.user_name
+    assert_select "td", text: "user"
+    assert_select "td", text: "admin"
   end
 
   test "index: users have edit option" do
+        sign_in_as(@admin)
+    get users_url
+    assert_response :success
+    assert_select "button", text: "Edit", count: User.count
   end
 end
