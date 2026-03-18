@@ -65,13 +65,13 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     get edit_user_url(@user)
     assert_select "input[type=submit], button[type=submit]"
   end
-=begin
+
   test "edit: has a back link to users index" do
     sign_in_as(@admin)
     get edit_user_url(@user)
     assert_select "a[href=?]", users_path
   end
-=end
+
   test "update: admin can change a user's role" do
     sign_in_as(@admin)
     patch user_url(@user), params: { user: { role: "admin" } }
