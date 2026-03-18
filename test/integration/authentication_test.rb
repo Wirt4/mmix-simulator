@@ -9,14 +9,14 @@ class AuthenticationIntegrationTest < ActionDispatch::IntegrationTest
     @user = users(:one)
   end
 
-  # Verifies that an unauthenticated request to a protected route
-  # redirects the user to the login page.
-  #
-  # Tests: require_authentication / request_authentication
-  # test "unauthenticated request to protected route redirects to login" do
-  #   delete session_url
-  #   assert_redirected_to new_session_path
-  # end
+   # Verifies that an unauthenticated request to a protected route
+   # redirects the user to the login page.
+   #
+   # Tests: require_authentication / request_authentication
+   test "unauthenticated request to protected route redirects to login" do
+     delete session_url
+     assert_redirected_to new_session_path
+   end
 
   # Verifies that after being redirected to login, a successful
   # authentication sends the user back to the URL they originally requested.
