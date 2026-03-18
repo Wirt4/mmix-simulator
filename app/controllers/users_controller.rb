@@ -9,6 +9,10 @@ class UsersController< ApplicationController
     @users = User.all
   end
 
+  def edit
+    @user = User.find(params[:id])
+  end
+
   # Public: updates the role of a given user
   def update
     @user = User.find(params[:id])
