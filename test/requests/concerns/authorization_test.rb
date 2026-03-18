@@ -16,7 +16,12 @@ class AuthorizationTest < ActiveSupport::TestCase
 
     include Authorization
 
+    attr_reader :head_status
     attr_accessor :redirected_to, :redirect_alert
+
+    def head(status)
+      @head_status = status
+    end
 
     def redirect_to(path, alert: nil)
       @redirected_to = path
@@ -36,7 +41,7 @@ class AuthorizationTest < ActiveSupport::TestCase
     assert_equal 1, klass.before_actions.length
   end
 
-  test "require_role redirects when user role is not in allowed roles" do
+  test "require_role returns forbidden when user role is not in allowed roles" do
     klass = Class.new(FakeController) do
       require_role :admin
     end
@@ -49,8 +54,7 @@ class AuthorizationTest < ActiveSupport::TestCase
       controller.instance_exec(&klass.before_actions.first[:block])
     end
 
-    assert_equal "/", controller.redirected_to
-    assert_equal "Not authorized.", controller.redirect_alert
+    assert_equal :forbidden, controller.head_status
   end
 
   test "require_role does not redirect when user role is in allowed roles" do
