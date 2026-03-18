@@ -22,6 +22,12 @@ class UsersController< ApplicationController
     @user.update(role: new_role)
     redirect_to users_url
   end
+  def destroy
+    return head :forbidden unless current_is_admin?
+    @user = User.find(params[:id])
+    @user.destroy
+    redirect_to users_url
+  end
 
   private
 
