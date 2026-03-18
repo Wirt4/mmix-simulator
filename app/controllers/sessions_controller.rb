@@ -24,11 +24,13 @@ class SessionsController < ApplicationController
     end
   end
 
-  # Public: Renders the logout confirmation page.
-  # only renders logoout if request is GET and session is authenticated
-  # else redirected to new session
   def destroy
-    return redirect_to new_session_path unless request.get? || authenticated?
-    render :logout
+    if request.delete?
+      return redirect_to new_session_path unless authenticated?
+      terminate_session
+      redirect_to new_session_path
+    else
+      render :logout
+    end
   end
 end
