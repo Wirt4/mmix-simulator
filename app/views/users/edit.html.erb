@@ -1,5 +1,10 @@
-<h1>Edit User</h1>
-
+<div>
+  <div>
+    <h1>Edit User</h1>
+  </div>
+  <div>
 <%= form_with model: @user do |f| %>
-  <%= f.select :role, User.roles.keys %>
+  username: <%= @user.user_name %>, email: <%= @user.email_address %>, role: <%= f.select :role, User.roles.keys %>
 <% end %>
+</div>
+</div>
