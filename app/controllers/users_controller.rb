@@ -9,11 +9,23 @@ class UsersController< ApplicationController
   def update
     @user = User.find(params[:id])
     new_role = params.dig(:user, :role)
-    if new_role != "admin" && @user.role == "admin" && User.where(role: :admin).count == 1
+    if is_deleting_last_admin?(@user, new_role)
       flash[:alert] = "Cannot demote the last admin."
       return redirect_to users_url
     end
     @user.update(role: new_role)
     redirect_to users_url
+  end
+
+  private
+  def is_deleting_last_admin?(user, new_role)
+    !!(is_admin?(user, new_role) && one_admin_left?)
+  end
+  def is_admin?(user, role)
+    admin = "admin"
+    !!(user.role == admin && role != admin)
+  end
+  def one_admin_left?
+    User.where(role: :admin).count == 1
   end
 end
