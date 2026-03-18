@@ -57,14 +57,14 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
      assert_redirected_to new_session_path
    end
 
-  # # Verifies that destroying a session clears the session cookie
-  # # and redirects to the login form.
-  # test "destroy" do
-  #   sign_in_as(@user)
+   # # Verifies that destroying a session clears the session cookie
+   # # and redirects to the login form.
+   test "destroy" do
+     sign_in_as(@user)
 
-  #   delete session_path
+     delete session_path
 
-  #   assert_redirected_to new_session_path
-  #   assert_empty cookies[:session_id]
-  # end
+     assert_redirected_to new_session_path
+     assert_empty cookies[:session_id]
+   end
 end
