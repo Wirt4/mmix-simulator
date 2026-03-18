@@ -2,7 +2,7 @@
 # access to the login form and login action. Rate-limits login attempts
 # to 10 per 3 minutes.
 class SessionsController < ApplicationController
-  allow_unauthenticated_access only: %i[ new create ]
+  allow_unauthenticated_access only: %i[ new create logout ]
   rate_limit to: 10,
     within: 3.minutes,
     only: :create,
@@ -22,6 +22,9 @@ class SessionsController < ApplicationController
     else
       redirect_to new_session_path, alert: "Try another email address or password."
     end
+  end
+
+  def logout
   end
 
   # Public: Terminates the current session and redirects to the login form.
