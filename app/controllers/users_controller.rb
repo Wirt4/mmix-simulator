@@ -39,10 +39,6 @@ class UsersController< ApplicationController
 
   private
 
-  def current_is_admin?
-    !!(Current&.session&.user&.role == "admin")
-  end
-
   def is_removing_last_admin?(user, new_role)
     !!(role_is_admin?(user, new_role) && one_admin_left?)
   end
