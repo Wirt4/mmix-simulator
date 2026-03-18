@@ -1,16 +1,16 @@
 # Public: Handles admin edits to users views. Only allows admin-level users
 
 class UsersController< ApplicationController
+  before_action :require_admin
+
   # Public: only the admin may view the users information
   def index
-    return head :forbidden unless current_is_admin?
+    require_admin
     @users = User.all
   end
 
   # Public: updates the role of a given user
   def update
-    return head :forbidden unless current_is_admin?
-
     @user = User.find(params[:id])
     new_role = params.dig(:user, :role)
 
@@ -25,8 +25,6 @@ class UsersController< ApplicationController
 
   # Public: deletes selected user. Editing user may not delete themself
   def destroy
-    return head :forbidden unless current_is_admin?
-
     @user = User.find(params[:id])
     if @user == Current.session.user
       flash[:alert] = "Cannot delete yourself."
@@ -37,6 +35,10 @@ class UsersController< ApplicationController
   end
 
   private
+
+  def require_admin
+    head :forbidden unless current_is_admin?
+  end
 
   def current_is_admin?
     !!(Current&.session&.user&.role == "admin")
