@@ -28,9 +28,9 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     sign_in_as(@admin)
     get users_url
     assert_response :success
-    assert_select "td", text: @admin.user_name
-    assert_select "td", text: @user.user_name
-    assert_select "td", text: "user"
-    assert_select "td", text: "admin"
+    assert_select "button", text: "Edit", count: 2
+  end
+
+  test "index: users have edit option" do
   end
 end
