@@ -29,9 +29,6 @@
   - Delete private methods: `require_admin`, `current_is_admin?`.
   - Remove the redundant `require_admin` call inside the `index` action body.
   - `update`: use strong params (`params.require(:user).permit(:role)`) instead of `params.dig(:user, :role)`.
-  - `destroy`: add last-admin-delete guard — if the target user is the last remaining admin, reject with
-  redirect and `flash[:alert] = "Cannot delete the last admin."`. This is in addition to the existing
-  self-delete guard.
 
   ### 3. `app/views/users/edit.html.erb`
 
