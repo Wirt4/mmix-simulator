@@ -7,6 +7,8 @@ class UsersController< ApplicationController
   end
 
   def update
+    return head :forbidden unless Current&.session&.user&.role == "admin"
+
     @user = User.find(params[:id])
     new_role = params.dig(:user, :role)
     if is_deleting_last_admin?(@user, new_role)
