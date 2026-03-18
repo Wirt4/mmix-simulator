@@ -62,21 +62,10 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Cannot demote the last admin.", flash[:alert]
   end
 
-=begin
-  test "update: can demote an admin when another admin exists" do
-    sign_in_as(@admin)
-    assert User.where(role: :admin).count >= 2
-
-    patch user_url(@admin_two), params: { user: { role: "user" } }
-    assert_redirected_to users_url
-    assert_equal "user", @admin_two.reload.role
-  end
-
   test "update: non-admin cannot update roles" do
     sign_in_as(@user)
     patch user_url(@user), params: { user: { role: "admin" } }
     assert_response :forbidden
     assert_equal "user", @user.reload.role
   end
-=end
 end
