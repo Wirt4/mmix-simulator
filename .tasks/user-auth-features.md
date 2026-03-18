@@ -112,8 +112,6 @@ Admin-only controller for managing user accounts. TomDoc on all public methods.
 - `destroy` — delete a user
   - Controller-level guard: cannot delete self (redirect with alert)
   - Controller-level guard: cannot delete the last remaining admin (redirect with alert)
-- Private `set_user` before_action for edit/update/destroy
-- Private `user_params` permitting only `role`
 
 #### `app/views/users/index.html.erb`
 Table listing all users: user_name, email_address, role, edit link, delete button. Minimal styling matching existing views.
