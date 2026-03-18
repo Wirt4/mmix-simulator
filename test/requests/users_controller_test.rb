@@ -60,13 +60,12 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-=begin
   test "edit: form has a submit button" do
     sign_in_as(@admin)
     get edit_user_url(@user)
     assert_select "input[type=submit], button[type=submit]"
   end
-
+=begin
   test "edit: has a back link to users index" do
     sign_in_as(@admin)
     get edit_user_url(@user)
