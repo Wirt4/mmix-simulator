@@ -45,6 +45,18 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Try again later.", flash[:alert]
   end
 
+  # Public: Verifies the logout page renders successfully.
+  test "logout" do
+    get logout_path
+    assert_response :success
+  end
+=begin
+  # Public: Verifies the logout page is accessible without authentication.
+  test "logout is accessible without authentication" do
+    get logout_path
+    assert_response :success
+  end
+=end
   # Public: Verifies that destroying a session clears the session cookie
   # and redirects to the login form.
   test "destroy" do
