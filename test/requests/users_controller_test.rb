@@ -44,6 +44,34 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "edit: admin can GET edit for a user" do
+    sign_in_as(@admin)
+    get edit_user_url(@user)
+    assert_response :success
+  end
+
+  test "edit: form has a role select tag populated from User.roles.keys" do
+    sign_in_as(@admin)
+    get edit_user_url(@user)
+    assert_select "select[name=?]", "user[role]" do
+      User.roles.keys.each do |role|
+        assert_select "option[value=?]", role
+      end
+    end
+  end
+
+  test "edit: form has a submit button" do
+    sign_in_as(@admin)
+    get edit_user_url(@user)
+    assert_select "input[type=submit], button[type=submit]"
+  end
+
+  test "edit: has a back link to users index" do
+    sign_in_as(@admin)
+    get edit_user_url(@user)
+    assert_select "a[href=?]", users_path
+  end
+
   test "update: admin can change a user's role" do
     sign_in_as(@admin)
     patch user_url(@user), params: { user: { role: "admin" } }
