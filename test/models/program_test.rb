@@ -5,14 +5,13 @@ class ProgramTest < ActiveSupport::TestCase
     program = programs(:one)
     assert program.valid?
   end
-=begin
   test "requires title" do
-    source = sources(:one)
-    source.title = nil
-    assert_not source.valid?
-    assert source.errors[:title].any?
+    program = programs(:one)
+    program.title = nil
+    assert_not program.valid?
+    assert program.errors[:title].any?
   end
-
+=begin
   test "requires body" do
     source = sources(:one)
     source.body = nil
