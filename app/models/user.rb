@@ -5,6 +5,7 @@
 class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
+  has_many :sources, dependent: :destroy
 
   enum :role, { admin: 0, user: 1 }
 
