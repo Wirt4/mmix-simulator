@@ -11,14 +11,13 @@ class ProgramTest < ActiveSupport::TestCase
     assert_not program.valid?
     assert program.errors[:title].any?
   end
-=begin
   test "requires body" do
-    source = sources(:one)
-    source.body = nil
-    assert_not source.valid?
-    assert source.errors[:body].any?
+    program = programs(:one)
+    program.body = nil
+    assert_not program.valid?
+    assert program.errors[:body].any?
   end
-
+=begin
   test "belongs to user" do
     source = sources(:one)
     assert_equal users(:one), source.user
