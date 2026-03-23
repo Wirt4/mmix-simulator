@@ -1,21 +1,21 @@
 require "test_helper"
 
 class ProgramTest < ActiveSupport::TestCase
+  setup do
+    @program = programs(:one)
+  end
   test "valid program" do
-    program = programs(:one)
-    assert program.valid?
+    assert @program.valid?
   end
   test "requires title" do
-    program = programs(:one)
-    program.title = nil
-    assert_not program.valid?
-    assert program.errors[:title].any?
+    @program.title = nil
+    assert_not @program.valid?
+    assert @program.errors[:title].any?
   end
   test "requires body" do
-    program = programs(:one)
-    program.body = nil
-    assert_not program.valid?
-    assert program.errors[:body].any?
+    @program.body = nil
+    assert_not @program.valid?
+    assert @program.errors[:body].any?
   end
 =begin
   test "belongs to user" do
