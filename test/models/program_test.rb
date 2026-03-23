@@ -17,17 +17,4 @@ class ProgramTest < ActiveSupport::TestCase
     assert_not @program.valid?
     assert @program.errors[:body].any?
   end
-=begin
-  test "belongs to user" do
-    source = sources(:one)
-    assert_equal users(:one), source.user
-  end
-
-  test "destroying user destroys sources" do
-    user = users(:one)
-    assert_difference("Source.count", -1) do
-      user.destroy
-    end
-  end
-=end
 end
