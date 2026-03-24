@@ -3,28 +3,27 @@
 # console_output - The String text content of the simulation output.
 # trace_output   - The String trace output of the simulation run (optional).
 # exit_value     - The Integer exit value of the simulation run.
+# flags          - The String flags passed to the simulation run (optional).
 # executable     - The Executable that produced this output.
 class Output < ApplicationRecord
   belongs_to :executable
 
   validate :console_output_must_be_text
   validate :trace_output_must_be_text
+  validate :flags_must_be_text
   validates :console_output, presence: true
   validates :exit_value, presence: true, numericality: { only_integer: true }
 
   private
-
-  def console_output_must_be_text
-    unless console_output_before_type_cast.is_a?(String)
-      errors.add(:console_output, "must be text")
-    end
+  def validate_text_field(field, allow_nil: true)
+    value = public_send(:"#{field}_before_type_cast")
+    return if allow_nil && value.nil?
+    errors.add(field, "must be text") unless value.is_a?(String)
   end
 
-  def trace_output_must_be_text
-    return if trace_output_before_type_cast.nil?
+  def console_output_must_be_text = validate_text_field(:console_output, allow_nil: false)
 
-    unless trace_output_before_type_cast.is_a?(String)
-      errors.add(:trace_output, "must be text")
-    end
-  end
+  def trace_output_must_be_text = validate_text_field(:trace_output)
+
+  def flags_must_be_text = validate_text_field(:flags)
 end

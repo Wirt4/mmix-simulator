@@ -56,10 +56,23 @@ class OutputTest <ActiveSupport::TestCase
     output.trace_output = nil
     assert output.valid?
   end
+
   test "trace_output must be text" do
     output = outputs(:one)
     output.trace_output = 123
     assert_not output.valid?
     assert output.errors[:trace_output].any?
+  end
+
+  test "has a flags field" do
+    output = Output.new(flags: "-v")
+    assert_equal "-v", output.flags
+  end
+
+  test "flags must be text" do
+    output = outputs(:one)
+    output.flags = 123
+    assert_not output.valid?
+    assert output.errors[:flags].any?
   end
 end
