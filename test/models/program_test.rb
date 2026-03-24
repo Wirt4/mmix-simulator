@@ -21,4 +21,9 @@ class ProgramTest < ActiveSupport::TestCase
     assert_respond_to @program, :executable
     assert_nil @program.executable
   end
+  test "destroying program destroys associated executable" do
+    executable = Executable.create!(body: "compiled", program_id: @program.id)
+    @program.destroy!
+    assert_not Executable.exists?(executable.id)
+  end
 end
