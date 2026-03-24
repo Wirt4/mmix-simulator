@@ -10,4 +10,11 @@ class OutputTest <ActiveSupport::TestCase
     output = Output.new(body: "Hello, World!")
     assert_equal "Hello, World!", output.body
   end
+
+  test "requires body" do
+    output = outputs(:one)
+    output.body = nil
+    assert_not output.valid?
+    assert output.errors[:body].any?
+  end
 end
