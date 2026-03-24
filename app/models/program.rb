@@ -4,7 +4,7 @@
 # body  - The String MMIX source code.
 class Program < ApplicationRecord
   belongs_to :user
-  has_one :executable, dependent: :destroy
+  has_many :executables, dependent: :destroy
   validates :title, presence: true
   validates :body, presence: true
 end
