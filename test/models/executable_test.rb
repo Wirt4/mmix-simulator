@@ -13,7 +13,7 @@ class ExecutableTest < ActiveSupport::TestCase
 
   test "destroying an executable also destroys its outputs" do
     executable = Executable.create!(body: "compiled", program_id: programs(:one).id)
-    output = executable.outputs.create!(console_output: "Hello, World!")
+    output = executable.outputs.create!(console_output: "Hello, World!", exit_value: 0)
 
     assert_difference "Output.count", -1 do
       executable.destroy!

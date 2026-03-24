@@ -1,3 +1,4 @@
 one:
   console_output: "Hello, World!"
   executable: one
+  exit_value: 0

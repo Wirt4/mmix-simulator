@@ -24,4 +24,18 @@ class OutputTest <ActiveSupport::TestCase
     assert_not output.valid?
     assert output.errors[:executable].any?
   end
+
+  test "requires exit_value" do
+    output = outputs(:one)
+    output.exit_value = nil
+    assert_not output.valid?
+    assert output.errors[:exit_value].any?
+  end
+
+  test "exit_value must be an integer" do
+    output = outputs(:one)
+    output.exit_value = "not_an_integer"
+    assert_not output.valid?
+    assert output.errors[:exit_value].any?
+  end
 end

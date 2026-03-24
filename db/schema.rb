@@ -23,6 +23,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_043138) do
     t.text "console_output"
     t.datetime "created_at", null: false
     t.integer "executable_id", null: false
+    t.integer "exit_value"
     t.datetime "updated_at", null: false
     t.index ["executable_id"], name: "index_outputs_on_executable_id"
   end
