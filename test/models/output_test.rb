@@ -11,6 +11,13 @@ class OutputTest <ActiveSupport::TestCase
     assert_equal "Hello, World!", output.console_output
   end
 
+  test "console_output must be text" do
+    output = outputs(:one)
+    output.console_output = 123
+    assert_not output.valid?
+    assert output.errors[:console_output].any?
+  end
+
   test "requires console_output" do
     output = outputs(:one)
     output.console_output = nil

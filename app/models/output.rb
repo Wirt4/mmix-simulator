@@ -6,6 +6,15 @@
 class Output < ApplicationRecord
   belongs_to :executable
 
+  validate :console_output_must_be_text
   validates :console_output, presence: true
   validates :exit_value, presence: true, numericality: { only_integer: true }
+
+  private
+
+  def console_output_must_be_text
+    unless console_output_before_type_cast.is_a?(String)
+      errors.add(:console_output, "must be text")
+    end
+  end
 end
