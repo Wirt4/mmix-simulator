@@ -1,0 +1,2 @@
+class Executable < ApplicationRecord
+end
