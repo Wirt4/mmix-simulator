@@ -21,10 +21,4 @@ class ProgramTest < ActiveSupport::TestCase
     assert_respond_to @program, :executable
     assert_nil @program.executable
   end
-=begin
-  test "can have zero executables" do
-    @program.executable = nil
-    assert @program.valid?
-  end
-=end
 end
