@@ -26,7 +26,7 @@ class ProgramTest < ActiveSupport::TestCase
   end
 
   test "destroying program destroys associated executables" do
-    executables = 3.times.map { Executable.create!(body: "compiled", program_id: @program.id) }
+    executables = 3.times.map { Executable.create!(bin: 1001, program_id: @program.id) }
     @program.destroy!
     executables.each { |e| assert_not Executable.exists?(e.id) }
   end

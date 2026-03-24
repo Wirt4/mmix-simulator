@@ -1,7 +1,7 @@
 class CreateExecutables < ActiveRecord::Migration[8.1]
   def change
     create_table :executables do |t|
-      t.text :body
+      t.binary :bin
       t.references :program, null: false, foreign_key: true
 
       t.timestamps
