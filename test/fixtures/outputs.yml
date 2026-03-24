@@ -1,1 +1,2 @@
-one: {}
+one:
+  body: "Hello, World!"
