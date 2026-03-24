@@ -2,5 +2,7 @@
 #
 # body - The String text content of the simulation output.
 class Output < ApplicationRecord
+  belongs_to :executable
+
   validates :body, presence: true
 end

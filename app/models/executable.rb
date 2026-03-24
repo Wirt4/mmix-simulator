@@ -2,7 +2,8 @@
 #
 # body - The String compiled executable content.
 class Executable < ApplicationRecord
-  has_many :outputs
+  belongs_to :program
+  has_many :outputs, dependent: :destroy
 
   validates :body, presence: true
 end

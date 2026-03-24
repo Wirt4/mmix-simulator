@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_24_043747) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_24_044814) do
   create_table "executables", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -22,7 +22,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_043747) do
   create_table "outputs", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
+    t.integer "executable_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["executable_id"], name: "index_outputs_on_executable_id"
   end
 
   create_table "programs", force: :cascade do |t|
@@ -64,6 +66,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_043747) do
   end
 
   add_foreign_key "executables", "programs"
+  add_foreign_key "outputs", "executables"
   add_foreign_key "programs", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "sources", "users"
