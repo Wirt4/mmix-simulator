@@ -5,6 +5,10 @@ class ExecutableTest < ActiveSupport::TestCase
     assert_equal :has_many, Executable.reflect_on_association(:outputs).macro
   end
 
+  test "body is a binary column" do
+    assert_equal :binary, Executable.columns_hash["body"].type
+  end
+
   test "executable must have a body" do
     executable = Executable.new
     assert_not executable.valid?
