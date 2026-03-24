@@ -17,4 +17,14 @@ class ProgramTest < ActiveSupport::TestCase
     assert_not @program.valid?
     assert @program.errors[:body].any?
   end
+  test "can have one executable" do
+    assert_respond_to @program, :executable
+    assert_nil @program.executable
+  end
+=begin
+  test "can have zero executables" do
+    @program.executable = nil
+    assert @program.valid?
+  end
+=end
 end
