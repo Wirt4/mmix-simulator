@@ -8,4 +8,10 @@ class ExecutableTest < ActiveSupport::TestCase
   test "executable has many outputs" do
     assert_equal :has_many, Executable.reflect_on_association(:outputs).macro
   end
+
+  test "executable must have a body" do
+    executable = Executable.new
+    assert_not executable.valid?
+    assert_includes executable.errors[:body], "can't be blank"
+  end
 end
