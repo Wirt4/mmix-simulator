@@ -6,16 +6,16 @@ class OutputTest <ActiveSupport::TestCase
     assert output.valid?
   end
 
-  test "has a body field" do
-    output = Output.new(body: "Hello, World!")
-    assert_equal "Hello, World!", output.body
+  test "has a console_output field" do
+    output = Output.new(console_output: "Hello, World!")
+    assert_equal "Hello, World!", output.console_output
   end
 
-  test "requires body" do
+  test "requires console_output" do
     output = outputs(:one)
-    output.body = nil
+    output.console_output = nil
     assert_not output.valid?
-    assert output.errors[:body].any?
+    assert output.errors[:console_output].any?
   end
 
   test "requires executable" do

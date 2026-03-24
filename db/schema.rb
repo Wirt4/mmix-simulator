@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_24_044814) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_24_043138) do
   create_table "executables", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -20,7 +20,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_044814) do
   end
 
   create_table "outputs", force: :cascade do |t|
-    t.text "body"
+    t.text "console_output"
     t.datetime "created_at", null: false
     t.integer "executable_id", null: false
     t.datetime "updated_at", null: false

@@ -4,5 +4,5 @@
 class Output < ApplicationRecord
   belongs_to :executable
 
-  validates :body, presence: true
+  validates :console_output, presence: true
 end
