@@ -10,8 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_24_043138) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_24_043747) do
   create_table "executables", force: :cascade do |t|
+    t.text "body"
     t.datetime "created_at", null: false
     t.integer "program_id", null: false
     t.datetime "updated_at", null: false
