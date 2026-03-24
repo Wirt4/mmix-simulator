@@ -5,4 +5,9 @@ class OutputTest <ActiveSupport::TestCase
     output = outputs(:one)
     assert output.valid?
   end
+
+  test "has a body field" do
+    output = Output.new(body: "Hello, World!")
+    assert_equal "Hello, World!", output.body
+  end
 end
