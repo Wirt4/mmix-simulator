@@ -17,4 +17,11 @@ class OutputTest <ActiveSupport::TestCase
     assert_not output.valid?
     assert output.errors[:body].any?
   end
+
+  test "requires executable" do
+    output = outputs(:one)
+    output.executable = nil
+    assert_not output.valid?
+    assert output.errors[:executable].any?
+  end
 end
