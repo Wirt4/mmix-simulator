@@ -10,7 +10,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_23_210639) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_24_043138) do
+  create_table "executables", force: :cascade do |t|
+    t.binary "bin"
+    t.datetime "created_at", null: false
+    t.integer "program_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["program_id"], name: "index_executables_on_program_id"
+  end
+
+  create_table "outputs", force: :cascade do |t|
+    t.text "console_output"
+    t.datetime "created_at", null: false
+    t.integer "executable_id", null: false
+    t.integer "exit_value"
+    t.string "flags"
+    t.text "trace_output"
+    t.datetime "updated_at", null: false
+    t.index ["executable_id"], name: "index_outputs_on_executable_id"
+  end
+
   create_table "programs", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -49,6 +68,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_23_210639) do
     t.index ["user_name"], name: "index_users_on_user_name", unique: true
   end
 
+  add_foreign_key "executables", "programs"
+  add_foreign_key "outputs", "executables"
   add_foreign_key "programs", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "sources", "users"

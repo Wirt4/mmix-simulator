@@ -1,0 +1,5 @@
+one:
+  console_output: "Hello, World!"
+  executable: one
+  exit_value: 0
+  trace_output: nil
