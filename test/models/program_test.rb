@@ -20,11 +20,9 @@ class ProgramTest < ActiveSupport::TestCase
   test "program has many executables" do
     assert_equal :has_many, Program.reflect_on_association(:executables).macro
   end
-=begin
   test "destroying program destroys associated executables" do
-    executable = Executable.create!(body: "compiled", program_id: @program.id)
+    executables = 3.times.map { Executable.create!(body: "compiled", program_id: @program.id) }
     @program.destroy!
-    assert_not Executable.exists?(executable.id)
+    executables.each { |e| assert_not Executable.exists?(e.id) }
   end
-=end
 end
