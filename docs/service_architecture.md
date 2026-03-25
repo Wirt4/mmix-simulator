@@ -168,15 +168,19 @@ Single point of OS process execution.
 
 **Does**
 - Executes command arrays via subprocesses
-- Enforces timeout — kills process and returns non-zero `CommandResult` with descriptive stderr
+- Enforces timeout as a last resort: will raise an error
 - Handles `Errno::ENOENT` (command not found) gracefully
 - Returns `CommandResult` for all outcomes
+  
 **Knows**
   - `CommandResult` object insubstantiation
   - `Open3` or similar OS subprocess module
+  - The OS and related tools
+  
 **Doesn't Know**
   - Anything about MMIX
   - Anything about Sandboxing or bubblewrap
+    
 ### `Assembler` - `app/services/mmix/assembler.rb`
 **Does**
 - makes a tmpdir
@@ -222,6 +226,19 @@ Single point of OS process execution.
   - details of `Open3` or any firsthand knowlege of the OS
   - Anything about inner details of `Simulator`
 
+### `SandboxWrapper` — `app/services/sandbox_wrapper.rb`
+
+Pure command transformer that constructs bubblewrap command arrays. Knows nothing about mmixal or mmix.
+**Does**
+ - appends invcations of bwrap to the command array so that the process will execute with the least necessary permissions
+ - enforces first line of defense timeout
+**Knows**
+ - bwrap best practices and flags, is an abstraction layer for containerization
+ - command-line domain of the OS
+**Doesn't Know**
+ - processes pased to it
+ - direct contact with OS
+
 ### `CommandResult` — `app/services/command_result.rb`
 
 Immutable value object representing the outcome of a shell command.
@@ -229,32 +246,11 @@ Immutable value object representing the outcome of a shell command.
 - Used by every service that runs a shell command
 - Trivially constructible in tests: `CommandResult.new(stdout: "", stderr: "", exit_code: 0)`
 
-### `ShellError` — `app/services/mmix_error.rb`
-
-Custom exception class for assembly and simulation failures.
-
 ### `SimulatorResult` - `app/services/mmix/simulator_result.rb`
 Class for delivering the return payload from the simulator
 
 ### `AssemblerResult` - `app/services/assembler_result.rb`
 Class for delivering the return payload from the assembler
-
-### `SandboxWrapper` — `app/services/sandbox_wrapper.rb`
-
-Pure command transformer that constructs bubblewrap command arrays. Knows nothing about mmixal or mmix.
-
-**Responsibilities:**
-- Constructs `bwrap` arguments for read-only root bind, read-write tmpdir bind, network isolation, and resource limits
-- `allowed_paths`: directories to bind-mount read-write (typically the invocation's tmpdir)
-- `network: false`: disables network access by default via `--unshare-net`
-- `time_limit`: timeout enforcement in seconds
-
-**Example transformation:**
-```
-Input:  ["mmixal", "program.mms"]
-Output: ["bwrap", "--ro-bind", "/", "/", "--bind", "/tmp/abc", "/tmp/abc",
-         "--unshare-net", "--die-with-parent", "mmixal", "program.mms"]
-```
 
 **Note:** Assembler and Simulator are callable directly from controllers for compile-only or run-only workflows.
 
@@ -278,7 +274,7 @@ Each service creates its own `SandboxWrapper` per `call` invocation, scoped to t
 
 ### Both services are public entry points
 
-Controllers can call:
+Controllers (or jobs queue) can call:
 - `Assembler` directly — for compile-only workflows (syntax checking, producing binaries without running)
 - `Simulator` directly — for re-running a previously compiled executable with different flags
 
@@ -293,7 +289,6 @@ Each service is tested in isolation by mocking its immediate dependencies.
 | `CommandRunner` | `test/services/command_runner_test.rb` | Nothing (integration) | Real `echo` command works; timeout kills long process; missing command returns error |
 | `Assembler` | `test/services/assembler_test.rb` | `CommandRunner#run` | Command array includes `mmixal` + flags; tmpdir created/cleaned; `.mmo` binary read on success |
 | `Simulator` | `test/services/simulator_test.rb` | `CommandRunner#run` | Command array includes `mmix` + flags; tmpdir created/cleaned; output mapped correctly |
-| `MmixPipeline` | `test/services/mmix_pipeline_test.rb` | `Assembler#call`, `Simulator#call` | `Executable` + `Output` records created; assembly failure raises error; simulation failure still persists |
 
 ### Mock boundary principle
 
@@ -334,11 +329,3 @@ graph LR
 | `test/services/command_runner_test.rb` | Integration test |
 | `test/services/assembler_test.rb` | Unit test (mock runner) |
 | `test/services/simulator_test.rb` | Unit test (mock runner) |
-
-
-
-1. **CommandResult** — no dependencies, used by everything
-2. **MmixErrors** — no dependencies, used by pipeline
-3. **SandboxWrapper** — no dependencies
-4. **CommandRunner** — depends on CommandResult
-5. **Assembler + Simulator** (parallel) — depend on CommandRunner, SandboxWrapper
