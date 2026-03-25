@@ -129,7 +129,6 @@ sequenceDiagram
     CR->>OS: Open3.popen3(...)
     OS-->>CR: stdout, stderr, exit_code
     CR-->>A: CommandResult
-    A-->>C: AssemblerResult(binary:, command_result:)
     A->>A: FileUtils.remove_entry(tmpdir)
     alt success
         A->>A: read tmpdir/program.mmo as binary
