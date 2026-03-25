@@ -10,125 +10,64 @@ The service layer in `app/services/` provides the interface between the Rails ap
 Both tools run inside **bubblewrap** (`bwrap`) sandboxes that restrict filesystem access, disable networking, and enforce time limits.
 
 ## Class Diagram
-
-```mermaid
+---
+config:
+  layout: elk
+---
 classDiagram
-    class CommandResult {
-        <<Data>>
-        +String stdout
-        +String stderr
-        +Integer exit_code
-        +success?() Boolean
+direction TB
+    class SandboxCommand {
+	    +sandbox_wrap(command, allowed_paths, network, time_limit) Array~String~
     }
 
     class AssembleResult {
-        <<Data>>
-        +Binary binary
-        +CommandResult command_result
-        +success?() Boolean
+	    +Binary binary
+	    +CommandResult command_result
+	    +success() Boolean
     }
 
     class SimulateResult {
-        <<Data>>
-        +String console_output
-        +String trace_output
-        +CommandResult command_result
-        +success?() Boolean
-        +exit_code() Integer
-    }
-
-    class SandboxWrapper {
-        -Array~String~ allowed_paths
-        -Boolean network
-        -Integer time_limit
-        +initialize(allowed_paths:, network:, time_limit:)
-        +wrap(command) Array~String~
+	    +String console_output
+	    +String trace_output
+	    +CommandResult command_result
+	    +success() Boolean
+	    +exit_code() Integer
     }
 
     class CommandRunner {
-        +run(command, chdir:, timeout:) CommandResult
+	    +run(command, chdir, timeout) CommandResult
     }
 
     class Assembler {
-        -CommandRunner runner
-        +initialize(runner:)
-        +call(source_code:, flags:) AssembleResult
+	    -CommandRunner runner
+	    +initialize(runner)
+	    +call(source_code, flags) AssembleResult
     }
 
     class Simulator {
-        -CommandRunner runner
-        +initialize(runner:)
-        +call(binary:, flags:) SimulateResult
-    }
-
-    class MmixPipeline {
-        -Assembler assembler
-        -Simulator simulator
-        +initialize(assembler:, simulator:)
-        +call(program:, sim_flags:) Output
-    }
-
-    class MmixErrors {
-        <<module>>
+	    -CommandRunner runner
+	    +initialize(runner)
+	    +call(binary, flags) SimulateResult
     }
 
     class AssemblyError {
-        +String stderr
-        +Integer exit_code
+	    +String stderr
+	    +Integer exit_code
     }
 
     class SimulationError {
-        +String stderr
-        +Integer exit_code
+	    +String stderr
+	    +Integer exit_code
     }
 
-    MmixErrors *-- AssemblyError
-    MmixErrors *-- SimulationError
+	<<module>> SandboxCommand
+	<<Data>> AssembleResult
+	<<Data>> SimulateResult
 
-    Assembler --> CommandRunner : delegates execution
-    Assembler --> SandboxWrapper : creates per invocation
-    Assembler --> AssembleResult : returns
-    Assembler --> CommandResult : via runner
-
-    Simulator --> CommandRunner : delegates execution
-    Simulator --> SandboxWrapper : creates per invocation
-    Simulator --> SimulateResult : returns
-    Simulator --> CommandResult : via runner
-
-    MmixPipeline --> Assembler : compiles source
-    MmixPipeline --> Simulator : runs binary
-    MmixPipeline --> MmixErrors : raises on failure
-
-    CommandRunner --> CommandResult : returns
-
-    AssembleResult --> CommandResult : wraps
-    SimulateResult --> CommandResult : wraps
-```
-
-## Dependency Graph
-
-```mermaid
-graph TD
-    MmixPipeline --> Assembler
-    MmixPipeline --> Simulator
-    MmixPipeline --> MmixErrors
-
-    Assembler --> SandboxWrapper
     Assembler --> CommandRunner
-    Assembler --> AssembleResult
-    Simulator --> SandboxWrapper
     Simulator --> CommandRunner
-    Simulator --> SimulateResult
-
-    CommandRunner --> CommandResult
-    AssembleResult --> CommandResult
-    SimulateResult --> CommandResult
-
-    style CommandResult fill:#e1f5fe
-    style AssembleResult fill:#e1f5fe
-    style SimulateResult fill:#e1f5fe
-    style MmixErrors fill:#fce4ec
-```
+    SandboxCommand <.. Assembler : includes
+    SandboxCommand <.. Simulator : includes
 
 ## Sequence Diagrams
 
