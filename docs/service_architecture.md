@@ -2,14 +2,12 @@
 
 ## Overview
 
-The service layer in `app/services/` provides the interface between the Rails application and the external MMIX toolchain. It shells out to two CLI tools:
+The service layer in `app/services/` provides the interface between the Rails application and the MMIX toolchain. It shells out to two CLI tools:
 
 - **mmixal** — the MMIX assembler, which compiles `.mms` source files into `.mmo` binary files
 - **mmix** — the MMIX simulator, which executes `.mmo` binaries and produces console/trace output
 
 Both tools run inside **bubblewrap** (`bwrap`) sandboxes that restrict filesystem access, disable networking, and enforce time limits.
-
-The design follows SOLID principles: each class has a single responsibility, dependencies are injected for testability, and the sandbox concern is decoupled from the tools it wraps.
 
 ## Class Diagram
 
@@ -223,12 +221,6 @@ sequenceDiagram
 
 Immutable value object representing the outcome of a shell command.
 
-```ruby
-CommandResult = Data.define(:stdout, :stderr, :exit_code) do
-  def success? = exit_code.zero?
-end
-```
-
 - Used by every service that runs a shell command
 - No ActiveRecord dependency
 - Trivially constructible in tests: `CommandResult.new(stdout: "", stderr: "", exit_code: 0)`
@@ -237,35 +229,9 @@ end
 
 Module containing custom exception classes for assembly and simulation failures.
 
-```ruby
-module MmixErrors
-  class AssemblyError < StandardError
-    attr_reader :stderr, :exit_code
-
-    def initialize(stderr:, exit_code:)
-      @stderr = stderr
-      @exit_code = exit_code
-      super("Assembly failed (exit #{exit_code}): #{stderr.truncate(200)}")
-    end
-  end
-
-  class SimulationError < StandardError
-    attr_reader :stderr, :exit_code
-    # same pattern
-  end
-end
-```
-
 ### `SandboxWrapper` — `app/services/sandbox_wrapper.rb`
 
 Pure command transformer that constructs bubblewrap command arrays. Knows nothing about mmixal or mmix.
-
-```ruby
-class SandboxWrapper
-  def initialize(allowed_paths:, network: false, time_limit: 10)
-  def wrap(command) # => Array<String>
-end
-```
 
 **Responsibilities:**
 - Constructs `bwrap` arguments for read-only root bind, read-write tmpdir bind, network isolation, and resource limits
@@ -284,12 +250,6 @@ Output: ["bwrap", "--ro-bind", "/", "/", "--bind", "/tmp/abc", "/tmp/abc",
 
 Single point of OS process execution. The only class that touches `Open3`.
 
-```ruby
-class CommandRunner
-  def run(command, chdir: nil, timeout: 30) # => CommandResult
-end
-```
-
 **Responsibilities:**
 - Executes command arrays via `Open3.popen3`
 - Enforces timeout — kills process and returns non-zero `CommandResult` with descriptive stderr
@@ -299,13 +259,6 @@ end
 ### `Assembler` — `app/services/assembler.rb`
 
 Compiles MMIX source code to `.mmo` binary via `mmixal`. Manages temporary files.
-
-```ruby
-class Assembler
-  def initialize(runner: CommandRunner.new)
-  def call(source_code:, flags: []) # => AssembleResult
-end
-```
 
 **Internal flow:**
 1. Create `Dir.mktmpdir`
@@ -317,23 +270,10 @@ end
 7. `ensure` cleanup via `FileUtils.remove_entry(tmpdir)`
 
 **Value object:**
-```ruby
-AssembleResult = Data.define(:binary, :command_result) do
-  def success? = command_result.success?
-end
-```
 
 ### `Simulator` — `app/services/simulator.rb`
 
 Runs compiled `.mmo` binary through the `mmix` simulator. Manages temporary files.
-
-```ruby
-class Simulator
-  def initialize(runner: CommandRunner.new)
-  def call(binary:, flags: []) # => SimulateResult
-end
-```
-
 **Internal flow:**
 1. Create `Dir.mktmpdir`
 2. Write `binary` to `#{tmpdir}/program.mmo`
@@ -354,14 +294,6 @@ end
 ### `MmixPipeline` — `app/services/mmix_pipeline.rb`
 
 Orchestrates the full compile-and-run workflow and persists results to the database.
-
-```ruby
-class MmixPipeline
-  def initialize(assembler: Assembler.new, simulator: Simulator.new)
-  def call(program:, sim_flags: []) # => Output
-end
-```
-
 **Internal flow:**
 1. `assembler.call(source_code: program.body)` — compile
 2. If assembly fails: raise `MmixErrors::AssemblyError` (no records persisted)
