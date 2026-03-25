@@ -120,37 +120,6 @@ sequenceDiagram
     S-->>C: SimulateResult(console_output:, trace_output:, command_result:)
     S->>S: FileUtils.remove_entry(tmpdir)
 ```
-
-### MmixPipeline (orchestrated)
-
-```mermaid
-sequenceDiagram
-    participant C as Controller
-    participant P as MmixPipeline
-    participant A as Assembler
-    participant S as Simulator
-    participant DB as Database
-
-    C->>P: call(program:, sim_flags:)
-    P->>A: call(source_code: program.body)
-    A-->>P: AssemblerResult
-
-    alt assembly failed
-        P-->>C: raise MmixErrors::AssemblyError
-    end
-
-    P->>DB: program.executables.create!(bin: result.binary)
-    DB-->>P: Executable
-
-    P->>S: call(binary: executable.bin, flags: sim_flags)
-    S-->>P: SimulateResult
-
-    P->>DB: executable.outputs.create!(...)
-    DB-->>P: Output
-
-    P-->>C: Output
-```
-
 ## Service Class Specifications
 
 ### `CommandResult` — `app/services/command_result.rb`
