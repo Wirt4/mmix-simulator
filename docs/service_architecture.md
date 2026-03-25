@@ -140,10 +140,10 @@ Immutable value object representing the outcome of a shell command.
 
 Custom exception class for assembly and simulation failures.
 
-### `SimulatorResult` ### - `app/services/simulator_result.rb`
+### `SimulatorResult` - `app/services/simulator_result.rb`
 Class for delivering the return payload from the simulator
 
-### `AssemblerResult` ### - `app/services/assembler_result.rb`
+### `AssemblerResult` - `app/services/assembler_result.rb`
 Class for delivering the return payload from the assembler
 
 ### `SandboxWrapper` — `app/services/sandbox_wrapper.rb`
