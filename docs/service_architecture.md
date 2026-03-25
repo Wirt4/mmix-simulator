@@ -324,7 +324,6 @@ graph LR
 | File | Type |
 |---|---|
 | `app/services/command_result.rb` | Value object |
-| `app/services/mmix_errors.rb` | Error module |
 | `app/services/sandbox_wrapper.rb` | Command transformer |
 | `app/services/command_runner.rb` | Shell executor |
 | `app/services/assembler.rb` | mmixal interface |
@@ -335,30 +334,8 @@ graph LR
 | `test/services/command_runner_test.rb` | Integration test |
 | `test/services/assembler_test.rb` | Unit test (mock runner) |
 | `test/services/simulator_test.rb` | Unit test (mock runner) |
-| `test/services/mmix_pipeline_test.rb` | Unit test (mock services) |
 
-## Implementation Order
 
-The dependency graph dictates the implementation sequence:
-
-```mermaid
-graph TD
-    1["1. CommandResult"] --> 4["4. CommandRunner"]
-    2["2. MmixErrors"] --> 6["6. MmixPipeline"]
-    3["3. SandboxWrapper"] --> 5a["5a. Assembler"]
-    3 --> 5b["5b. Simulator"]
-    4 --> 5a
-    4 --> 5b
-    5a --> 6
-    5b --> 6
-
-    style 1 fill:#c8e6c9
-    style 2 fill:#c8e6c9
-    style 3 fill:#c8e6c9
-    style 5a fill:#fff9c4
-    style 5b fill:#fff9c4
-    style 6 fill:#ffccbc
-```
 
 1. **CommandResult** — no dependencies, used by everything
 2. **MmixErrors** — no dependencies, used by pipeline
