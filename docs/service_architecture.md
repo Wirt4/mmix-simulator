@@ -10,6 +10,7 @@ The service layer in `app/services/` provides the interface between the Rails ap
 Both tools run inside **bubblewrap** (`bwrap`) sandboxes that restrict filesystem access, disable networking, and enforce time limits.
 
 ## Class Diagram
+``` mermaid
 ---
 config:
   layout: elk
@@ -68,7 +69,7 @@ direction TB
     Simulator --> CommandRunner
     SandboxCommand <.. Assembler : includes
     SandboxCommand <.. Simulator : includes
-
+```
 ## Sequence Diagrams
 
 ### Assembler (standalone)
