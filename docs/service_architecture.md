@@ -78,20 +78,19 @@ direction TB
 sequenceDiagram
     participant C as Controller
     participant A as Assembler
-    participant SW as SandboxWrapper
     participant CR as CommandRunner
     participant OS as OS/Shell
 
     C->>A: call(source_code:, flags:)
     A->>A: Dir.mktmpdir
-    A->>A: write source to tmpdir/program.mms
-    A->>SW: new(allowed_paths: [tmpdir])
-    A->>SW: wrap(["mmixal", *flags, "program.mms"])
-    SW-->>A: ["bwrap", ...sandbox_flags..., "mmixal", *flags, "program.mms"]
+    A->>A: write source_code/program to tmpdir/program.mms
+    A->>A: sandbox_wrap(command, allowed_paths, network, time_limit)
     A->>CR: run(wrapped_command, chdir: tmpdir)
     CR->>OS: Open3.popen3(...)
     OS-->>CR: stdout, stderr, exit_code
     CR-->>A: CommandResult
+    A-->>C: AssemblerResult(binary:, command_result:)
+    A->>A: FileUtils.remove_entry(tmpdir)
     alt success
         A->>A: read tmpdir/program.mmo as binary
         A-->>C: AssembleResult(binary:, command_result:)
@@ -107,16 +106,13 @@ sequenceDiagram
 sequenceDiagram
     participant C as Controller
     participant S as Simulator
-    participant SW as SandboxWrapper
     participant CR as CommandRunner
     participant OS as OS/Shell
 
     C->>S: call(binary:, flags:)
     S->>S: Dir.mktmpdir
     S->>S: write binary to tmpdir/program.mmo
-    S->>SW: new(allowed_paths: [tmpdir])
-    S->>SW: wrap(["mmix", *flags, "program.mmo"])
-    SW-->>S: ["bwrap", ...sandbox_flags..., "mmix", *flags, "program.mmo"]
+    S->>S: sandbox_wrap(command, allowed_paths, network, time_limit)
     S->>CR: run(wrapped_command, chdir: tmpdir)
     CR->>OS: Open3.popen3(...)
     OS-->>CR: stdout, stderr, exit_code
@@ -137,7 +133,7 @@ sequenceDiagram
 
     C->>P: call(program:, sim_flags:)
     P->>A: call(source_code: program.body)
-    A-->>P: AssembleResult
+    A-->>P: AssemblerResult
 
     alt assembly failed
         P-->>C: raise MmixErrors::AssemblyError
