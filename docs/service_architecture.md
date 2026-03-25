@@ -186,12 +186,15 @@ Single point of OS process execution.
 - reads the binary from the resulting .mmo in tempdir
 - Returns object containging the binary and status inferred from command run
 - cleans up the tmpdir when done
+  
 **Knows**
+
   - creating and removing tempdir
   - writing to .mms files in the tempdir
   - reading files from tempdir
   - commands needed to assemble the text
   - interface of `CommandResult`
+    
 **Doesn't Know**
   - Anything about executing a binary
   - Anything about the OS
@@ -199,13 +202,14 @@ Single point of OS process execution.
 
 ### `Simulator` — `app/services/mmix/simulator.rb`
 **Does**
--makes a tmpdir
+- makes a tmpdir
 - Transforms the passed SimulatorParams object into appropriate command arrays
 - Fill in default values for unset SimulatorParams
 - invokes SandBoxwrapper to containerize command arrays
 - delegates execution to `CommandRunner` and returns object containting resulting `CommandResult`[s]
 - one run for straight console output, one additional run for trace output
 - cleans up the tempdir when done
+
 **Knows**
   - making and removing tempdirs
   - writing to .mmo files in the tempdir
@@ -213,6 +217,7 @@ Single point of OS process execution.
   - Schema and construction of `SimulatorParams` object
   - Expected behavior based on presence or absence of displayConfig
   - Interface of `CommandResult`
+	
 **Doesn't Know**
   - details of `Open3` or any firsthand knowlege of the OS
   - Anything about inner details of `Simulator`
@@ -251,53 +256,7 @@ Output: ["bwrap", "--ro-bind", "/", "/", "--bind", "/tmp/abc", "/tmp/abc",
          "--unshare-net", "--die-with-parent", "mmixal", "program.mms"]
 ```
 
-### `Assembler` — `app/services/assembler.rb`
-
-Compiles MMIX source code to `.mmo` binary via `mmixal`. Manages temporary files.
-
-**Internal flow:**
-1. Create `Dir.mktmpdir`
-2. Write `source_code` to `#{tmpdir}/program.mms`
-3. Create `SandboxWrapper.new(allowed_paths: [tmpdir])`
-4. Build and wrap command: `["mmixal", *flags, "program.mms"]`
-5. Delegate to `runner.run(wrapped_command, chdir: tmpdir)`
-6. On success, read `#{tmpdir}/program.mmo` as binary into `AssembleResult`
-7. `ensure` cleanup via `FileUtils.remove_entry(tmpdir)`
-
-**Value object:**
-
-### `Simulator` — `app/services/simulator.rb`
-
-Runs compiled `.mmo` binary through the `mmix` simulator. Manages temporary files.
-**Internal flow:**
-1. Create `Dir.mktmpdir`
-2. Write `binary` to `#{tmpdir}/program.mmo`
-3. Create `SandboxWrapper.new(allowed_paths: [tmpdir])`
-4. Build and wrap command: `["mmix", *flags, "program.mmo"]`
-5. Delegate to `runner.run(wrapped_command, chdir: tmpdir)`
-6. Map stdout to `console_output`, stderr to `trace_output`
-7. `ensure` cleanup via `FileUtils.remove_entry(tmpdir)`
-
-**Value object:**
-```ruby
-SimulateResult = Data.define(:console_output, :trace_output, :command_result) do
-  def success? = command_result.success?
-  def exit_code = command_result.exit_code
-end
-```
-
-### `MmixPipeline` — `app/services/mmix_pipeline.rb`
-
-Orchestrates the full compile-and-run workflow and persists results to the database.
-**Internal flow:**
-1. `assembler.call(source_code: program.body)` — compile
-2. If assembly fails: raise `MmixErrors::AssemblyError` (no records persisted)
-3. `program.executables.create!(bin: assemble_result.binary)` — persist binary
-4. `simulator.call(binary: executable.bin, flags: sim_flags)` — simulate
-5. `executable.outputs.create!(...)` — persist output (even on simulation failure, with non-zero exit value)
-6. Return the `Output` record
-
-**Note:** Assembler and Simulator are also callable directly from controllers for compile-only or run-only workflows.
+**Note:** Assembler and Simulator are callable directly from controllers for compile-only or run-only workflows.
 
 ## Design Decisions
 
