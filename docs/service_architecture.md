@@ -48,7 +48,10 @@ direction TB
     class Simulator {
 	    -CommandRunner runner
 	    +initialize(runner)
-	    +call(binary, flags) SimulateResult
+	    +call(binary,
+		simulatorDisplayParams, 
+		std_io_filename, 
+		simulatorConfiguration) SimulateResult
     }
     
     class SimulatorConfiguration {
@@ -65,11 +68,7 @@ direction TB
         +Integer list_source_lines_on_profile
         +Boolean verbose
     }
-    class SimulatorIO{
-	+String standard_input_filename
-    }
-
-    
+   
     class ShellError {
 	    +String stderr
 	    +Integer exit_code
@@ -144,9 +143,9 @@ Immutable value object representing the outcome of a shell command.
 - Used by every service that runs a shell command
 - Trivially constructible in tests: `CommandResult.new(stdout: "", stderr: "", exit_code: 0)`
 
-### `MmixErrors` — `app/services/mmix_errors.rb`
+### `ShellError` — `app/services/mmix_error.rb`
 
-Module containing custom exception classes for assembly and simulation failures.
+Custom exception class for assembly and simulation failures.
 
 ### `SandboxWrapper` — `app/services/sandbox_wrapper.rb`
 
