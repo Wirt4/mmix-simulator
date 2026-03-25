@@ -51,16 +51,12 @@ direction TB
 	    +call(binary, flags) SimulateResult
     }
 
-    class AssemblyError {
+    class ShellError {
 	    +String stderr
 	    +Integer exit_code
     }
 
-    class SimulationError {
-	    +String stderr
-	    +Integer exit_code
-    }
-
+	<<Data>>   ShellError
 	<<module>> SandboxCommand
 	<<Data>> AssembleResult
 	<<Data>> SimulateResult
@@ -127,7 +123,6 @@ sequenceDiagram
 Immutable value object representing the outcome of a shell command.
 
 - Used by every service that runs a shell command
-- No ActiveRecord dependency
 - Trivially constructible in tests: `CommandResult.new(stdout: "", stderr: "", exit_code: 0)`
 
 ### `MmixErrors` — `app/services/mmix_errors.rb`
