@@ -50,7 +50,26 @@ direction TB
 	    +initialize(runner)
 	    +call(binary, flags) SimulateResult
     }
+    
+    class SimulatorConfiguration {
+	+ Integer buffer_size
+        + Integer register_ring_capacity
+}
+    class SimulatorDisplayParams {
+	+Integer trace_each_instruction_n_times
+        +HexidecimalInteger trace_each_raised_error
+        +Boolean trace_details_of_register_Stack
+	+Integer list_source_lines
+        +Boolean show_running_time_statistics
+	+Boolean show_program_profile
+        +Integer list_source_lines_on_profile
+        +Boolean verbose
+    }
+    class SimulatorIO{
+	+String standard_input_filename
+    }
 
+    
     class ShellError {
 	    +String stderr
 	    +Integer exit_code
