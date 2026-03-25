@@ -9,33 +9,20 @@ The service layer in `app/services/` provides the interface between the Rails ap
 
 Both tools run inside **bubblewrap** (`bwrap`) sandboxes that restrict filesystem access, disable networking, and enforce time limits.
 
-## Class Diagram
+## Class Diagrams
+### Process
 ```mermaid
 classDiagram
 direction TB
+
     class SandboxCommand {
 	    +sandbox_wrap(command, allowed_paths, network, time_limit) Array~String~
-    }
-
-    class AssembleResult {
-	    +Binary binary
-	    +CommandResult command_result
-	    +success() Boolean
-    }
-
-    class SimulateResult {
-	    +String console_output
-	    +String trace_output
-	    +CommandResult command_result
-	    +success() Boolean
-	    +exit_code() Integer
     }
 
     class CommandRunner {
 	    +run(command, chdir, timeout) CommandResult
     }
-
-    class Assembler {
+   class Assembler {
 	    -CommandRunner runner
 	    +initialize(runner)
 	    +call(source_code) AssembleResult
@@ -47,48 +34,83 @@ direction TB
 	    +call(binary, config) SimulationResult
     }
 
-	class SimulatorConfig {
-		+ SimulatorSystem system
-		+ SimulatorShow show
-		+ SimulatorIO io
+
+    Assembler --> CommandRunner
+    Simulator --> CommandRunner
+    SandboxCommand <.. Assembler : includes
+    SandboxCommand <.. Simulator : includes
+    
+```
+### Data
+```mermaid
+classDiagram
+direction TB
+	namespace SimulatorInput{
+
+	class SimulatorParams {
+		+ DisplayConfig | null display
+		+ SystemConfig | null system
+		+ IOConfig | null io
     }
 
-    class SimulatorSystem {
+    class SystemConfig {
 	    + Integer buffer_size
         + Integer register_ring_capacity
 	}
 
-    class SimulatorShow {
-		+Integer instructions
-        +HexidecimalInteger arithmetic_exceptions
-        +Boolean register_stack
-		+Boolean line_numbers
-		+Integer line_gap_size
-		+Boolean verbose
-        +Boolean show_running_time_statistics
-		+Boolean show_program_profile
-        +Integer list_source_lines_on_profile
+    class DisplayConfig {
+		+DisplayRuntime | null: runtime
+		+LineNumberStats | null: profile
     }
 
-	class SimulatorIO{
+	class IOConfig{
 		+ Text | null std_in
 		+ Text | null prep_file
 	}
-   
+
+	class DisplayRuntime{
+		Integer trace_instructions_n_times
+		Boolean show_register_stack
+		LineNumberStats | null line_numbers
+		Boolean verbose
+	}
+
+	class LineNumberStats{
+		+ Integer: gap_size
+		+ Boolean: display_line_numbers
+	}
+} 
+    class AssembleResult {
+	    +Binary binary
+	    +CommandResult command_result
+	    +success() Boolean
+    }
+
+ class SimulateResult {
+	    +String console_output
+	    +String trace_output
+	    +CommandResult command_result
+	    +success() Boolean
+	    +exit_code() Integer
+    }
+
+
     class ShellError {
 	    +String stderr
 	    +Integer exit_code
     }
 
 	<<Data>>   ShellError
-	<<module>> SandboxCommand
 	<<Data>> AssembleResult
 	<<Data>> SimulateResult
+	<<Data>> SimulatorParams
 
-    Assembler --> CommandRunner
-    Simulator --> CommandRunner
-    SandboxCommand <.. Assembler : includes
-    SandboxCommand <.. Simulator : includes
+    SimulatorParams ..> DisplayConfig : includes
+    SimulatorParams ..> SystemConfig : includes
+    SimulatorParams ..> IOConfig : includes
+    DisplayConfig ..> LineNumberStats : includes
+    DisplayConfig ..> DisplayRuntime: includes
+    
 ```
 ## Sequence Diagrams
 
