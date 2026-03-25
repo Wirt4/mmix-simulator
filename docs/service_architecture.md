@@ -11,10 +11,6 @@ Both tools run inside **bubblewrap** (`bwrap`) sandboxes that restrict filesyste
 
 ## Class Diagram
 ```mermaid
----
-config:
-  layout: elk
----
 classDiagram
 direction TB
     class SandboxCommand {
@@ -73,8 +69,8 @@ direction TB
 
 	<<Data>>   ShellError
 	<<module>> SandboxCommand
-	<<Data>> AssemblyResult
-	<<Data>> SimulationResult
+	<<Data>> AssembleResult
+	<<Data>> SimulateResult
 
     Assembler --> CommandRunner
     Simulator --> CommandRunner
