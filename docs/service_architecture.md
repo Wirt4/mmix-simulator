@@ -48,10 +48,7 @@ direction TB
     class Simulator {
 	    -CommandRunner runner
 	    +initialize(runner)
-	    +call(binary,
-		simulatorDisplayParams, 
-		std_io_filename, 
-		simulatorConfiguration) SimulateResult
+	    +call(binary, simulatorDisplayParams, std_io_filename, simulatorConfiguration) SimulationResult
     }
     
     class SimulatorConfiguration {
@@ -76,8 +73,8 @@ direction TB
 
 	<<Data>>   ShellError
 	<<module>> SandboxCommand
-	<<Data>> AssembleResult
-	<<Data>> SimulateResult
+	<<Data>> AssemblyResult
+	<<Data>> SimulationResult
 
     Assembler --> CommandRunner
     Simulator --> CommandRunner
@@ -146,6 +143,12 @@ Immutable value object representing the outcome of a shell command.
 ### `ShellError` — `app/services/mmix_error.rb`
 
 Custom exception class for assembly and simulation failures.
+
+### `SimulatorResult` ### - `app/services/simulator_result.rb`
+Class for delivering the return payload from the simulator
+
+### `AssemblerResult` ### - `app/services/assembler_result.rb`
+Class for delivering the return payload from the assembler
 
 ### `SandboxWrapper` — `app/services/sandbox_wrapper.rb`
 
@@ -240,12 +243,11 @@ Each service creates its own `SandboxWrapper` per `call` invocation, scoped to t
 - **Sandbox config** co-located with the service that knows what filesystem paths are needed
 - **Each piece** independently testable without knowledge of the others
 
-### All three services are public entry points
+### Both services are public entry points
 
 Controllers can call:
 - `Assembler` directly — for compile-only workflows (syntax checking, producing binaries without running)
 - `Simulator` directly — for re-running a previously compiled executable with different flags
-- `MmixPipeline` — for the common compile + run + persist workflow
 
 ## Testing Strategy
 
@@ -330,4 +332,3 @@ graph TD
 3. **SandboxWrapper** — no dependencies
 4. **CommandRunner** — depends on CommandResult
 5. **Assembler + Simulator** (parallel) — depend on CommandRunner, SandboxWrapper
-6. **MmixPipeline** — depends on all above
