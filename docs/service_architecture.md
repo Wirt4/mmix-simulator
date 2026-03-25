@@ -38,7 +38,7 @@ direction TB
     class Assembler {
 	    -CommandRunner runner
 	    +initialize(runner)
-	    +call(source_code, flags) AssembleResult
+	    +call(source_code) AssembleResult
     }
 
     class Simulator {
