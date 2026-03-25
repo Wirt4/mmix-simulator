@@ -10,7 +10,7 @@ The service layer in `app/services/` provides the interface between the Rails ap
 Both tools run inside **bubblewrap** (`bwrap`) sandboxes that restrict filesystem access, disable networking, and enforce time limits.
 
 ## Class Diagram
-``` mermaid
+```mermaid
 ---
 config:
   layout: elk
