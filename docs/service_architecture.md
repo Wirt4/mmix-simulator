@@ -73,6 +73,7 @@ direction TB
 		Boolean show_register_stack
 		LineNumberStats | null line_numbers
 		Boolean verbose
+		Boolean quiet
 	}
 
 	class LineNumberStats{
@@ -81,26 +82,23 @@ direction TB
 	}
 } 
     class AssembleResult {
-	    +Binary binary
-	    +CommandResult command_result
+	    +bin() Binary
 	    +success() Boolean
     }
+
+	class CommandResult {
+       +Text stdout
+       +Text | null sterr
+       +Integer exit_code
+   }
 
  class SimulateResult {
-	    +String console_output
-	    +String trace_output
-	    +CommandResult command_result
+	    +console_output() Text
+        +trace_output() Text
 	    +success() Boolean
-	    +exit_code() Integer
     }
 
 
-    class ShellError {
-	    +String stderr
-	    +Integer exit_code
-    }
-
-	<<Data>>   ShellError
 	<<Data>> AssembleResult
 	<<Data>> SimulateResult
 	<<Data>> SimulatorParams
@@ -164,6 +162,61 @@ sequenceDiagram
 ```
 ## Service Class Specifications
 
+### `CommandRunner` — `app/services/command_runner.rb`
+
+Single point of OS process execution.
+
+**Does**
+- Executes command arrays via subprocesses
+- Enforces timeout — kills process and returns non-zero `CommandResult` with descriptive stderr
+- Handles `Errno::ENOENT` (command not found) gracefully
+- Returns `CommandResult` for all outcomes
+**Knows**
+  - `CommandResult` object insubstantiation
+  - `Open3` or similar OS subprocess module
+**Doesn't Know**
+  - Anything about MMIX
+  - Anything about Sandboxing or bubblewrap
+### `Assembler` - `app/services/mmix/assembler.rb`
+**Does**
+- makes a tmpdir
+- Writes the passed program (source code) text or stream to the .mms in tempdir
+- invokes SandboxWrapper to containerize command array
+- delegates execution to `CommandRunner`
+- reads the binary from the resulting .mmo in tempdir
+- Returns object containging the binary and status inferred from command run
+- cleans up the tmpdir when done
+**Knows**
+  - creating and removing tempdir
+  - writing to .mms files in the tempdir
+  - reading files from tempdir
+  - commands needed to assemble the text
+  - interface of `CommandResult`
+**Doesn't Know**
+  - Anything about executing a binary
+  - Anything about the OS
+  - Anything about the Simiulator 
+
+### `Simulator` — `app/services/mmix/simulator.rb`
+**Does**
+-makes a tmpdir
+- Transforms the passed SimulatorParams object into appropriate command arrays
+- Fill in default values for unset SimulatorParams
+- invokes SandBoxwrapper to containerize command arrays
+- delegates execution to `CommandRunner` and returns object containting resulting `CommandResult`[s]
+- one run for straight console output, one additional run for trace output
+- cleans up the tempdir when done
+**Knows**
+  - making and removing tempdirs
+  - writing to .mmo files in the tempdir
+  - Default settings for a simulation
+  - Schema and construction of `SimulatorParams` object
+  - Expected behavior based on presence or absence of displayConfig
+  - Interface of `CommandResult`
+**Doesn't Know**
+  - details of `Open3` or any firsthand knowlege of the OS
+  - Anything about inner details of `Simulator`
+
 ### `CommandResult` — `app/services/command_result.rb`
 
 Immutable value object representing the outcome of a shell command.
@@ -175,7 +228,7 @@ Immutable value object representing the outcome of a shell command.
 
 Custom exception class for assembly and simulation failures.
 
-### `SimulatorResult` - `app/services/simulator_result.rb`
+### `SimulatorResult` - `app/services/mmix/simulator_result.rb`
 Class for delivering the return payload from the simulator
 
 ### `AssemblerResult` - `app/services/assembler_result.rb`
@@ -197,16 +250,6 @@ Input:  ["mmixal", "program.mms"]
 Output: ["bwrap", "--ro-bind", "/", "/", "--bind", "/tmp/abc", "/tmp/abc",
          "--unshare-net", "--die-with-parent", "mmixal", "program.mms"]
 ```
-
-### `CommandRunner` — `app/services/command_runner.rb`
-
-Single point of OS process execution. The only class that touches `Open3`.
-
-**Responsibilities:**
-- Executes command arrays via `Open3.popen3`
-- Enforces timeout — kills process and returns non-zero `CommandResult` with descriptive stderr
-- Handles `Errno::ENOENT` (command not found) gracefully
-- Returns `CommandResult` for all outcomes
 
 ### `Assembler` — `app/services/assembler.rb`
 
