@@ -44,23 +44,36 @@ direction TB
     class Simulator {
 	    -CommandRunner runner
 	    +initialize(runner)
-	    +call(binary, simulatorDisplayParams, std_io_filename, simulatorConfiguration) SimulationResult
+	    +call(binary, config) SimulationResult
     }
-    
-    class SimulatorConfiguration {
-	+ Integer buffer_size
+
+	class SimulatorConfig {
+		+ SimulatorSystem system
+		+ SimulatorShow show
+		+ SimulatorIO io
+    }
+
+    class SimulatorSystem {
+	    + Integer buffer_size
         + Integer register_ring_capacity
-}
-    class SimulatorDisplayParams {
-	+Integer trace_each_instruction_n_times
-        +HexidecimalInteger trace_each_raised_error
-        +Boolean trace_details_of_register_Stack
-	+Integer list_source_lines
+	}
+
+    class SimulatorShow {
+		+Integer instructions
+        +HexidecimalInteger arithmetic_exceptions
+        +Boolean register_stack
+		+Boolean line_numbers
+		+Integer line_gap_size
+		+Boolean verbose
         +Boolean show_running_time_statistics
-	+Boolean show_program_profile
+		+Boolean show_program_profile
         +Integer list_source_lines_on_profile
-        +Boolean verbose
     }
+
+	class SimulatorIO{
+		+ Text | null std_in
+		+ Text | null prep_file
+	}
    
     class ShellError {
 	    +String stderr
