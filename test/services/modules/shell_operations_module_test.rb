@@ -16,6 +16,6 @@ class ShellOperationsModuleTest < ActiveSupport::TestCase
       end
     end
 
-    assert_equal "output", ShellOperationsModule.shellOut(strategy)
+    assert_equal "output", @instance.shellOut(strategy)
   end
 end
