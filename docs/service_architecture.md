@@ -39,7 +39,7 @@ Have a module of shell operations that includes a "shellout" method that takes a
   Why it won't work
     It's simple here, but inheritance can quickly get abused, especially in a duck typed way.
   Why this way is better
-   Only uses a parent classe to define an interface, and at this point it's more for self-documenting code than anything else.
+   Only uses a parent class to define an interface, and at this point it's more for self-documenting code than anything else.
 
 ##  Diagram
 ```mermaid
@@ -49,17 +49,14 @@ class Shell ["Shell Operations Module"]{
    shellOut(strategy, input, timeout : integer) binary | Text
 }
 	class AbstractStrategy{
-		+ read() : binary | Text
         + write (content)
-        + run (wrapperCommands: String[])
+        + run (wrapperCommands: String[]) binary | Text
 	}
 class AssemblerStrategy{
-		+ read() : binary
         + write (text)
         + run (wrapperCommands)
 	}
 class SimulatorStrategy{
-		+ read() : text
         + write (binary)
         + run (wrapperCommands)
 	}
