@@ -25,7 +25,7 @@ Have a module of shell operations that includes a "shellout" method that takes a
 ## Alternatives
 1. pass bare strings to cover the missing parts `binary <- commandLineExecute("mmix", program, ".mms")` and `output <- commandLineExecute("mmixsimulator", binary, ".mmo)`
   Why it won't work
-   -  the parameters will keep on growing... the simulator's config (extensive flags) aren't in there
+   -  the parameters will keep on growing... the simulator's config (extensive flags) and timeout parameter aren't in there
    -  too much exposed information
   Why this way is better
    - Better information hiding
@@ -46,7 +46,7 @@ Have a module of shell operations that includes a "shellout" method that takes a
 classDiagram
 direction TB
 class Shell ["Shell Operations Module"]{
-   shellOut(strategy, input, timeout : integer): binary | Text
+   shellOut(strategy, input, timeout : integer) binary | Text
 }
 	class AbstractStrategy{
 		+ read() : binary | Text
