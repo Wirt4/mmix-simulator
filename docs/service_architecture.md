@@ -17,6 +17,7 @@ Have a module of Shell operations that includes a "shellout" method that takes a
 - strategy as parameter makes for easy mocking for tests
 - run method hides the invocation of the mmix tool, and can be prepened with the appropriate containerization invocation
 - if helper methods are required, they can likewise be put in the shell operations module
+- Configurable SimulatorStrategy makes for an expected use case of "two runs" for separating the datasets for the clean console output and the debuggy trace runs: `shellOut(strategyWithQuietConfigs, input)` and `shellOut(strategyWithTraceConfics, input)`
 ## Cons
 - Lots of encapsulation on text strings especially when the diffence is as trivial as ".mmo" extension vs ".mms"
 - Enforcing an interface contract by abstract class is clunky
