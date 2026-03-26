@@ -3,7 +3,7 @@ module ShellOperationsModule
   def shellOut(strategy, input)
     Dir.mktmpdir do |dir|
     strategy.write(dir, input)
-    strategy.run("foo")
+    strategy.run(dir)
     end
   end
 end
