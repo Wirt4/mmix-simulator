@@ -31,7 +31,7 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
       define_method(:run) do |args|
        output
       end
-      def write(args)
+      def write(dir, args)
       end
     end
     strategy.new
@@ -50,7 +50,7 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
   test "shellOut passes the input to the strategy's write method" do
     simulatorStrategy = strategyDouble(@mmix_machine_code)
     written_input = nil
-    simulatorStrategy.define_singleton_method(:write) do |input|
+    simulatorStrategy.define_singleton_method(:write) do |dir, input|
       written_input = input
     end
 
@@ -58,4 +58,58 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
 
     assert_equal @mmix_machine_code, written_input
   end
+  test "shellOut passes the Dir.mktmpdir path to strategy.write" do
+    # double the strategy with a spy on write
+    written_dir = nil
+    assemblerStrategy = strategyDouble(@mmix_program)
+    assemblerStragety.define_singleton_method(:write) do |dir, input|
+      written_dir = dir
+    end
+    # double Dir with a file path
+    fake_dir = "/tmp/fake_tmpdir"
+    original_mktmpdir = Dir.method(:mktmpdir)
+    Dir.define_singleton_method(:mktmpdir) do |&block|
+      block.call(fake_dir)
+    end
+
+    begin
+      @instance.shellOut(strategy, @mmix_machine_code)
+    ensure
+      # restore Dir.mktmpdir after call
+      # ensure block in case of raised error
+      Dir.define_singleton_method(:mktmpdir, original_mktmpdir)
+    end
+
+    assert_equal fake_dir, written_dir
+  end
+=begin
+  test "shellOut passes the Dir.mktmpdir path to strategy.run" do
+    written_dir = nil
+    run_dir = nil
+    strategy = Class.new do
+      define_method(:run) do |args, dir|
+        run_dir = dir
+        "output"
+      end
+      define_method(:write) do |input, dir|
+        written_dir = dir
+      end
+    end.new
+
+    fake_dir = "/tmp/fake_tmpdir"
+    original_mktmpdir = Dir.method(:mktmpdir)
+    Dir.define_singleton_method(:mktmpdir) do |&block|
+      block.call(fake_dir)
+    end
+
+    begin
+      @instance.shellOut(strategy, @mmix_machine_code)
+    ensure
+      Dir.define_singleton_method(:mktmpdir, original_mktmpdir)
+    end
+
+    assert_equal fake_dir, written_dir
+    assert_equal fake_dir, run_dir
+  end
+=end
 end
