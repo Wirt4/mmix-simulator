@@ -11,8 +11,8 @@ Writing to Database models
 Using in Controllers
 Queued or background jobs
 
-# The Solution
-Have a module of Shell operations that includes a "shellout" method that takes a strategy object and text/binary as input and returns text/binary as output. The strategy interface is one of `read`, `write(content)` and `run(wrapperCommands)`. The Strategies themselves may be included in the module. 
+# Solution
+Have a module of shell operations that includes a "shellout" method that takes a strategy object and text/binary as input and returns text/binary as output. The strategy interface is one of `read`, `write(content)` and `run(wrapperCommands)`. The Strategies themselves may be included in the module. 
 ## Pros
 - strategy as parameter makes for easy mocking for tests
 - run method hides the invocation of the mmix tool, and can be prepened with the appropriate containerization invocation
@@ -23,24 +23,23 @@ Have a module of Shell operations that includes a "shellout" method that takes a
 - Enforcing an interface contract by abstract class is clunky
 
 ## Alternatives
-1. Encapsulated responsibility by function instead of classes, feed something like `binary <- commandLineExecute("mmix", program, ".mms")` and `output <- commandLineExecute("mmixsimulator", binary, ".mmo)`
+1. pass bare strings to cover the missing parts `binary <- commandLineExecute("mmix", program, ".mms")` and `output <- commandLineExecute("mmixsimulator", binary, ".mmo)`
   Why it won't work
-   - too much information exposed: calling function needs to know the file extension to read from and the executable to call
-   - stretches duck typing a bit much, two different output types, two different input types
+   -  the parameters will keep on growing... the simulator's config (extensive flags) aren't in there
+   -  too much exposed information
   Why this way is better
-   - An inheritance scheme differentiates the call types without exposing their guts, an assembler's an assembler, a simuluator's a simulator
-   - The heiarchy from an abstract class enforces an interface by convention
-   - We limit the type return variability to one: shellEnviornment.execute()
+   - Better information hiding
+   - Trading off more methods for fewer parameters
 2. One simple endpoint `/run' do it all in one controller and return the generated output. Fewer files
   Why it won't work
      - A large file size will make error tracing hard since there's so many different ways to throw.
   Why this way is better
-     - An anticipated use case is to run the simulator twice: once for a standard output run and once with all the trace options the caller configured, Composing two different command objects makes developer intent much clearer from the calling structure
+     - An anticipated use case is to run the simulator twice: once for a standard output run and once with all the trace options the caller configured, composition makes developer intent much clearer from the calling structure
 3. Command Pattern: all inheritance AbstractShell <|-- SimulatorShell, AbstractShell <|-- AssemblerShell, AbstractCommand <|--SimulatorCommand, AbstractCommand <|-- Assembler Command. Fewer classes.
   Why it won't work
-    It's simple here, but inheritance can quickly get abused, especially in a duck typed way
+    It's simple here, but inheritance can quickly get abused, especially in a duck typed way.
   Why this way is better
-   Only use parent classes to define an interface
+   Only uses a parent classe to define an interface, and at this point it's more for self-documenting code than anything else.
 
 ##  Diagram
 ```mermaid
