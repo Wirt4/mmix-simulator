@@ -16,7 +16,7 @@ WORKDIR /rails
 
 # Install base packages
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y bubblewrap curl libjemalloc2 libvips sqlite3 systemd-container && \
+    apt-get install --no-install-recommends -y bubblewrap curl libjemalloc2 libvips python3-seccomp sqlite3 && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
@@ -85,6 +85,11 @@ COPY --from=build /usr/local/bin/mmix /usr/local/bin/mmix
 COPY --from=build /usr/local/bin/mmixal /usr/local/bin/mmixal
 COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --chown=rails:rails --from=build /rails /rails
+
+# Make bwrap-seccomp available on PATH (needs root for /usr/local/bin)
+USER root
+RUN ln -s /rails/script/bwrap_seccomp.py /usr/local/bin/bwrap-seccomp
+USER 1000:1000
 
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]

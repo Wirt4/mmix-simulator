@@ -3,7 +3,7 @@ ARG RUBY_VERSION=4.0.1
 FROM ghcr.io/rails/devcontainer/images/ruby:$RUBY_VERSION
 
 USER root
-RUN apt-get update && apt-get install -y nodejs npm texlive-binaries build-essential && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y nodejs npm texlive-binaries build-essential bubblewrap python3-seccomp && rm -rf /var/lib/apt/lists/*
 
 # Build MMIX and MMIXAL from vendored source
 COPY vendor/mmixware /tmp/mmixware
@@ -22,6 +22,8 @@ RUN cd /tmp/mmixware && \
     gcc -O0 mmix-sim.c mmix-arith.o mmix-io.o -o mmix && \
     cp mmix mmixal /usr/local/bin/ && \
     rm -rf /tmp/mmixware
+RUN ln -s /workspaces/mmix-simulator/script/bwrap_seccomp.py /usr/local/bin/bwrap-seccomp && \
+    chmod +x /workspaces/mmix-simulator/script/bwrap_seccomp.py 2>/dev/null || true
 USER vscode
 
 # Ensure binding is always 0.0.0.0
