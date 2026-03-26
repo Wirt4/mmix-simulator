@@ -16,7 +16,7 @@ WORKDIR /rails
 
 # Install base packages
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips sqlite3 && \
+    apt-get install --no-install-recommends -y bubblewrap curl libjemalloc2 libvips sqlite3 systemd-container && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
@@ -30,10 +30,28 @@ ENV RAILS_ENV="production" \
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 
-# Install packages needed to build gems
+# Install packages needed to build gems and MMIX from source
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config && \
+    apt-get install --no-install-recommends -y build-essential texlive-binaries git libyaml-dev pkg-config && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# Build MMIX and MMIXAL from vendored source
+COPY vendor/mmixware /tmp/mmixware
+ENV CWEBINPUTS=/tmp/mmixware
+RUN cd /tmp/mmixware && \
+    ctangle mmix-arith.w && \
+    ctangle mmix-io.w && \
+    ctangle mmix-sim.w && \
+    ctangle mmixal.w && \
+    ctangle abstime.w && \
+    gcc -O0 -c mmix-arith.c && \
+    gcc -O0 -c mmix-io.c && \
+    gcc -O0 -o abstime abstime.c && \
+    ./abstime > abstime.h && \
+    gcc -O0 mmixal.c mmix-arith.o -o mmixal && \
+    gcc -O0 mmix-sim.c mmix-arith.o mmix-io.o -o mmix && \
+    cp mmix mmixal /usr/local/bin/ && \
+    rm -rf /tmp/mmixware
 
 # Install application gems
 COPY vendor/* ./vendor/
@@ -62,7 +80,9 @@ RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
 USER 1000:1000
 
-# Copy built artifacts: gems, application
+# Copy built artifacts: gems, application, MMIX binaries
+COPY --from=build /usr/local/bin/mmix /usr/local/bin/mmix
+COPY --from=build /usr/local/bin/mmixal /usr/local/bin/mmixal
 COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --chown=rails:rails --from=build /rails /rails
 
