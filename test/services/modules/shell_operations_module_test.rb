@@ -81,6 +81,17 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
 
     assert_equal @tmpdir, written_dir
   end
+  test "shellOut passes the Dir.mktmpdir path to strategy.run" do
+     working_dir = nil
+    assemblerStrategy = strategyDouble(@mmix_program)
+    assemblerStrategy.define_singleton_method(:run) do |dir|
+      working_dir = dir
+    end
+
+     @instance.shellOut(assemblerStrategy, @mmix_machine_code)
+
+     assert_equal @tmpdir, working_dir
+  end
 =begin
   test "shellOut passes the Dir.mktmpdir path to strategy.run" do
     written_dir = nil
