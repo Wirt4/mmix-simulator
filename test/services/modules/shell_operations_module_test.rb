@@ -62,7 +62,7 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
     # double the strategy with a spy on write
     written_dir = nil
     assemblerStrategy = strategyDouble(@mmix_program)
-    assemblerStragety.define_singleton_method(:write) do |dir, input|
+    assemblerStrategy.define_singleton_method(:write) do |dir, input|
       written_dir = dir
     end
     # double Dir with a file path
@@ -73,7 +73,7 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
     end
 
     begin
-      @instance.shellOut(strategy, @mmix_machine_code)
+      @instance.shellOut(assemblerStrategy, @mmix_machine_code)
     ensure
       # restore Dir.mktmpdir after call
       # ensure block in case of raised error
