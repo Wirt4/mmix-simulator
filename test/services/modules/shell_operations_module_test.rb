@@ -16,7 +16,7 @@ class ShellOperationsModuleTest < ActiveSupport::TestCase
       end
     end
 
-    assert_equal "output", @instance.shellOut(strategy)
+    assert_equal "output", @instance.shellOut(strategy.new)
   end
 
     test "shellOut returns the binary output from the strategy's 'run' method" do
@@ -24,10 +24,10 @@ class ShellOperationsModuleTest < ActiveSupport::TestCase
 
     strategy = Class.new do
       def run(args)
-        bin
+        0b000000000110111100000000011101010000000001110100000000000111000000000000011101010000000001110100
       end
     end
 
-    assert_equal bin, @instance.shellOut(strategy)
+    assert_equal 0b000000000110111100000000011101010000000001110100000000000111000000000000011101010000000001110100, @instance.shellOut(strategy.new)
   end
 end

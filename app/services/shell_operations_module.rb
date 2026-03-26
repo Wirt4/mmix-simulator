@@ -1,5 +1,5 @@
 module ShellOperationsModule
   def shellOut(strategy)
-    "output"
+    strategy.run("foo")
   end
 end
