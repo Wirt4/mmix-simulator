@@ -12,9 +12,16 @@ Using in Controllers
 Queued or background jobs
 
 # The Solution
-In the services directory, create a ShellEnvironment class that can take eithr an AssemblerStrategy or SimulatorStrategy as an init parameter, and an abstract Command class with children for Assembler and Simulator. The Shell handles making and cleaning up the temporary directory in which the command will run. The Command itself runs
+Have a module of Shell operations that includes a "shellout" method that takes a strategy object and text/binary as input and returns text/binary as output. The strategy interface is one of `read`, `write(content)` and `run(wrapperCommands)`. The Strategies themselves may be included in the module. 
+## Pros
+- strategy as parameter makes for easy mocking for tests
+- run method hides the invocation of the mmix tool, and can be prepened with the appropriate containerization invocation
+- if helper methods are required, they can likewise be put in the shell operations module
+## Cons
+- Lots of encapsulation on text strings especially when the diffence is as trivial as ".mmo" extension vs ".mms"
+- Enforcing an interface contract by abstract class is clunky
 
-# Alternatives
+## Alternatives
 1. Encapsulated responsibility by function instead of classes, feed something like `binary <- commandLineExecute("mmix", program, ".mms")` and `output <- commandLineExecute("mmixsimulator", binary, ".mmo)`
   Why it won't work
    - too much information exposed: calling function needs to know the file extension to read from and the executable to call
@@ -39,22 +46,22 @@ In the services directory, create a ShellEnvironment class that can take eithr a
 classDiagram
 direction TB
 class Shell ["Shell Operations Module"]{
-   shellOut(strategy, input): binary | Text
+   shellOut(strategy, input, timeout : integer): binary | Text
 }
 	class AbstractStrategy{
 		+ read() : binary | Text
-        + write ()
-        + run (prefixedCommandArray: String[])
+        + write (content)
+        + run (wrapperCommands: String[])
 	}
 class AssemblerStrategy{
-		+ read() : text
-        + write ()
-        + run (prefixedCommandArray)
+		+ read() : binary
+        + write (text)
+        + run (wrapperCommands)
 	}
 class SimulatorStrategy{
-		+ read() : binary
-        + write ()
-        + run (prefixedCommandArray)
+		+ read() : text
+        + write (binary)
+        + run (wrapperCommands)
 	}
  AbstractStrategy <|-- AssemblerStrategy
 AbstractStrategy <|-- SimulatorStrategy
