@@ -1,0 +1,129 @@
+require "test_helper"
+
+class MmixStrategyAssemblerTest < ActiveSupport::TestCase
+  setup do
+    @strategy = Shell::MmixStrategyAssembler.new
+    @dir = "/tmp/fake_dir"
+    @writes = {}
+
+    writes = @writes
+    @original_write = File.method(:write)
+    File.define_singleton_method(:write) do |path, data|
+      writes[:path] = path
+      writes[:contents] = data
+    end
+
+    @contents = "	LOC	Data_Segment\n
+	GREG	@\n
+Text	BYTE	\"Hello world!\",10,0\n
+
+        LOC	#100\b
+
+Main	LDA	$255,Text\n
+	TRAP	0,Fputs,StdOut\n
+	TRAP	0,Halt,0"
+
+    @original_execute_with_timeout = Shell::ShellOperations.method(:executeWithTimeout)
+  end
+
+  teardown do
+    File.define_singleton_method(:write, @original_write)
+    Shell::ShellOperations.define_singleton_method(:executeWithTimeout, @original_execute_with_timeout)
+  end
+
+  test "is a subclass of AbstractMMIXStrategy" do
+    assert Shell::MmixStrategyAssembler < Shell::AbstractMmixStrategy
+  end
+
+  test "create file program.mms in the given directory" do
+    @strategy.write(@dir, @contents)
+
+    assert_equal File.join(@dir, "program.mms"), @writes[:path]
+  end
+
+  test "write to program.mms in the given directory with the given contents" do
+    @strategy.write(@dir, @contents)
+
+    assert_equal @contents, @writes[:contents]
+  end
+
+  test "write creates program.mms in the given directory with different contents" do
+    contents = "LOC #100\nMain TRAP 0,Halt,0\n"
+
+    @strategy.write(@dir, contents)
+
+    assert_equal contents, @writes[:contents]
+  end
+
+    test "write creates program.mms in the given directory with diffent directory name" do
+    dir ="/alternate/fake_dir/path"
+
+    @strategy.write(dir, @contents)
+
+    assert_equal File.join(dir, "program.mms"), @writes[:path]
+  end
+
+  test "run passes timeout to executeWithTimeout" do
+    timeout = 10
+    received_timeout = nil
+
+    Shell::ShellOperations.define_singleton_method(:executeWithTimeout) do |_dir, _command, t|
+      received_timeout = t
+    end
+
+    @strategy.run(@dir, timeout)
+
+    assert_equal timeout, received_timeout
+  end
+
+  test "run passes different timeout to executeWithTimeout" do
+    timeout = 5
+    received_timeout = nil
+
+    Shell::ShellOperations.define_singleton_method(:executeWithTimeout) do |_dir, _command, t|
+      received_timeout = t
+    end
+
+    @strategy.run(@dir, timeout)
+
+    assert_equal timeout, received_timeout
+  end
+
+  test "run calls command line utility `bwrap-seccomp`" do
+    received_command = nil
+
+    Shell::ShellOperations.define_singleton_method(:executeWithTimeout) do |_dir, command, _t|
+      received_command = command
+    end
+
+    @strategy.run(@dir, 1)
+
+    assert_equal received_command, [ "bwrap-seccomp", "-a", "program.mms" ]
+  end
+  test "run returns contents of program.mmo" do
+    mmo_contents = 0b0110100001100101011011000110110001101111001000000111011101101111011100100110110001100100
+
+    Shell::ShellOperations.define_singleton_method(:executeWithTimeout) do |_dir, _command, _t|
+    end
+
+    File.define_singleton_method(:read) do |path|
+      mmo_contents if path == File.join("/tmp/fake_dir", "program.mmo")
+    end
+
+    result = @strategy.run(@dir, 1)
+
+    assert_equal mmo_contents, result
+  end
+
+  test "passes dir to executeWithTimeout" do
+    received_dir = nil
+
+    Shell::ShellOperations.define_singleton_method(:executeWithTimeout) do |dir, _command, _t|
+      received_dir = dir
+    end
+
+    @strategy.run(@dir, 1)
+
+    assert_match received_dir, @dir
+  end
+end

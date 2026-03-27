@@ -1,12 +1,8 @@
 require "test_helper"
+require "open3"
 
 class ShellOperationsTest < ActiveSupport::TestCase
-  class TestClass
-    include Shell::ShellOperations
-  end
-
   setup do
-    @instance = TestClass.new
     @mmix_program = '        LOC   #100                   % Set the address of the program
                                      % initially to 0x100.
 
@@ -26,6 +22,7 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
      @mmix_output = "Hello, world!"
 
      @original_mktmpdir = Dir.method(:mktmpdir)
+     @original_capture3 = Open3.method(:capture3)
      @tmpdir = "/tmp/fake_tmpdir"
      tmpdir = @tmpdir
     Dir.define_singleton_method(:mktmpdir) do |&block|
@@ -35,6 +32,19 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
 
   teardown do
     Dir.define_singleton_method(:mktmpdir, @original_mktmpdir)
+    Open3.define_singleton_method(:capture3, @original_capture3)
+  end
+
+  def mockWithTimeout(timeout)
+    Open3.define_singleton_method(:capture3) do |*_args|
+      sleep(timeout)
+    end
+  end
+
+  def mockReturn(stdout, stderr = "")
+Open3.define_singleton_method(:capture3) do |*_args|
+      [ stdout, stderr, Object.new ]
+    end
   end
 
   def strategyDouble(output)
@@ -50,12 +60,12 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
 
   test "shellOut returns the output from the strategy's 'run' method" do
     simulatorStrategy = strategyDouble(@mmix_output)
-    assert_equal @mmix_output, @instance.shellOut(simulatorStrategy, @mmix_machine_code)
+    assert_equal @mmix_output, Shell::ShellOperations.shellOut(simulatorStrategy, @mmix_machine_code)
   end
 
   test "shellOut returns the binary output from the strategy's 'run' method" do
     assemblerStrategy = strategyDouble(@mmix_machine_code)
-    assert_equal @mmix_machine_code, @instance.shellOut(assemblerStrategy, @mmix_machine_code)
+    assert_equal @mmix_machine_code, Shell::ShellOperations.shellOut(assemblerStrategy, @mmix_machine_code)
   end
 
   test "shellOut passes the input to the strategy's write method" do
@@ -65,7 +75,7 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
       written_input = input
     end
 
-    @instance.shellOut(simulatorStrategy, @mmix_machine_code)
+    Shell::ShellOperations.shellOut(simulatorStrategy, @mmix_machine_code)
 
     assert_equal @mmix_machine_code, written_input
   end
@@ -77,7 +87,7 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
       written_dir = dir
     end
 
-    @instance.shellOut(assemblerStrategy, @mmix_machine_code)
+    Shell::ShellOperations.shellOut(assemblerStrategy, @mmix_machine_code)
 
     assert_equal @tmpdir, written_dir
   end
@@ -89,7 +99,7 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
        working_dir = dir
      end
 
-     @instance.shellOut(assemblerStrategy, @mmix_machine_code)
+     Shell::ShellOperations.shellOut(assemblerStrategy, @mmix_machine_code)
 
      assert_equal @tmpdir, working_dir
   end
@@ -103,7 +113,7 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
 
      expected_timeout = 2
 
-     @instance.shellOut(assemblerStrategy, @mmix_machine_code, expected_timeout)
+     Shell::ShellOperations.shellOut(assemblerStrategy, @mmix_machine_code, expected_timeout)
 
      assert_equal expected_timeout, actual_timeout
   end
@@ -116,8 +126,92 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
 
      expected_timeout = 30
 
-     @instance.shellOut(assemblerStrategy, @mmix_machine_code, expected_timeout)
+     Shell::ShellOperations.shellOut(assemblerStrategy, @mmix_machine_code, expected_timeout)
 
      assert_equal expected_timeout, actual_timeout
+  end
+
+  test "executeWithTimeout raises runtime error when command exceeds timeout" do
+    slow_command = [ "sleep", "5" ]
+
+ mockWithTimeout(5)
+    # am not using Timeout, so will not use the timeout library
+    assert_raises(RuntimeError) do
+      Shell::ShellOperations.executeWithTimeout(@tmpdir, slow_command, 2)
+    end
+  end
+
+  test "executeWithTimeout raises specific error message when command exceeds timeout" do
+    slow_command = [ "sleep", "5" ]
+
+    mockWithTimeout(5)
+
+     # am not using Timeout, so will not use the timeout library
+     exception = assert_raises(RuntimeError) do
+      Shell::ShellOperations.executeWithTimeout(@tmpdir, slow_command, 2)
+    end
+     assert_match("runtime exceeded 2 seconds", exception.message)
+  end
+
+  test "executeWithTimeout raises specific error message when command exceeds timeout: different data" do
+    slow_command = [ "sleep", "5" ]
+    mockWithTimeout(5)
+     # am not using Timeout, so will not use the timeout library
+     exception = assert_raises(RuntimeError) do
+      Shell::ShellOperations.executeWithTimeout(@tmpdir, slow_command, 3)
+    end
+     assert_match("runtime exceeded 3 seconds", exception.message)
+  end
+
+  test "executeWithTimeout returns an array containing the stdout_s from Open3.capture3" do
+    expected_stdout = "Hello, world!\n"
+    mockReturn(expected_stdout)
+    result = Shell::ShellOperations.executeWithTimeout(@tmpdir, [ "echo", "Hello, world!" ], 2)
+    assert_includes(result, expected_stdout, "The result array should include #{expected_stdout}")
+  end
+
+  test "executeWithTimeout returns an array containing the stdout_s from Open3.capture3: different data" do
+    expected_stdout = "Greetings Program\n"
+    mockReturn(expected_stdout)
+    result = Shell::ShellOperations.executeWithTimeout(@tmpdir, [ "echo", "Greetings Program" ], 2)
+
+    assert_includes(result, expected_stdout, "The result array should include #{expected_stdout}")
+  end
+
+  test "executeWithTimeout returns an array including the stderr_s from Open3.capture3" do
+    expected_stderr = "something went wrong\n"
+    mockReturn("", expected_stderr)
+
+    result = Shell::ShellOperations.executeWithTimeout(@tmpdir, [ "echo", "ignored" ], 2)
+    assert_includes(result, expected_stderr, "The result array should include #{expected_stderr}")
+  end
+
+  test "executeWithTimeout returns an array of size 3, the same as the return from Open3" do
+    mockReturn("some value")
+    result = Shell::ShellOperations.executeWithTimeout(@tmpdir, [ "echo", "ignored" ], 2)
+    assert_equal(3, result.size)
+  end
+
+  test "executeWithTimeout executes the command inside the specified directory" do
+    captured_dir = nil
+    Open3.define_singleton_method(:capture3) do |*args|
+      captured_dir = args.last[:chdir]
+      [ "", "", Object.new ]
+    end
+
+    Shell::ShellOperations.executeWithTimeout(@tmpdir, [ "echo", "hello" ], 2)
+
+    assert_equal @tmpdir, captured_dir
+  end
+    test "executeWithTimeout executes the command inside a different specified directory" do
+    captured_dir = nil
+    Open3.define_singleton_method(:capture3) do |*args|
+      captured_dir = args.last[:chdir]
+      [ "", "", Object.new ]
+    end
+    dir = "/random/other/directory"
+    Shell::ShellOperations.executeWithTimeout(dir, [ "echo", "hello" ], 2)
+
+    assert_equal dir, captured_dir
   end
 end
