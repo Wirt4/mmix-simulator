@@ -39,7 +39,7 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
 
   def strategyDouble(output)
     strategy = Class.new do
-      define_method(:run) do |args|
+      define_method(:run) do |args, timeout|
        output
       end
       def write(dir, args)
@@ -84,13 +84,40 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
 
   test "shellOut passes the Dir.mktmpdir path to strategy.run" do
      working_dir = nil
-    assemblerStrategy = strategyDouble(@mmix_program)
-    assemblerStrategy.define_singleton_method(:run) do |dir|
-      working_dir = dir
-    end
+     assemblerStrategy = strategyDouble(@mmix_program)
+     assemblerStrategy.define_singleton_method(:run) do |dir, timeout|
+       working_dir = dir
+     end
 
      @instance.shellOut(assemblerStrategy, @mmix_machine_code)
 
      assert_equal @tmpdir, working_dir
+  end
+
+  test "shellOut passes 2 second timeout constraint to strategy.run" do
+     actual_timeout = -1
+     assemblerStrategy = strategyDouble(@mmix_program)
+     assemblerStrategy.define_singleton_method(:run) do |dir, timeout|
+       actual_timeout = timeout
+     end
+
+     expected_timeout = 2
+
+     @instance.shellOut(assemblerStrategy, @mmix_machine_code, expected_timeout)
+
+     assert_equal expected_timeout, actual_timeout
+  end
+    test "shellOut passes 30 second timeout constraint to strategy.run" do
+     actual_timeout = -1
+     assemblerStrategy = strategyDouble(@mmix_program)
+     assemblerStrategy.define_singleton_method(:run) do |dir, timeout|
+       actual_timeout = timeout
+     end
+
+     expected_timeout = 30
+
+     @instance.shellOut(assemblerStrategy, @mmix_machine_code, expected_timeout)
+
+     assert_equal expected_timeout, actual_timeout
   end
 end
