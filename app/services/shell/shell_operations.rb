@@ -1,5 +1,6 @@
 require "tmpdir"
-module ShellOperationsModule
+module Shell
+  module ShellOperations
   # Public: Execute an MMIX program by writing it to a temporary directory
   # and running it via the given strategy.
   #
@@ -15,5 +16,6 @@ module ShellOperationsModule
     strategy.write(dir, input)
     strategy.run(dir, timeout)
     end
+  end
   end
 end

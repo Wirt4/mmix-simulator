@@ -1,8 +1,8 @@
 require "test_helper"
 
-class ShellOperationsModuleTest < ActiveSupport::TestCase
+class ShellOperationsTest < ActiveSupport::TestCase
   class TestClass
-    include ShellOperationsModule
+    include Shell::ShellOperations
   end
 
   setup do
