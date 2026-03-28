@@ -41,5 +41,8 @@ module Shell
     end
     thread.value
   end
+  def writeToFile(dir, filename, content)
+      File.write(File.join(dir, filename), content)
+  end
   end
 end

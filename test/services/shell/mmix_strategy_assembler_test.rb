@@ -24,10 +24,16 @@ Main	LDA	$255,Text\n
 	TRAP	0,Halt,0"
 
     @original_execute_with_timeout = Shell::ShellOperations.method(:executeWithTimeout)
-  end
+
+    @original_read = File.method(:read)
+    File.define_singleton_method(:read) do |_path, **_opts|
+      ""
+    end
+ end
 
   teardown do
     File.define_singleton_method(:write, @original_write)
+    File.define_singleton_method(:read, @original_read)
     Shell::ShellOperations.define_singleton_method(:executeWithTimeout, @original_execute_with_timeout)
   end
 
@@ -98,16 +104,17 @@ Main	LDA	$255,Text\n
 
     @strategy.run(@dir, 1)
 
-    assert_equal received_command, [ "bwrap-seccomp", "-a", "program.mms" ]
+    assert_equal received_command, [ "bwrap-seccomp", "-a", "mmixal", "program.mms" ]
   end
-  test "run returns contents of program.mmo" do
-    mmo_contents = 0b0110100001100101011011000110110001101111001000000111011101101111011100100110110001100100
+  test "run returns variable contents of program.mmo" do
+    mmo_contents = 01101001001001110110110100100000011000100110000101110100011011010110000101101110
 
     Shell::ShellOperations.define_singleton_method(:executeWithTimeout) do |_dir, _command, _t|
     end
 
-    File.define_singleton_method(:read) do |path|
-      mmo_contents if path == File.join("/tmp/fake_dir", "program.mmo")
+    dir = @dir
+    File.define_singleton_method(:read) do |path, **_opts|
+      mmo_contents if path == File.join(dir, "program.mmo")
     end
 
     result = @strategy.run(@dir, 1)
