@@ -1,0 +1,53 @@
+             (rG,rA)=M8[#6000000000000088]=#fe00000000000000
+             rS-=8, rZ=M8[#6000000000000080]=#0000000000000000
+             rS-=8, rY=M8[#6000000000000078]=#0000000000000000
+             rS-=8, rX=M8[#6000000000000070]=#0000000000000000
+             rS-=8, rW=M8[#6000000000000068]=#0000000000000000
+             rS-=8, rP=M8[#6000000000000060]=#0000000000000000
+             rS-=8, rR=M8[#6000000000000058]=#0000000000000000
+             rS-=8, rM=M8[#6000000000000050]=#0000000000000000
+             rS-=8, rJ=M8[#6000000000000048]=#0000000000000000
+             rS-=8, rH=M8[#6000000000000040]=#0000000000000000
+             rS-=8, rE=M8[#6000000000000038]=#0000000000000000
+             rS-=8, rD=M8[#6000000000000030]=#0000000000000000
+             rS-=8, rB=M8[#6000000000000028]=#0000000000000000
+             rS-=8, g[255]=M8[#6000000000000020]=#0000000000000100
+             rS-=8, g[254]=M8[#6000000000000018]=#2000000000000000
+             rS-=8, l[2]=M8[#6000000000000010]=#0000000000000002
+             rS-=8, l[1]=M8[#6000000000000008]=#4000000000000008
+             rS-=8, l[0]=M8[#6000000000000000]=#0000000000000001
+           (00000000000000fc: fb0000ff (UNSAVE)) #6000000000000088: rG=254, ..., rL=2
+  0 instructions, 0 mems, 0 oops; 0 good guesses, 0 bad
+"hello_world.mms"
+line 1:     	LOC	Data_Segment
+line 2:     	GREG	@
+line 3:     Text	BYTE	"Hello world!",10,0
+line 4:     
+line 5:     	LOC	#100
+line 6:     Main	LDA	$255,Text
+         1. 0000000000000100: 23fffe00 (ADDUI) $255=g[255] = 2305843009213693952 = #2000000000000000
+  1 instruction, 0 mems, 1 oop; 0 good guesses, 0 bad
+Hello world!
+line 7:     	TRAP	0,Fputs,StdOut
+         1. 0000000000000104: 00000701 (TRAP) $255 = Fputs(StdOut,#2000000000000000) = 13
+  2 instructions, 0 mems, 6 oops; 0 good guesses, 0 bad
+line 8:     	TRAP	0,Halt,0
+         1. 0000000000000108: 00000000 (TRAP) Halt(0)
+  3 instructions, 0 mems, 11 oops; 0 good guesses, 0 bad
+  (halted at location #0000000000000108)
+
+Program profile:
+"hello_world.mms"
+line 1:     	LOC	Data_Segment
+line 2:     	GREG	@
+line 3:     Text	BYTE	"Hello world!",10,0
+line 4:     
+line 5:     	LOC	#100
+line 6:     Main	LDA	$255,Text
+         1. 0000000000000100: 23fffe00 (ADDUI)
+line 7:     	TRAP	0,Fputs,StdOut
+         1. 0000000000000104: 00000701 (TRAP)
+line 8:     	TRAP	0,Halt,0
+         1. 0000000000000108: 00000000 (TRAP)
+  3 instructions, 0 mems, 11 oops; 0 good guesses, 0 bad
+  (halted at location #0000000000000108)

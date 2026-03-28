@@ -60,7 +60,7 @@ BASE_ALLOWED = [
 
 COMPILE_ALLOWED = ["openat", "prlimit64", "rseq"]
 
-EXECUTE_ALLOWED = ["prlimit64", "rseq", "rt_sigaction"]
+EXECUTE_ALLOWED = ["prlimit64", "rseq", "rt_sigaction", "newfstatat", "lseek", "dup3"]
 
 
 def build_filter(to_compile=False, to_execute=False, verbose=False):
@@ -193,7 +193,7 @@ def main():
     # Apply resource limits via prlimit (works with any bubblewrap version).
     bwrap_args = [
         "prlimit",
-        f"--as={75 * 1024 * 1024}",   # 75 MB RAM (address space)
+        f"--as={75 * 1024 * 1024}",  # 75 MB RAM (address space)
         f"--fsize={128 * 1024 * 1024}",  # 128 MB max file size (disk)
     ] + bwrap_args
 

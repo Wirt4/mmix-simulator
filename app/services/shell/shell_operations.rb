@@ -6,17 +6,19 @@ module Shell
   # Public: Execute an MMIX program by writing it to a temporary directory
   # and running it via the given strategy.
   #
+  # title    - the name of the code to write, minus file extension ("my_wonderful_program" instead of "my_wonderful_program.mms")
+  # dir      - the directory where to write the code
   # strategy - A strategy object that responds to #write and #run, responsible
   #            for writing the input to file and executing the MMIX toolchain.
-  # input    - Text or Binary containing the MMIX asset to run.
+  # input    - Text or Hash containing the MMIX asset to run.
   # timeout  - An Integer specifying the maximum number of seconds to allow
   #            the strategy to run (default: 30).
   #
   # Returns the result of strategy.run.
-  def shellOut(strategy, input, timeout = 30)
+  def shellOut(title, strategy, input, timeout = 30)
     Dir.mktmpdir do |dir|
-    strategy.write(dir, input)
-    strategy.run(dir, timeout)
+    strategy.write(title, dir, input)
+    strategy.run(title, dir, timeout)
     end
   end
 
@@ -41,8 +43,9 @@ module Shell
     end
     thread.value
   end
+
   def writeToFile(dir, filename, content)
-      File.write(File.join(dir, filename), content)
+    File.binwrite(File.join(dir, filename), content)
   end
   end
 end

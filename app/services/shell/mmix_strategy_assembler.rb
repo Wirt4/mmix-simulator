@@ -1,13 +1,31 @@
+# Public: Strategy for assembling MMIX source code into machine code using
+# mmixal. Writes a .mms source file and runs the assembler inside a
+# bubblewrap sandbox, returning the resulting .mmo binary.
 module Shell
   class MmixStrategyAssembler < Shell::AbstractMmixStrategy
-    def write(dir, program_code)
-      Shell::ShellOperations.writeToFile(dir, "program.mms", program_code)
+    # Public: Write MMIX assembly source to a file in the working directory.
+    # title        - name of file to write, no file extension
+    # dir          - String path to the working directory.
+    # program_code - String MMIX assembly source code.
+    #
+    # Returns nothing.
+    def write(title, dir, program_code)
+      Shell::ShellOperations.writeToFile(dir, "#{title}.mms", program_code)
     end
 
-    def run(dir, timeout)
-      command = [ "bwrap-seccomp", "-a", "mmixal", "program.mms" ]
+    # Public: Assemble the source file with mmixal and return the object file.
+    #
+    # title        - name of file to write, no file extension
+
+    # dir     - String path to the working directory containing program.mms.
+    # timeout - Integer seconds before the command is killed.
+    #
+    # Returns String binary contents of the assembled program.mmo.
+    def run(title, dir, timeout)
+      command = [ "bwrap-seccomp", "-a", "mmixal", "#{title}.mms" ]
+
       Shell::ShellOperations.executeWithTimeout(dir, command, timeout)
-      File.read(File.join(dir, "program.mmo"), mode: "rb")
+      File.binread(File.join(dir, "#{title}.mmo"))
     end
   end
 end
