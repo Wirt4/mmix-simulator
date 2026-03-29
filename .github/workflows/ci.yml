@@ -7,7 +7,7 @@ on:
 
 jobs:
   scan_ruby:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -20,12 +20,12 @@ jobs:
 
       - name: Scan for common Rails security vulnerabilities using static analysis
         run: bin/brakeman --no-pager
-      
+
       - name: Scan for known security vulnerabilities in gems used
         run: bin/bundler-audit
-      
+
   scan_js:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -40,7 +40,7 @@ jobs:
         run: bin/importmap audit
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       RUBOCOP_CACHE_ROOT: tmp/rubocop
     steps:
@@ -66,68 +66,65 @@ jobs:
         run: bin/rubocop -f github
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
-    # services:
-    #  redis:
-    #    image: valkey/valkey:8
-    #    ports:
-    #      - 6379:6379
-    #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Set up Node
-        uses: actions/setup-node@v6
+      - name: Build test image
+        uses: docker/build-push-action@v6
         with:
-          node-version: lts/*
-          cache: npm
+          context: .
+          target: test
+          load: true
+          tags: mmix-simulator:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          no-cache-filters: build,test
 
-      - name: Install JavaScript dependencies
-        run: npm install
+      - name: Diagnose bwrap inside container
+        run: |
+          docker run --rm --privileged mmix-simulator:test bash -c '
+            echo "=== Environment ==="
+            uname -a
+            cat /proc/sys/kernel/unprivileged_userns_clone 2>/dev/null || echo "userns_clone: not present"
+            cat /proc/sys/kernel/apparmor_restrict_unprivileged_userns 2>/dev/null || echo "apparmor_restrict: not present"
+            which bwrap && bwrap --version
+            which mmixal && mmixal --version 2>&1 || true
+
+            echo "=== Direct mmixal test ==="
+            cd /tmp && mkdir diagtest && cd diagtest
+            printf "\tLOC\t#100\nMain\tTRAP\t0,Halt,0\n" > test.mms
+            mmixal test.mms 2>&1; echo "mmixal exit: $?"
+            ls -la test.mmo 2>&1
+
+            echo "=== bwrap-seccomp test ==="
+            bwrap-seccomp -a mmixal test.mms 2>&1; echo "bwrap exit: $?"
+            ls -la test.mmo 2>&1
+
+            echo "=== Ruby Open3 test ==="
+            ruby -e "
+              require \"open3\"
+              require \"tmpdir\"
+              Dir.mktmpdir do |dir|
+                File.binwrite(File.join(dir, \"test.mms\"), \"\tLOC\t#100\nMain\tTRAP\t0,Halt,0\n\")
+                cmd = [\"bwrap-seccomp\", \"-a\", \"mmixal\", \"test.mms\"]
+                out, err, st = Open3.capture3(*cmd, chdir: dir)
+                puts \"stdout=#{out.inspect}\"
+                puts \"stderr=#{err.inspect}\"
+                puts \"status=#{st.exitstatus}\"
+                puts \"files=#{Dir.entries(dir).inspect}\"
+              end
+            "
+          '
 
       - name: Run tests
-        env:
-          RAILS_ENV: test
-          # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-          # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare test
-
-  system-test:
-    runs-on: ubuntu-latest
-
-    # services:
-    #  redis:
-    #    image: valkey/valkey:8
-    #    ports:
-    #      - 6379:6379
-    #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
-
-      - name: Run System Tests
-        env:
-          RAILS_ENV: test
-          # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-          # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare test:system
-
-      - name: Keep screenshots from failed system tests
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: screenshots
-          path: ${{ github.workspace }}/tmp/screenshots
-          if-no-files-found: ignore
+        run: >
+          docker run --rm
+          --privileged
+          mmix-simulator:test
+          bash -c "bin/setup --skip-server && bin/rails test"

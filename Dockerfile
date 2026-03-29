@@ -1,12 +1,6 @@
 # syntax=docker/dockerfile:1
 # check=error=true
 
-# This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t mmix_simulator .
-# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name mmix_simulator mmix_simulator
-
-# For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
-
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version
 ARG RUBY_VERSION=4.0.1
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
@@ -54,26 +48,44 @@ RUN cd /tmp/mmixware && \
     rm -rf /tmp/mmixware
 
 # Install application gems
-COPY vendor/* ./vendor/
 COPY Gemfile Gemfile.lock ./
 
 RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
-    # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
     bundle exec bootsnap precompile -j 1 --gemfile
 
 # Copy application code
 COPY . .
 
 # Precompile bootsnap code for faster boot times.
-# -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
 RUN bundle exec bootsnap precompile -j 1 app/ lib/
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
-# Final stage for app image
-FROM base
+# ── Test stage ───────────────────────────────────────────────────────
+# Includes build tools and all gem groups (dev + test).
+FROM build AS test
+
+ENV RAILS_ENV="test" \
+    BUNDLE_WITHOUT="" \
+    BUNDLE_DEPLOYMENT="0"
+
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y nodejs npm && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+RUN bundle install && \
+    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache
+
+RUN npm install
+
+RUN ln -s /rails/script/bwrap_seccomp.py /usr/local/bin/bwrap-seccomp
+
+CMD ["bin/ci"]
+
+# ── Production stage ─────────────────────────────────────────────────
+FROM base AS production
 
 # Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \
@@ -86,12 +98,13 @@ COPY --from=build /usr/local/bin/mmixal /usr/local/bin/mmixal
 COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --chown=rails:rails --from=build /rails /rails
 
-# Make bwrap-seccomp available on PATH (needs root for /usr/local/bin)
+# Make bwrap-seccomp available on PATH
 USER root
 RUN ln -s /rails/script/bwrap_seccomp.py /usr/local/bin/bwrap-seccomp
 USER 1000:1000
 
 # Entrypoint prepares the database.
+## note: shouldn't that start with `./bin/rails` ??
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
 # Start server via Thruster by default, this can be overwritten at runtime

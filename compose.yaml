@@ -1,0 +1,25 @@
+services:
+  web:
+    build:
+      target: production
+    ports:
+    - "80:80"
+    environment:
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+    security_opt:
+    - seccomp=unconfined
+    - apparmor=unconfined
+    cap_add:
+    - SYS_ADMIN
+
+  dev:
+    build:
+      target: test
+    environment:
+      RUN_SANDBOX_TESTS: "true"
+    security_opt:
+    - seccomp=unconfined
+    - apparmor=unconfined
+    cap_add:
+    - SYS_ADMIN
+    profiles: [dev]

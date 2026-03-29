@@ -5,7 +5,6 @@ application up and running.
 
 Things you may want to cover:
 
-
 * Database creation
 
 * Database initialization
@@ -21,15 +20,14 @@ Things you may want to cover:
 Localhosting
 
 # Build and start the containers                       
-  docker compose -f .devcontainer/compose.yaml up -d --build                                              
+  docker compose build dev                                              
   # Shell into the rails-app container                                                                    
-  docker compose -f .devcontainer/compose.yaml exec rails-app bash                                        
+  docker compose run --rm dev bash
                   
-# Inside the container
-  * cd /workspaces/mmix-simulator
-  * bin/rails server
-
 __alternatively__  run `sh scripts/setup` to get up, running and in the shell.
+
+# Inside the container
+  * bin/rails server
 
 # Testing
 ## All
