@@ -58,21 +58,9 @@ BASE_ALLOWED = [
     "getrandom",
 ]
 
-# Additional syscalls required by dynamically-linked binaries on Ubuntu 24.04.
-# Determined by running `strace -f mmixal` and `strace -f mmix` on the
-# GitHub Actions CI runner. Without these, the binaries are killed with
-# SIGSYS (exit 159) during integration tests.
-UBUNTU_PERMISSIONS = [
-    "access",       # ld.so checks /etc/ld.so.preload at startup
-    "arch_prctl",   # x86_64 TLS setup (set FS register for thread-local storage)
-    "pread64",      # reading ELF sections during dynamic linking
-    "prlimit64",    # resource limit queries during glibc startup
-    "rseq",         # restartable sequences, mandatory since glibc 2.35
-]
+COMPILE_ALLOWED = ["openat", "prlimit64", "rseq"]
 
-COMPILE_ALLOWED = ["openat"]
-
-EXECUTE_ALLOWED = ["rt_sigaction", "lseek", "dup3"]
+EXECUTE_ALLOWED = ["prlimit64", "rseq", "rt_sigaction", "newfstatat", "lseek", "dup3"]
 
 
 def build_filter(to_compile=False, to_execute=False, verbose=False):
@@ -85,7 +73,7 @@ def build_filter(to_compile=False, to_execute=False, verbose=False):
     else:
         f = seccomp.SyscallFilter(seccomp.KILL)
 
-    for name in BASE_ALLOWED + UBUNTU_PERMISSIONS:
+    for name in BASE_ALLOWED:
         try:
             f.add_rule(seccomp.ALLOW, name)
         except Exception:
@@ -161,12 +149,13 @@ def main():
         "bwrap",
         # Isolation — avoid --unshare-pid because mounting /proc in a new
         # PID namespace fails inside containers ("Can't mount proc").
-        # Avoid --unshare-net because setting up loopback requires
-        # CAP_NET_ADMIN which CI runners lack.
         "--unshare-user",
         "--unshare-ipc",
         "--unshare-uts",
         "--unshare-cgroup",
+        "--unshare-net",
+        # prevent user from creating namespace
+        # "--disable-userns",
         # Filesystem (read-only system, writable sandbox)
         "--ro-bind",
         "/usr",

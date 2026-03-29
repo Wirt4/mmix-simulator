@@ -24,8 +24,7 @@ module Shell
     def run(title, dir, timeout)
       command = [ "bwrap-seccomp", "-a", "mmixal", "#{title}.mms" ]
 
-      _stdout, stderr, status = Shell::ShellOperations.executeWithTimeout(dir, command, timeout)
-      raise "mmixal failed (exit #{status.exitstatus}): #{stderr}" unless status.success?
+      Shell::ShellOperations.executeWithTimeout(dir, command, timeout)
       File.binread(File.join(dir, "#{title}.mmo"))
     end
   end

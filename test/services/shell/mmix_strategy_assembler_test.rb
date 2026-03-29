@@ -27,10 +27,6 @@ Main	LDA	$255,Text\n
 
     @original_execute_with_timeout = Shell::ShellOperations.method(:executeWithTimeout)
 
-    @mock_success_status = Object.new
-    @mock_success_status.define_singleton_method(:success?) { true }
-    @mock_success_status.define_singleton_method(:exitstatus) { 0 }
-
     @original_read = File.method(:binread)
     File.define_singleton_method(:binread) do |_path, **_opts|
       ""
@@ -89,11 +85,9 @@ Main	LDA	$255,Text\n
   test "run passes timeout to executeWithTimeout" do
     timeout = 10
     received_timeout = nil
-    mock_status = @mock_success_status
 
     Shell::ShellOperations.define_singleton_method(:executeWithTimeout) do |_dir, _command, t|
       received_timeout = t
-      [ "", "", mock_status ]
     end
 
     @strategy.run(@title, @dir, timeout)
@@ -104,11 +98,9 @@ Main	LDA	$255,Text\n
   test "run passes different timeout to executeWithTimeout" do
     timeout = 5
     received_timeout = nil
-    mock_status = @mock_success_status
 
     Shell::ShellOperations.define_singleton_method(:executeWithTimeout) do |_dir, _command, t|
       received_timeout = t
-      [ "", "", mock_status ]
     end
 
     @strategy.run(@title, @dir, timeout)
@@ -118,11 +110,9 @@ Main	LDA	$255,Text\n
 
   test "run calls command line utility `bwrap-seccomp`" do
     received_command = nil
-    mock_status = @mock_success_status
 
     Shell::ShellOperations.define_singleton_method(:executeWithTimeout) do |_dir, command, _t|
       received_command = command
-      [ "", "", mock_status ]
     end
 
     @strategy.run("program", @dir, 1)
@@ -131,11 +121,9 @@ Main	LDA	$255,Text\n
   end
   test "run calls command line utility `bwrap-seccomp` with different name" do
     received_command = nil
-    mock_status = @mock_success_status
 
     Shell::ShellOperations.define_singleton_method(:executeWithTimeout) do |_dir, command, _t|
       received_command = command
-      [ "", "", mock_status ]
     end
 
     @strategy.run("my_code", @dir, 1)
@@ -145,10 +133,8 @@ Main	LDA	$255,Text\n
 
   test "run returns variable contents of the compiled.mmo" do
     mmo_contents = 01101001001001110110110100100000011000100110000101110100011011010110000101101110
-    mock_status = @mock_success_status
 
     Shell::ShellOperations.define_singleton_method(:executeWithTimeout) do |_dir, _command, _t|
-      [ "", "", mock_status ]
     end
 
     dir = @dir
@@ -167,11 +153,9 @@ Main	LDA	$255,Text\n
 
   test "passes dir to executeWithTimeout" do
     received_dir = nil
-    mock_status = @mock_success_status
 
     Shell::ShellOperations.define_singleton_method(:executeWithTimeout) do |dir, _command, _t|
       received_dir = dir
-      [ "", "", mock_status ]
     end
 
     @strategy.run(@title, @dir, 1)

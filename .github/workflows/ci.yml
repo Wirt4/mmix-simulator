@@ -92,41 +92,6 @@ jobs:
       - name: Install JavaScript dependencies
         run: npm install
 
-      - name: Install MMIX sandbox dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install --no-install-recommends -y bubblewrap python3-seccomp texlive-binaries build-essential
-          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-
-      - name: Build MMIX binaries from vendored source
-        run: |
-          cd vendor/mmixware
-          export CWEBINPUTS=.
-          ctangle mmix-arith.w
-          ctangle mmix-io.w
-          ctangle mmix-sim.w
-          ctangle mmixal.w
-          ctangle abstime.w
-          gcc -O0 -c mmix-arith.c
-          gcc -O0 -c mmix-io.c
-          gcc -O0 -o abstime abstime.c
-          ./abstime > abstime.h
-          gcc -O0 mmixal.c mmix-arith.o -o mmixal
-          gcc -O0 mmix-sim.c mmix-arith.o mmix-io.o -o mmix
-          sudo cp mmix mmixal /usr/local/bin/
-
-      - name: Set up bwrap-seccomp
-        run: |
-          chmod +x script/bwrap_seccomp.py
-          sudo ln -s ${{ github.workspace }}/script/bwrap_seccomp.py /usr/local/bin/bwrap-seccomp
-
-      - name: Strace bwrap-seccomp to find all required syscalls
-        run: |
-          cd /tmp && echo -e "LOC #100\nMain TRAP 0,Halt,0" > test.mms
-          strace -ff -o /tmp/bwrap_trace bwrap-seccomp -a mmixal test.mms 2>&1 || true
-          echo "=== All syscalls across all pids ==="
-          cat /tmp/bwrap_trace.* | awk -F'(' '{print $1}' | sed 's/^ *//' | sort -u
-
       - name: Run tests
         env:
           RAILS_ENV: test
@@ -151,34 +116,6 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
-
-      - name: Install MMIX sandbox dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install --no-install-recommends -y bubblewrap python3-seccomp texlive-binaries build-essential
-          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-
-      - name: Build MMIX binaries from vendored source
-        run: |
-          cd vendor/mmixware
-          export CWEBINPUTS=.
-          ctangle mmix-arith.w
-          ctangle mmix-io.w
-          ctangle mmix-sim.w
-          ctangle mmixal.w
-          ctangle abstime.w
-          gcc -O0 -c mmix-arith.c
-          gcc -O0 -c mmix-io.c
-          gcc -O0 -o abstime abstime.c
-          ./abstime > abstime.h
-          gcc -O0 mmixal.c mmix-arith.o -o mmixal
-          gcc -O0 mmix-sim.c mmix-arith.o mmix-io.o -o mmix
-          sudo cp mmix mmixal /usr/local/bin/
-
-      - name: Set up bwrap-seccomp
-        run: |
-          chmod +x script/bwrap_seccomp.py
-          sudo ln -s ${{ github.workspace }}/script/bwrap_seccomp.py /usr/local/bin/bwrap-seccomp
 
       - name: Run System Tests
         env:
