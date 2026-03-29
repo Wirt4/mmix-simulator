@@ -153,7 +153,6 @@ def main():
         "--unshare-ipc",
         "--unshare-uts",
         "--unshare-cgroup",
-        "--unshare-net",
         # prevent user from creating namespace
         # "--disable-userns",
         # Filesystem (read-only system, writable sandbox)
