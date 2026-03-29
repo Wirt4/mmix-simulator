@@ -58,6 +58,18 @@ BASE_ALLOWED = [
     "getrandom",
 ]
 
+# Additional syscalls required by dynamically-linked binaries on Ubuntu 24.04.
+# The glibc/ld-linux runtime startup on Ubuntu CI runners (GitHub Actions)
+# uses these syscalls before main() is even reached. Without them, mmixal
+# and mmix are killed with SIGSYS (exit 159) during integration tests.
+UBUNTU_PERMISSIONS = [
+    "arch_prctl",   # x86_64 TLS setup (set FS register for thread-local storage)
+    "newfstatat",   # modern stat() used by glibc instead of fstat
+    "pread64",      # reading ELF sections during dynamic linking
+    "futex",        # glibc internal locking primitives
+    "getcwd",       # resolve current working directory
+]
+
 COMPILE_ALLOWED = ["openat", "prlimit64", "rseq"]
 
 EXECUTE_ALLOWED = ["prlimit64", "rseq", "rt_sigaction", "newfstatat", "lseek", "dup3"]
@@ -73,7 +85,7 @@ def build_filter(to_compile=False, to_execute=False, verbose=False):
     else:
         f = seccomp.SyscallFilter(seccomp.KILL)
 
-    for name in BASE_ALLOWED:
+    for name in BASE_ALLOWED + UBUNTU_PERMISSIONS:
         try:
             f.add_rule(seccomp.ALLOW, name)
         except Exception:
