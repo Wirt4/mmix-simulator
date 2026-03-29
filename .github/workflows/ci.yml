@@ -98,10 +98,9 @@ jobs:
           sudo apt-get install --no-install-recommends -y bubblewrap python3-seccomp texlive-binaries build-essential
 
       - name: Build MMIX binaries from vendored source
-        env:
-          CWEBINPUTS: vendor/mmixware
         run: |
           cd vendor/mmixware
+          export CWEBINPUTS=.
           ctangle mmix-arith.w
           ctangle mmix-io.w
           ctangle mmix-sim.w
@@ -151,10 +150,9 @@ jobs:
           sudo apt-get install --no-install-recommends -y bubblewrap python3-seccomp texlive-binaries build-essential
 
       - name: Build MMIX binaries from vendored source
-        env:
-          CWEBINPUTS: vendor/mmixware
         run: |
           cd vendor/mmixware
+          export CWEBINPUTS=.
           ctangle mmix-arith.w
           ctangle mmix-io.w
           ctangle mmix-sim.w
