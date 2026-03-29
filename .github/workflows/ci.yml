@@ -96,6 +96,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install --no-install-recommends -y bubblewrap python3-seccomp texlive-binaries build-essential
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
       - name: Build MMIX binaries from vendored source
         run: |
@@ -148,6 +149,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install --no-install-recommends -y bubblewrap python3-seccomp texlive-binaries build-essential
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
       - name: Build MMIX binaries from vendored source
         run: |
