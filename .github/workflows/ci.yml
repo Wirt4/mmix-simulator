@@ -92,6 +92,34 @@ jobs:
       - name: Install JavaScript dependencies
         run: npm install
 
+      - name: Install MMIX sandbox dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install --no-install-recommends -y bubblewrap python3-seccomp texlive-binaries build-essential
+
+      - name: Build MMIX binaries from vendored source
+        env:
+          CWEBINPUTS: vendor/mmixware
+        run: |
+          cd vendor/mmixware
+          ctangle mmix-arith.w
+          ctangle mmix-io.w
+          ctangle mmix-sim.w
+          ctangle mmixal.w
+          ctangle abstime.w
+          gcc -O0 -c mmix-arith.c
+          gcc -O0 -c mmix-io.c
+          gcc -O0 -o abstime abstime.c
+          ./abstime > abstime.h
+          gcc -O0 mmixal.c mmix-arith.o -o mmixal
+          gcc -O0 mmix-sim.c mmix-arith.o mmix-io.o -o mmix
+          sudo cp mmix mmixal /usr/local/bin/
+
+      - name: Set up bwrap-seccomp
+        run: |
+          chmod +x script/bwrap_seccomp.py
+          sudo ln -s ${{ github.workspace }}/script/bwrap_seccomp.py /usr/local/bin/bwrap-seccomp
+
       - name: Run tests
         env:
           RAILS_ENV: test
@@ -116,6 +144,34 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+
+      - name: Install MMIX sandbox dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install --no-install-recommends -y bubblewrap python3-seccomp texlive-binaries build-essential
+
+      - name: Build MMIX binaries from vendored source
+        env:
+          CWEBINPUTS: vendor/mmixware
+        run: |
+          cd vendor/mmixware
+          ctangle mmix-arith.w
+          ctangle mmix-io.w
+          ctangle mmix-sim.w
+          ctangle mmixal.w
+          ctangle abstime.w
+          gcc -O0 -c mmix-arith.c
+          gcc -O0 -c mmix-io.c
+          gcc -O0 -o abstime abstime.c
+          ./abstime > abstime.h
+          gcc -O0 mmixal.c mmix-arith.o -o mmixal
+          gcc -O0 mmix-sim.c mmix-arith.o mmix-io.o -o mmix
+          sudo cp mmix mmixal /usr/local/bin/
+
+      - name: Set up bwrap-seccomp
+        run: |
+          chmod +x script/bwrap_seccomp.py
+          sudo ln -s ${{ github.workspace }}/script/bwrap_seccomp.py /usr/local/bin/bwrap-seccomp
 
       - name: Run System Tests
         env:
