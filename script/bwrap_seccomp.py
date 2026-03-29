@@ -145,49 +145,50 @@ def main():
     # Build the bwrap command.
     # Adjust these flags to match your needs. This is a reasonable
     # default for running a simple untrusted binary.
-    bwrap_args = [
+    cwd = os.getcwd()
+
+    # Start with the bwrap command and try namespace isolation.
+    # If user namespaces are unavailable (e.g. GitHub Actions),
+    # fall back to a minimal bwrap invocation that still provides
+    # seccomp filtering and resource limits.
+    bwrap_full = [
         "bwrap",
-        # Isolation — avoid --unshare-pid because mounting /proc in a new
-        # PID namespace fails inside containers ("Can't mount proc").
         "--unshare-user",
         "--unshare-ipc",
         "--unshare-uts",
         "--unshare-cgroup",
-        # prevent user from creating namespace
-        # "--disable-userns",
-        # Filesystem (read-only system, writable sandbox)
-        "--ro-bind",
-        "/usr",
-        "/usr",
-        "--ro-bind",
-        "/lib",
-        "/lib",
-        "--ro-bind",
-        "/bin",
-        "/bin",
-        "--symlink",
-        "usr/lib64",
-        "/lib64",
-        "--ro-bind",
-        "/proc",
-        "/proc",
-        "--dev",
-        "/dev",
-        "--tmpfs",
-        "/tmp",
-        # Writable working directory
-        "--bind",
-        os.getcwd(),
-        "/sandbox",
-        "--chdir",
-        "/sandbox",
-        # Security
-        "--seccomp",
-        str(r),  # the pipe FD with our BPF filter
-        "--new-session",  # block terminal injection (TIOCSTI)
-        "--die-with-parent",  # kill sandbox if parent dies
+        "--ro-bind", "/usr", "/usr",
+        "--ro-bind", "/lib", "/lib",
+        "--ro-bind", "/bin", "/bin",
+        "--symlink", "usr/lib64", "/lib64",
+        "--ro-bind", "/proc", "/proc",
+        "--dev", "/dev",
+        "--tmpfs", "/tmp",
+        "--bind", cwd, "/sandbox",
+        "--chdir", "/sandbox",
+        "--seccomp", str(r),
+        "--new-session",
+        "--die-with-parent",
         "--",
     ] + command
+
+    bwrap_minimal = [
+        "bwrap",
+        "--bind", "/", "/",
+        "--chdir", cwd,
+        "--seccomp", str(r),
+        "--new-session",
+        "--die-with-parent",
+        "--",
+    ] + command
+
+    # Probe whether user namespaces work on this system.
+    import subprocess
+    probe = subprocess.run(
+        ["bwrap", "--unshare-user", "--ro-bind", "/", "/", "true"],
+        capture_output=True,
+    )
+    bwrap_args = bwrap_full if probe.returncode == 0 else bwrap_minimal
 
     # Apply resource limits via prlimit (works with any bubblewrap version).
     bwrap_args = [
