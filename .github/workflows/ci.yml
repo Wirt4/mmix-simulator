@@ -120,12 +120,16 @@ jobs:
           chmod +x script/bwrap_seccomp.py
           sudo ln -s ${{ github.workspace }}/script/bwrap_seccomp.py /usr/local/bin/bwrap-seccomp
 
-      - name: Strace mmixal under bwrap to find required syscalls
+      - name: Strace mmixal to find required syscalls
         run: |
+          sudo apt-get install --no-install-recommends -y strace
           cd /tmp && echo "LOC #100" > test.mms && echo "Main TRAP 0,Halt,0" >> test.mms
-          strace -f -o /tmp/trace.log bwrap-seccomp -a mmixal test.mms 2>&1 || true
-          echo "=== All unique syscalls ==="
-          awk -F'(' '/^[0-9]/{print $1}' /tmp/trace.log | sed 's/.*] //' | sort -u
+          echo "=== mmixal syscalls (no bwrap) ==="
+          strace -f -o /tmp/trace_plain.log mmixal test.mms 2>&1 || true
+          awk -F'(' '/^[0-9]/{print $1}' /tmp/trace_plain.log | sed 's/.*] //' | sort -u
+          echo "=== mmix syscalls (no bwrap) ==="
+          strace -f -o /tmp/trace_sim.log mmix test.mmo 2>&1 || true
+          awk -F'(' '/^[0-9]/{print $1}' /tmp/trace_sim.log | sed 's/.*] //' | sort -u
 
       - name: Run tests
         env:
