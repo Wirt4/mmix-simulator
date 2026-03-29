@@ -120,6 +120,13 @@ jobs:
           chmod +x script/bwrap_seccomp.py
           sudo ln -s ${{ github.workspace }}/script/bwrap_seccomp.py /usr/local/bin/bwrap-seccomp
 
+      - name: Strace bwrap-seccomp to find all required syscalls
+        run: |
+          cd /tmp && echo -e "LOC #100\nMain TRAP 0,Halt,0" > test.mms
+          strace -ff -o /tmp/bwrap_trace bwrap-seccomp -a mmixal test.mms 2>&1 || true
+          echo "=== All syscalls across all pids ==="
+          cat /tmp/bwrap_trace.* | awk -F'(' '{print $1}' | sed 's/^ *//' | sort -u
+
       - name: Run tests
         env:
           RAILS_ENV: test
