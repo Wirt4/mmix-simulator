@@ -59,20 +59,20 @@ BASE_ALLOWED = [
 ]
 
 # Additional syscalls required by dynamically-linked binaries on Ubuntu 24.04.
-# The glibc/ld-linux runtime startup on Ubuntu CI runners (GitHub Actions)
-# uses these syscalls before main() is even reached. Without them, mmixal
-# and mmix are killed with SIGSYS (exit 159) during integration tests.
+# Determined by running `strace -f mmixal` and `strace -f mmix` on the
+# GitHub Actions CI runner. Without these, the binaries are killed with
+# SIGSYS (exit 159) during integration tests.
 UBUNTU_PERMISSIONS = [
+    "access",       # ld.so checks /etc/ld.so.preload at startup
     "arch_prctl",   # x86_64 TLS setup (set FS register for thread-local storage)
-    "newfstatat",   # modern stat() used by glibc instead of fstat
     "pread64",      # reading ELF sections during dynamic linking
-    "futex",        # glibc internal locking primitives
-    "getcwd",       # resolve current working directory
+    "prlimit64",    # resource limit queries during glibc startup
+    "rseq",         # restartable sequences, mandatory since glibc 2.35
 ]
 
-COMPILE_ALLOWED = ["openat", "prlimit64", "rseq"]
+COMPILE_ALLOWED = ["openat"]
 
-EXECUTE_ALLOWED = ["prlimit64", "rseq", "rt_sigaction", "newfstatat", "lseek", "dup3"]
+EXECUTE_ALLOWED = ["rt_sigaction", "lseek", "dup3"]
 
 
 def build_filter(to_compile=False, to_execute=False, verbose=False):
