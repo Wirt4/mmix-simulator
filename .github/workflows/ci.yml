@@ -65,7 +65,8 @@ jobs:
         run: |
           docker compose build rails-app
           docker compose run --rm rails-app bash -c "
-              cd /workspaces/mmix-simulator &&
+              cp -r /workspaces/mmix-simulator /tmp/app &&
+              cd /tmp/app &&
               BUNDLE_FROZEN=true bundle install &&
               bin/rails db:test:prepare test
           "
