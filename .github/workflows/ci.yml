@@ -66,7 +66,7 @@ jobs:
           docker compose build rails-app
           docker compose run --rm rails-app bash -c "
               cd /workspaces/mmix-simulator &&
-              cp -r /home/vscode/.node_modules_cache node_modules &&
+              npm install
               bin/setup --skip-server &&
               bin/rails db:test:prepare test
           "
