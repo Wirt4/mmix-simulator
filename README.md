@@ -5,10 +5,12 @@ application up and running.
 Localhosting
 
 # Build and start the containers                       
-  docker compose -f .devcontainer/compose.yaml up -d --build                                              
+  docker compose up -d --build                                              
   # Shell into the rails-app container                                                                    
-  docker compose -f .devcontainer/compose.yaml exec rails-app bash                                        
-                  
+  docker compose exec rails-app bash                                        
+  # Shut down the container
+docker compose down
+
 # Inside the container
   * cd /workspaces/mmix-simulator
   * bin/rails server
