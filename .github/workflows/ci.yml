@@ -108,9 +108,9 @@ jobs:
 #        if: failure()
 #        with:
 #          name: screenshots
-#          path: ${{ github.workspace }}/tmp/screenshots
+#          path: ${{ github.workspace }}/#tmp/screenshots
 #          if-no-files-found: ignore
 
 #      - name: Tear down
 #        if: always()
-        run: docker compose down
+#        run: docker compose down
