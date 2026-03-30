@@ -65,13 +65,10 @@ jobs:
         run: |
           docker compose build rails-app
           docker compose run --rm rails-app bash -c "
-            chown -R vscode:vscode /workspaces/mmix-simulator &&
-            su vscode -c '
               cd /workspaces/mmix-simulator &&
               cp -r /home/vscode/.node_modules_cache node_modules &&
               bin/setup --skip-server &&
               bin/rails db:test:prepare test
-            '
           "
 
       - name: Tear down
