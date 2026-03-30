@@ -2,7 +2,7 @@
 // For config options, see the README at: https://github.com/devcontainers/templates/tree/main/src/ruby
 {
   "name": "mmix_simulator",
-  "dockerComposeFile": "compose.yaml",
+  "dockerComposeFile": "../compose.yaml",
   "service": "rails-app",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 
@@ -31,5 +31,5 @@
 
 
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "bin/setup --skip-server"
+  "postCreateCommand": "cp -r /home/vscode/.node_modules_cache node_modules && bin/setup --skip-server"
 }

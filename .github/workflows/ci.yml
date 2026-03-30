@@ -20,10 +20,10 @@ jobs:
 
       - name: Scan for common Rails security vulnerabilities using static analysis
         run: bin/brakeman --no-pager
-      
+
       - name: Scan for known security vulnerabilities in gems used
         run: bin/bundler-audit
-      
+
   scan_js:
     runs-on: ubuntu-latest
 
@@ -41,8 +41,7 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    env:
-      RUBOCOP_CACHE_ROOT: tmp/rubocop
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -51,16 +50,6 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
-
-      - name: Prepare RuboCop cache
-        uses: actions/cache@v4
-        env:
-          DEPENDENCIES_HASH: ${{ hashFiles('.ruby-version', '**/.rubocop.yml', '**/.rubocop_todo.yml', 'Gemfile.lock') }}
-        with:
-          path: ${{ env.RUBOCOP_CACHE_ROOT }}
-          key: rubocop-${{ runner.os }}-${{ env.DEPENDENCIES_HASH }}-${{ github.ref_name == github.event.repository.default_branch && github.run_id || 'default' }}
-          restore-keys: |
-            rubocop-${{ runner.os }}-${{ env.DEPENDENCIES_HASH }}-
 
       - name: Lint code for consistent style
         run: bin/rubocop -f github
@@ -72,24 +61,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
+      - name: Build and run tests in container
+        run: |
+          docker compose build rails-app
+          docker compose run --rm rails-app bash -c "
+            cd /workspaces/mmix-simulator &&
+            cp -r /home/vscode/.node_modules_cache node_modules &&
+            bin/setup --skip-server &&
+            bin/rails db:test:prepare test
+          "
 
-      - name: Set up Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: lts/*
-          cache: npm
-
-      - name: Install JavaScript dependencies
-        run: npm install
-
-      - name: Run tests
-        env:
-          RAILS_ENV: test
-        run: bin/rails db:test:prepare test
+      - name: Tear down
+        if: always()
+        run: docker compose down
 
   system-test:
     runs-on: ubuntu-latest
@@ -98,15 +82,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
-
-      - name: Run System Tests
+      - name: Build and run system tests in container
         env:
-          RAILS_ENV: test
-        run: bin/rails db:test:prepare test:system
+          CAPYBARA_SERVER_PORT: "45678"
+          SELENIUM_HOST: selenium
+        run: |
+          docker compose build rails-app
+          docker compose run --rm \
+            -e CAPYBARA_SERVER_PORT=45678 \
+            -e SELENIUM_HOST=selenium \
+            -e RAILS_ENV=test \
+            rails-app bash -c "
+              cd /workspaces/mmix-simulator &&
+              cp -r /home/vscode/.node_modules_cache node_modules &&
+              bin/setup --skip-server &&
+              bin/rails db:test:prepare test:system
+            "
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v4
@@ -115,3 +106,7 @@ jobs:
           name: screenshots
           path: ${{ github.workspace }}/tmp/screenshots
           if-no-files-found: ignore
+
+      - name: Tear down
+        if: always()
+        run: docker compose down

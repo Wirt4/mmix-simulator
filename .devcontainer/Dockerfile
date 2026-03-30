@@ -24,8 +24,18 @@ RUN cd /tmp/mmixware && \
     rm -rf /tmp/mmixware
 RUN ln -s /workspaces/mmix-simulator/script/bwrap_seccomp.py /usr/local/bin/bwrap-seccomp && \
     chmod +x /workspaces/mmix-simulator/script/bwrap_seccomp.py 2>/dev/null || true
+
+# Install dependencies as vscode user (Ruby is installed via mise under vscode's home)
 USER vscode
+ENV PATH="/home/vscode/.local/bin:/home/vscode/.local/share/mise/installs/ruby/4.0.1/bin:${PATH}"
+
+# Install Ruby dependencies
+COPY --chown=vscode Gemfile Gemfile.lock /tmp/deps/
+RUN cd /tmp/deps && bundle install && rm -rf /tmp/deps
+
+# Cache JavaScript dependencies (copied into workspace by postCreateCommand)
+COPY --chown=vscode package.json package-lock.json /tmp/deps/
+RUN cd /tmp/deps && npm install && mv node_modules /home/vscode/.node_modules_cache && rm -rf /tmp/deps
 
 # Ensure binding is always 0.0.0.0
-# Binds the server to all IP addresses of the container, so it can be accessed from outside the container.
 ENV BINDING="0.0.0.0"
