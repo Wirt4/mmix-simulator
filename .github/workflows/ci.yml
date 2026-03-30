@@ -85,6 +85,42 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Diagnose bwrap inside container
+        run: |
+          docker run --rm --privileged mmix-simulator:test bash -c '
+            echo "=== Environment ==="
+            uname -a
+            cat /proc/sys/kernel/unprivileged_userns_clone 2>/dev/null || echo "userns_clone: not present"
+            cat /proc/sys/kernel/apparmor_restrict_unprivileged_userns 2>/dev/null || echo "apparmor_restrict: not present"
+            which bwrap && bwrap --version
+            which mmixal && mmixal --version 2>&1 || true
+
+            echo "=== Direct mmixal test ==="
+            cd /tmp && mkdir diagtest && cd diagtest
+            printf "\tLOC\t#100\nMain\tTRAP\t0,Halt,0\n" > test.mms
+            mmixal test.mms 2>&1; echo "mmixal exit: $?"
+            ls -la test.mmo 2>&1
+
+            echo "=== bwrap-seccomp test ==="
+            bwrap-seccomp -a mmixal test.mms 2>&1; echo "bwrap exit: $?"
+            ls -la test.mmo 2>&1
+
+            echo "=== Ruby Open3 test ==="
+            ruby -e "
+              require \"open3\"
+              require \"tmpdir\"
+              Dir.mktmpdir do |dir|
+                File.binwrite(File.join(dir, \"test.mms\"), \"\tLOC\t#100\nMain\tTRAP\t0,Halt,0\n\")
+                cmd = [\"bwrap-seccomp\", \"-a\", \"mmixal\", \"test.mms\"]
+                out, err, st = Open3.capture3(*cmd, chdir: dir)
+                puts \"stdout=#{out.inspect}\"
+                puts \"stderr=#{err.inspect}\"
+                puts \"status=#{st.exitstatus}\"
+                puts \"files=#{Dir.entries(dir).inspect}\"
+              end
+            "
+          '
+
       - name: Run tests
         run: >
           docker run --rm
