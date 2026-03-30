@@ -89,4 +89,6 @@ jobs:
         run: >
           docker run --rm
           --privileged
+          -e PARALLEL_WORKERS=1
           mmix-simulator:test
+          bash -c "bin/setup --skip-server && bin/rails test"
