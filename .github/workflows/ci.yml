@@ -64,11 +64,14 @@ jobs:
       - name: Build and run tests in container
         run: |
           docker compose build rails-app
-          docker compose run --rm --user vscode rails-app bash -c "
-            cd /workspaces/mmix-simulator &&
-            cp -r /home/vscode/.node_modules_cache node_modules &&
-            bin/setup --skip-server &&
-            bin/rails db:test:prepare test
+          docker compose run --rm rails-app bash -c "
+            chown -R vscode:vscode /workspaces/mmix-simulator &&
+            su vscode -c '
+              cd /workspaces/mmix-simulator &&
+              cp -r /home/vscode/.node_modules_cache node_modules &&
+              bin/setup --skip-server &&
+              bin/rails db:test:prepare test
+            '
           "
 
       - name: Tear down
@@ -110,4 +113,4 @@ jobs:
 
 #      - name: Tear down
 #        if: always()
-#        run: docker compose down
+        run: docker compose down
