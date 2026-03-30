@@ -66,7 +66,6 @@ jobs:
           docker compose build rails-app
           docker compose run --rm rails-app bash -c "
               cd /workspaces/mmix-simulator &&
-              npm install
               bin/setup --skip-server &&
               bin/rails db:test:prepare test
           "
