@@ -18,7 +18,7 @@ module Shell
     # dir     - String path to the working directory.
     # timeout - Integer seconds before the command is killed.
     #
-    # Raises RuntimeError (abstract method).
+    # Raises RuntimeError (abstract method)
     def run(title, dir, timeout)
       raise "abstract method"
     end

@@ -28,7 +28,7 @@ module Shell
   # commandArrary - An Array of Strings representing the command and its
   #                 arguments to execute.
   # timeout       - An Integer specifying the maximum number of seconds
-  #                 to allow the command to run.
+  #                 to allow the command to run, whee!
   #
   # Raises RuntimeError if the command exceeds the timeout.
   #
