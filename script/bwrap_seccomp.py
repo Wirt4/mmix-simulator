@@ -53,16 +53,19 @@ BASE_ALLOWED = [
     "write",
     "close",
     "fstat",
+    "newfstatat",
     "faccessat",
-    # runtime internals
+    # runtime internals (x86_64 dynamic linker and glibc)
+    "arch_prctl",
     "set_tid_address",
     "set_robust_list",
     "getrandom",
+    "futex",
 ]
 
 COMPILE_ALLOWED = ["openat", "prlimit64", "rseq"]
 
-EXECUTE_ALLOWED = ["prlimit64", "rseq", "rt_sigaction", "newfstatat", "lseek", "dup3"]
+EXECUTE_ALLOWED = ["prlimit64", "rseq", "rt_sigaction", "lseek", "dup3"]
 
 
 def build_filter(to_compile=False, to_execute=False, verbose=False):
