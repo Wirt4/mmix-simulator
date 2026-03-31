@@ -15,6 +15,8 @@ services:
   dev:
     build:
       target: test
+    environment:
+      RUN_SANDBOX_TESTS: "true"
     security_opt:
     - seccomp=unconfined
     - apparmor=unconfined

@@ -1,6 +1,9 @@
 require "test_helper"
 
 class ShellOperationsIntegrationTest < ActionDispatch::IntegrationTest
+def setup
+  skip "Sandbox tests disabled" unless ENV["RUN_SANDBOX_TESTS"]
+end
   test "assemble and simulate hello world" do
     source = <<~MMIX
       \tLOC\tData_Segment
