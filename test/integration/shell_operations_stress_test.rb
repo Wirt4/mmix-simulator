@@ -1,6 +1,6 @@
 require "test_helper"
 
-class ShellOperationsStressIntegrationTest < ActionDispatch::IntegrationTest
+class ShellOperationsStressIntegrationTest < SandboxIntegrationTest
   test "sandbox enforces memory and disk limits on stress program" do
     source = File.binread("test/fixtures/mmix_code/stress.mms")
 

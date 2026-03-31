@@ -1,6 +1,6 @@
 require "test_helper"
 
-class ShellOperationsIntegrationTest < ActionDispatch::IntegrationTest
+class ShellOperationsIntegrationTest < SandboxIntegrationTest
    test "want to be sure test with flags matches" do
     source = File.binread("test/fixtures/mmix_code/hello_world.mms")
     strategy_a = Shell::MmixStrategyAssembler.new
