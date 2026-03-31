@@ -84,6 +84,7 @@ jobs:
           tags: mmix-simulator:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          no-cache-filters: build,test
 
       - name: Diagnose bwrap inside container
         run: |
