@@ -1,6 +1,6 @@
 require "test_helper"
 
-class ShellOperationsJailbreakIntegrationTest < ActionDispatch::IntegrationTest
+class ShellOperationsJailbreakIntegrationTest < SandboxIntegrationTest
   test "jailbreak code cannot write files outside the sandbox" do
     source = File.binread("test/fixtures/mmix_code/jailbreak.mms")
 
