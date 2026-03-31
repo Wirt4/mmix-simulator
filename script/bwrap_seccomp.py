@@ -47,6 +47,7 @@ BASE_ALLOWED = [
     "mmap",
     "munmap",
     "mprotect",
+    "madvise",
     # file I/O
     "openat",
     "read",
@@ -54,11 +55,13 @@ BASE_ALLOWED = [
     "close",
     "fstat",
     "newfstatat",
+    "readlinkat",
     "faccessat",
     # runtime internals (x86_64 dynamic linker and glibc)
     "arch_prctl",
     "set_tid_address",
     "set_robust_list",
+    "sched_getaffinity",
     "getrandom",
     "futex",
 ]
