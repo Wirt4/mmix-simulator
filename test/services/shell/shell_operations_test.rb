@@ -1,5 +1,6 @@
 require "test_helper"
 require "open3"
+require "stringio"
 
 class ShellOperationsTest < ActiveSupport::TestCase
   setup do
@@ -38,6 +39,26 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
       end
    end
     strategy.new
+  end
+
+  def fakePopen3(stdout_s, stderr_s, status)
+    stdin = StringIO.new
+    stdout = StringIO.new(stdout_s)
+    stderr = StringIO.new(stderr_s)
+    wait_thr = Thread.new { status }
+    wait_thr.define_singleton_method(:pid) { 0 }
+    [ stdin, stdout, stderr, wait_thr ]
+  end
+
+  def blockingPopen3
+    child_pid = Process.spawn("sleep", "60")
+    stdin = StringIO.new
+    stdout = StringIO.new("")
+    stderr = StringIO.new("")
+    wait_thr = Thread.new { Process.wait(child_pid); $? }
+    wait_thr.report_on_exception = false
+    wait_thr.define_singleton_method(:pid) { child_pid }
+    [ child_pid, [ stdin, stdout, stderr, wait_thr ] ]
   end
 
   test "shellOut returns the output from the strategy's 'run' method" do
@@ -135,40 +156,46 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
 
 
   test "executeWithTimeout raises runtime error when command exceeds timeout" do
-    slow_command = [ "sleep", "5" ]
-    slow_capture = ->(*_args) { sleep(5) }
-    Open3.stub(:capture3, slow_capture) do
+    child_pid, fake_return = blockingPopen3
+    Open3.stub(:popen3, fake_return) do
       assert_raises(RuntimeError) do
-        Shell::ShellOperations.executeWithTimeout(@tmpdir, slow_command, 2)
+        Shell::ShellOperations.executeWithTimeout(@tmpdir, [ "sleep", "5" ], 1)
       end
     end
+  ensure
+    Process.kill("TERM", child_pid) rescue nil
+    Process.wait(child_pid) rescue nil
   end
 
   test "executeWithTimeout raises specific error message when command exceeds timeout" do
-    slow_command = [ "sleep", "5" ]
-    slow_capture = ->(*_args) { sleep(5) }
-    Open3.stub(:capture3, slow_capture) do
+    child_pid, fake_return = blockingPopen3
+    Open3.stub(:popen3, fake_return) do
       exception = assert_raises(RuntimeError) do
-        Shell::ShellOperations.executeWithTimeout(@tmpdir, slow_command, 2)
+        Shell::ShellOperations.executeWithTimeout(@tmpdir, [ "sleep", "5" ], 2)
       end
       assert_match("runtime exceeded 2 seconds", exception.message)
     end
+  ensure
+    Process.kill("TERM", child_pid) rescue nil
+    Process.wait(child_pid) rescue nil
   end
 
   test "executeWithTimeout raises specific error message when command exceeds timeout: different data" do
-    slow_command = [ "sleep", "5" ]
-    slow_capture = ->(*_args) { sleep(5) }
-    Open3.stub(:capture3, slow_capture) do
+    child_pid, fake_return = blockingPopen3
+    Open3.stub(:popen3, fake_return) do
       exception = assert_raises(RuntimeError) do
-        Shell::ShellOperations.executeWithTimeout(@tmpdir, slow_command, 3)
+        Shell::ShellOperations.executeWithTimeout(@tmpdir, [ "sleep", "5" ], 3)
       end
       assert_match("runtime exceeded 3 seconds", exception.message)
     end
+  ensure
+    Process.kill("TERM", child_pid) rescue nil
+    Process.wait(child_pid) rescue nil
   end
 
   test "executeWithTimeout returns an array containing the stdout_s from Open3.capture3" do
     expected_stdout = "Hello, world!\n"
-    Open3.stub(:capture3, [ expected_stdout, "", Object.new ]) do
+    Open3.stub(:popen3, fakePopen3(expected_stdout, "", Object.new)) do
       result = Shell::ShellOperations.executeWithTimeout(@tmpdir, [ "echo", "Hello, world!" ], 2)
       assert_includes(result, expected_stdout, "The result array should include #{expected_stdout}")
     end
@@ -176,7 +203,7 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
 
   test "executeWithTimeout returns an array containing the stdout_s from Open3.capture3: different data" do
     expected_stdout = "Greetings Program\n"
-    Open3.stub(:capture3, [ expected_stdout, "", Object.new ]) do
+    Open3.stub(:popen3, fakePopen3(expected_stdout, "", Object.new)) do
       result = Shell::ShellOperations.executeWithTimeout(@tmpdir, [ "echo", "Greetings Program" ], 2)
       assert_includes(result, expected_stdout, "The result array should include #{expected_stdout}")
     end
@@ -184,26 +211,42 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
 
   test "executeWithTimeout returns an array including the stderr_s from Open3.capture3" do
     expected_stderr = "something went wrong\n"
-    Open3.stub(:capture3, [ "", expected_stderr, Object.new ]) do
+    Open3.stub(:popen3, fakePopen3("", expected_stderr, Object.new)) do
       result = Shell::ShellOperations.executeWithTimeout(@tmpdir, [ "echo", "ignored" ], 2)
       assert_includes(result, expected_stderr, "The result array should include #{expected_stderr}")
     end
   end
 
   test "executeWithTimeout returns an array of size 3, the same as the return from Open3" do
-    Open3.stub(:capture3, [ "some value", "", Object.new ]) do
+    Open3.stub(:popen3, fakePopen3("some value", "", Object.new)) do
       result = Shell::ShellOperations.executeWithTimeout(@tmpdir, [ "echo", "ignored" ], 2)
       assert_equal(3, result.size)
     end
   end
 
+  test "executeWithTimeout kills the child process when command exceeds timeout" do
+    child_pid, fake_return = blockingPopen3
+    Open3.stub(:popen3, fake_return) do
+      assert_raises(RuntimeError) do
+        Shell::ShellOperations.executeWithTimeout(@tmpdir, [ "sleep", "60" ], 1)
+      end
+    end
+    # The child process should have been killed — if it's still alive, this assertion fails
+    assert_raises(Errno::ESRCH, "Child process #{child_pid} was not killed — it was orphaned") do
+      Process.kill(0, child_pid)
+    end
+  ensure
+    Process.kill("TERM", child_pid) rescue nil
+    Process.wait(child_pid) rescue nil
+  end
+
   test "executeWithTimeout executes the command inside the specified directory" do
     captured_dir = nil
-    fake_capture3 = ->(*args) {
+    fake_popen3 = ->(*args) {
       captured_dir = args.last[:chdir]
-      [ "", "", Object.new ]
+      fakePopen3("", "", Object.new)
     }
-    Open3.stub(:capture3, fake_capture3) do
+    Open3.stub(:popen3, fake_popen3) do
       Shell::ShellOperations.executeWithTimeout(@tmpdir, [ "echo", "hello" ], 2)
     end
     assert_equal @tmpdir, captured_dir
@@ -211,12 +254,12 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
 
   test "executeWithTimeout executes the command inside a different specified directory" do
     captured_dir = nil
-    fake_capture3 = ->(*args) {
+    fake_popen3 = ->(*args) {
       captured_dir = args.last[:chdir]
-      [ "", "", Object.new ]
+      fakePopen3("", "", Object.new)
     }
     dir = "/random/other/directory"
-    Open3.stub(:capture3, fake_capture3) do
+    Open3.stub(:popen3, fake_popen3) do
       Shell::ShellOperations.executeWithTimeout(dir, [ "echo", "hello" ], 2)
     end
     assert_equal dir, captured_dir

@@ -1,5 +1,6 @@
 require "tmpdir"
 require "open3"
+
 module Shell
   module ShellOperations
   module_function
@@ -33,15 +34,21 @@ module Shell
   # Raises RuntimeError if the command exceeds the timeout.
   #
   # Returns an Array of [stdout, stderr, status] from Open3.capture3.
-  def executeWithTimeout(dir, commandArrary, timeout)
-    thread = Thread.new { Open3.capture3(*commandArrary, chdir: dir
-) }
+  def executeWithTimeout(dir, command_array, timeout)
+    stdin, stdout, stderr, wait_thr = Open3.popen3(*command_array, chdir: dir)
+    stdin.close
+    pid = wait_thr.pid
+    thread = Thread.new { [ stdout.read, stderr.read, wait_thr.value ] }
     result = thread.join(timeout)
     if result.nil?
+      Process.kill("TERM", pid)
+      Process.wait(pid) rescue nil
       thread.kill
       raise "runtime exceeded #{timeout} seconds"
     end
     thread.value
+  ensure
+    [ stdin, stdout, stderr ].each { |io| io&.close unless io&.closed? }
   end
 
   def writeToFile(dir, filename, file_extension, content)
