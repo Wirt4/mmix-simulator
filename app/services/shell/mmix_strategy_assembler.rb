@@ -10,7 +10,7 @@ module Shell
     #
     # Returns nothing.
     def write(title, dir, program_code)
-      Shell::ShellOperations.writeToFile(dir, "#{title}.mms", program_code)
+      Shell::ShellOperations.writeToFile(dir, title, ".mms", program_code)
     end
 
     # Public: Assemble the source file with mmixal and return the object file.

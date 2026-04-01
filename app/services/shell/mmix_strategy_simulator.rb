@@ -20,8 +20,8 @@ module Shell
     #
     # Returns nothing.
     def write(title, dir, package)
-      Shell::ShellOperations.writeToFile(dir, "#{title}.mms", package[:src])
-      Shell::ShellOperations.writeToFile(dir, "#{title}.mmo", package[:bin])
+      Shell::ShellOperations.writeToFile(dir, title, ".mms", package[:src])
+      Shell::ShellOperations.writeToFile(dir, title, ".mmo", package[:bin])
     end
 
     # Public: Run the simulator against the executable inside a bubblewrap

@@ -9,8 +9,8 @@ class MmixStrategySimulatorTest < ActiveSupport::TestCase
 
   def stub_write_to_file
     writes = []
-    Shell::ShellOperations.stub :writeToFile, proc { |dir, filename, content|
-      writes << { dir: dir, filename: filename, content: content }
+    Shell::ShellOperations.stub :writeToFile, proc { |dir, filename, extension, content|
+      writes << { dir: dir, filename: filename, extension: extension, content: content }
     } do
       yield writes
     end
@@ -36,9 +36,9 @@ class MmixStrategySimulatorTest < ActiveSupport::TestCase
       strategy = Shell::MmixStrategySimulator.new
       strategy.write("executable", @dir, { src: "", bin: 0b11011 })
 
-      mmo_write = writes.find { |w| w[:filename].end_with?(".mmo") }
+      mmo_write = writes.find { |w| w[:extension] == ".mmo" }
       assert_equal @dir, mmo_write[:dir]
-      assert_equal "executable.mmo", mmo_write[:filename]
+      assert_equal "executable", mmo_write[:filename]
     end
   end
 
@@ -47,9 +47,9 @@ class MmixStrategySimulatorTest < ActiveSupport::TestCase
       strategy = Shell::MmixStrategySimulator.new
       strategy.write("executable", @dir, { src: "<source code>", bin: 0b11011 })
 
-      mms_write = writes.find { |w| w[:filename].end_with?(".mms") }
+      mms_write = writes.find { |w| w[:extension] == ".mms" }
       assert_equal @dir, mms_write[:dir]
-      assert_equal "executable.mms", mms_write[:filename]
+      assert_equal "executable", mms_write[:filename]
     end
   end
 
@@ -59,7 +59,7 @@ class MmixStrategySimulatorTest < ActiveSupport::TestCase
       bin_data = "\x00\x01\x02\x03".b
       strategy.write(@title, @dir, { src: "", bin: bin_data })
 
-      mmo_write = writes.find { |w| w[:filename].end_with?(".mmo") }
+      mmo_write = writes.find { |w| w[:extension] == ".mmo" }
       assert_equal bin_data, mmo_write[:content]
     end
   end
@@ -70,7 +70,7 @@ class MmixStrategySimulatorTest < ActiveSupport::TestCase
       src = "<some very cool source code>"
       strategy.write(@title, @dir, { src: src, bin: 0b11011 })
 
-      mms_write = writes.find { |w| w[:filename].end_with?(".mms") }
+      mms_write = writes.find { |w| w[:extension] == ".mms" }
       assert_equal src, mms_write[:content]
     end
   end

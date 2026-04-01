@@ -228,45 +228,55 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
     written_path = nil
     fake_binwrite = ->(path, data) { written_path = path }
     File.stub(:binwrite, fake_binwrite) do
-      Shell::ShellOperations.writeToFile("/some/dir", "test.mmo", "content")
+      Shell::ShellOperations.writeToFile("/some/dir", "test", ".mmo", "content")
     end
     assert_equal "/some/dir/test.mmo", written_path
   end
 
-  # test "writeToFile writes content to a different path" do
-  #   written_path = nil
-  #   fake_binwrite = ->(path, data) { written_path = path }
-  #   File.stub(:binwrite, fake_binwrite) do
-  #     Shell::ShellOperations.writeToFile("/other/dir", "program.mms", "source")
-  #   end
-  #   assert_equal "/other/dir/program.mms", written_path
-  # end
-  #
-  # test "writeToFile passes the content to File.binwrite" do
-  #   written_data = nil
-  #   fake_binwrite = ->(path, data) { written_data = data }
-  #   File.stub(:binwrite, fake_binwrite) do
-  #     Shell::ShellOperations.writeToFile("/some/dir", "test.mmo", "the content")
-  #   end
-  #   assert_equal "the content", written_data
-  # end
-  #
-  # test "writeToFile passes binary content to File.binwrite" do
-  #   written_data = nil
-  #   fake_binwrite = ->(path, data) { written_data = data }
-  #   bin_data = "\x00\x01\x02\x03".b
-  #   File.stub(:binwrite, fake_binwrite) do
-  #     Shell::ShellOperations.writeToFile("/some/dir", "test.mmo", bin_data)
-  #   end
-  #   assert_equal bin_data, written_data
-  # end
-  #
-  # test "writeToFile joins directory and filename into a single path" do
-  #   written_path = nil
-  #   fake_binwrite = ->(path, data) { written_path = path }
-  #   File.stub(:binwrite, fake_binwrite) do
-  #     Shell::ShellOperations.writeToFile("/tmp/workdir", "hello.mms", "source code")
-  #   end
-  #   assert_equal File.join("/tmp/workdir", "hello.mms"), written_path
-  # end
+  test "writeToFile writes content to a different path" do
+    written_path = nil
+    fake_binwrite = ->(path, data) { written_path = path }
+    File.stub(:binwrite, fake_binwrite) do
+      Shell::ShellOperations.writeToFile("/other/dir", "program", ".mms", "source")
+    end
+    assert_equal "/other/dir/program.mms", written_path
+  end
+
+  test "writeToFile santizies the name" do
+    written_path = nil
+    fake_binwrite = ->(path, data) { written_path = path }
+    File.stub(:binwrite, fake_binwrite) do
+      Shell::ShellOperations.writeToFile("/other/dir", "../../etc/cron.d/evil.mms", ".mms", "source")
+    end
+    assert_equal "/other/dir/evil.mms", written_path
+  end
+
+
+  test "writeToFile passes the content to File.binwrite" do
+    written_data = nil
+    fake_binwrite = ->(path, data) { written_data = data }
+    File.stub(:binwrite, fake_binwrite) do
+      Shell::ShellOperations.writeToFile("/some/dir", "test", ".mmo", "the content")
+    end
+    assert_equal "the content", written_data
+  end
+
+  test "writeToFile passes binary content to File.binwrite" do
+    written_data = nil
+    fake_binwrite = ->(path, data) { written_data = data }
+    bin_data = "\x00\x01\x02\x03".b
+    File.stub(:binwrite, fake_binwrite) do
+      Shell::ShellOperations.writeToFile("/some/dir", "test", ".mmo", bin_data)
+    end
+    assert_equal bin_data, written_data
+  end
+
+  test "writeToFile joins directory and filename into a single path" do
+    written_path = nil
+    fake_binwrite = ->(path, data) { written_path = path }
+    File.stub(:binwrite, fake_binwrite) do
+      Shell::ShellOperations.writeToFile("/tmp/workdir", "hello", ".mms", "source code")
+    end
+    assert_equal File.join("/tmp/workdir", "hello.mms"), written_path
+  end
 end

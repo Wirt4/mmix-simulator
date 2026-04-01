@@ -5,7 +5,6 @@ class MmixStrategyAssemblerTest < ActiveSupport::TestCase
     @title = "good_code_doc"
     @strategy = Shell::MmixStrategyAssembler.new
     @dir = "/tmp/fake_dir"
-    @writes = {}
 
     @contents = "	LOC	Data_Segment\n
 	GREG	@\n

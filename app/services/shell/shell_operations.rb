@@ -44,8 +44,8 @@ module Shell
     thread.value
   end
 
-  def writeToFile(dir, filename, content)
-    File.binwrite(File.join(dir, filename), content)
+  def writeToFile(dir, filename, file_extension, content)
+    File.binwrite(File.join(dir, "#{File.basename(filename, ".*")}#{file_extension}"), content)
   end
   end
 end
