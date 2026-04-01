@@ -26,6 +26,7 @@ module Shell
   # Public: Execute a shell command with a timeout constraint, raising an
   # error if the command does not complete in time.
   #
+  # dir           - The String path to the working directory for the command.
   # command_array - An Array of Strings representing the command and its
   #                 arguments to execute.
   # timeout       - An Integer specifying the maximum number of seconds
@@ -33,7 +34,7 @@ module Shell
   #
   # Raises RuntimeError if the command exceeds the timeout.
   #
-  # Returns an Array of [stdout, stderr, status] from Open3.capture3.
+  # Returns an Array of [stdout, stderr, status] from Open3.popen3.
   def execute_with_timeout(dir, command_array, timeout)
     stdin, stdout, stderr, wait_thr = Open3.popen3(*command_array, chdir: dir)
     stdin.close
@@ -51,6 +52,14 @@ module Shell
     [ stdin, stdout, stderr ].each { |io| io&.close unless io&.closed? }
   end
 
+  # Public: Write content to a file in the given directory.
+  #
+  # dir            - The String path to the target directory.
+  # filename       - The String filename (extension is stripped and replaced).
+  # file_extension - The String extension to use (e.g. ".mms").
+  # content        - The String or binary content to write.
+  #
+  # Returns the number of bytes written.
   def write_to_file(dir, filename, file_extension, content)
     File.binwrite(File.join(dir, "#{File.basename(filename, ".*")}#{file_extension}"), content)
   end

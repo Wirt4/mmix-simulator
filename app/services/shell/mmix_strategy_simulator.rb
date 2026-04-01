@@ -40,6 +40,9 @@ module Shell
     private
     SANCTIONED_FLAGS = %i[t e r l s P L v q b c f D].freeze
 
+    # Private: Converts the config hash into command-line flag strings,
+    # filtering to only SANCTIONED_FLAGS and validating value types.
+    #
     # Returns Array of String flags (e.g. ["-t100", "-v"]).
     def parse_flags
       @config.except(:empty).filter_map do |key, value|
