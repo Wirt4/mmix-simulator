@@ -36,6 +36,9 @@ Main	LDA	$255,Text\n
       args[:directory] = dir
       args[:command] = command
       args[:timeout] = timeout
+      success = Minitest::Mock.new
+      success.expect(:success?, true)
+      [ "", "", success ]
     } do
       if stub_binread
         File.stub :binread, "" do
@@ -133,6 +136,65 @@ Main	LDA	$255,Text\n
     stub_execute_with_timeout do |args|
       @strategy.run(@title, @dir, 1)
       assert_match args[:directory], @dir
+    end
+  end
+
+  test "run raises an error when the assembler exits with a non-zero status" do
+    failed_status = Minitest::Mock.new
+    failed_status.expect(:success?, false)
+    stderr_output = "#{@title}.mms:5: syntax error at token `LOC'"
+
+    stub_execute_with_timeout_returning([ "", stderr_output, failed_status ]) do
+      assert_raises(RuntimeError) do
+        @strategy.run(@title, @dir, 1)
+      end
+    end
+  end
+
+  test "run surfaces stderr in the error message when the assembler fails" do
+    failed_status = Minitest::Mock.new
+    failed_status.expect(:success?, false)
+    stderr_output = "#{@title}.mms:3: undefined symbol `BadLabel'"
+
+    stub_execute_with_timeout_returning([ "", stderr_output, failed_status ]) do
+      error = assert_raises(RuntimeError) do
+        @strategy.run(@title, @dir, 1)
+      end
+      assert_match stderr_output, error.message
+    end
+  end
+
+  test "run does not attempt to read the .mmo file when the assembler fails" do
+    failed_status = Minitest::Mock.new
+    failed_status.expect(:success?, false)
+
+    binread_called = false
+    stub_execute_with_timeout_returning([ "", "some error", failed_status ]) do
+      File.stub :binread, proc { binread_called = true; "" } do
+        assert_raises(RuntimeError) do
+          @strategy.run(@title, @dir, 1)
+        end
+      end
+    end
+    assert_not binread_called, "File.binread should not be called when the assembler fails"
+  end
+
+  test "run reads the .mmo file when the assembler succeeds" do
+    success_status = Minitest::Mock.new
+    success_status.expect(:success?, true)
+    mmo_contents = "\x00\x01\x02".b
+
+    stub_execute_with_timeout_returning([ "", "", success_status ]) do
+      File.stub :binread, mmo_contents do
+        result = @strategy.run(@title, @dir, 1)
+        assert_equal mmo_contents, result
+      end
+    end
+  end
+
+  def stub_execute_with_timeout_returning(return_value)
+    Shell::ShellOperations.stub :execute_with_timeout, return_value do
+      yield
     end
   end
 end
