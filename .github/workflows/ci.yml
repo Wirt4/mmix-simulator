@@ -89,6 +89,5 @@ jobs:
       - name: Run tests
         run: >
           docker run --rm
-          --privileged
           mmix-simulator:test
           bash -c "bin/setup --skip-server && bin/rails test"
