@@ -137,6 +137,30 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
      assert_equal expected_timeout, actual_timeout
   end
 
+  test "shell_out passes a sanitized title to strategy.write" do
+     actual_write_title = ""
+     assembler_strategy = strategy_double(@mmix_program)
+     fake_write = ->(title, _dir, _input) { actual_write_title = title }
+     stub_mktmpdir do
+       assembler_strategy.stub(:write, fake_write) do
+         Shell::ShellOperations.shell_out("../../etc/cron.d/evil", assembler_strategy, @mmix_machine_code)
+       end
+     end
+     assert_equal "evil", actual_write_title
+  end
+
+  test "shell_out passes a sanitized title to strategy.run" do
+     actual_run_title = ""
+     assembler_strategy = strategy_double(@mmix_program)
+     fake_run = ->(title, _dir, _timeout) { actual_run_title = title }
+     stub_mktmpdir do
+       assembler_strategy.stub(:run, fake_run) do
+         Shell::ShellOperations.shell_out("../../etc/cron.d/evil.exe", assembler_strategy, @mmix_machine_code)
+       end
+     end
+     assert_equal "evil", actual_run_title
+  end
+
   test "shell_out passes title to strategy.run and strategy.write" do
      actual_write_title = ""
      actual_run_title = ""
@@ -284,16 +308,6 @@ string  BYTE  "Hello, world!",#a,0   % String to be printed.  #a is
     end
     assert_equal "/other/dir/program.mms", written_path
   end
-
-  test "write_to_file santizies the name" do
-    written_path = nil
-    fake_binwrite = ->(path, data) { written_path = path }
-    File.stub(:binwrite, fake_binwrite) do
-      Shell::ShellOperations.write_to_file("/other/dir", "../../etc/cron.d/evil.mms", ".mms", "source")
-    end
-    assert_equal "/other/dir/evil.mms", written_path
-  end
-
 
   test "write_to_file passes the content to File.binwrite" do
     written_data = nil

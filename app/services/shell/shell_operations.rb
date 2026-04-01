@@ -17,9 +17,10 @@ module Shell
   #
   # Returns the result of strategy.run.
   def shell_out(title, strategy, input, timeout = 30)
+    sanitized_title = File.basename(title, ".*")
     Dir.mktmpdir do |dir|
-    strategy.write(title, dir, input)
-    strategy.run(title, dir, timeout)
+    strategy.write(sanitized_title, dir, input)
+    strategy.run(sanitized_title, dir, timeout)
     end
   end
 
@@ -61,7 +62,7 @@ module Shell
   #
   # Returns the number of bytes written.
   def write_to_file(dir, filename, file_extension, content)
-    File.binwrite(File.join(dir, "#{File.basename(filename, ".*")}#{file_extension}"), content)
+    File.binwrite(File.join(dir, "#{filename}#{file_extension}"), content)
   end
   end
 end
