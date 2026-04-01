@@ -106,6 +106,12 @@ RUN --mount=type=cache,target=/var/cache/apt \
     apt-get install --no-install-recommends -y nodejs npm && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
+# Go (needed for landrun)
+ARG GO_VERSION=1.24.2
+RUN curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-$(dpkg --print-architecture).tar.gz" \
+    | tar -C /usr/local -xz
+ENV PATH="/usr/local/go/bin:${PATH}"
+
 # Reuse gems instead of reinstalling
 COPY --from=build /usr/local/bundle /usr/local/bundle
 
