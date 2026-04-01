@@ -23,7 +23,6 @@ module Shell
     # Returns String binary contents of the assembled program.mmo.
     def run(title, dir, timeout)
       command = [ "bwrap-seccomp", "-a", "mmixal", "#{title}.mms" ]
-      # TODO: should title be sanitized here too?
       result = Shell::ShellOperations.execute_with_timeout(dir, command, timeout)
       if !result[2].success?
         raise result[1]
