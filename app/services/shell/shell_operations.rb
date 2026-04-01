@@ -16,7 +16,7 @@ module Shell
   #            the strategy to run (default: 30).
   #
   # Returns the result of strategy.run.
-  def shellOut(title, strategy, input, timeout = 30)
+  def shell_out(title, strategy, input, timeout = 30)
     Dir.mktmpdir do |dir|
     strategy.write(title, dir, input)
     strategy.run(title, dir, timeout)
@@ -26,7 +26,7 @@ module Shell
   # Public: Execute a shell command with a timeout constraint, raising an
   # error if the command does not complete in time.
   #
-  # commandArrary - An Array of Strings representing the command and its
+  # command_array - An Array of Strings representing the command and its
   #                 arguments to execute.
   # timeout       - An Integer specifying the maximum number of seconds
   #                 to allow the command to run.
@@ -34,7 +34,7 @@ module Shell
   # Raises RuntimeError if the command exceeds the timeout.
   #
   # Returns an Array of [stdout, stderr, status] from Open3.capture3.
-  def executeWithTimeout(dir, command_array, timeout)
+  def execute_with_timeout(dir, command_array, timeout)
     stdin, stdout, stderr, wait_thr = Open3.popen3(*command_array, chdir: dir)
     stdin.close
     pid = wait_thr.pid
@@ -51,7 +51,7 @@ module Shell
     [ stdin, stdout, stderr ].each { |io| io&.close unless io&.closed? }
   end
 
-  def writeToFile(dir, filename, file_extension, content)
+  def write_to_file(dir, filename, file_extension, content)
     File.binwrite(File.join(dir, "#{File.basename(filename, ".*")}#{file_extension}"), content)
   end
   end

@@ -3,7 +3,7 @@
 # Only single-run flags are permitted; interactive mode and help flags are
 # excluded for security.
 module Shell
-  class MmixStrategySimulator < Shell::AbstractMmixStrategy
+  class MMIXStrategySimulator < Shell::AbstractMMIXStrategy
     # Public: Initialize the simulator strategy.
     #
     # config - Hash of Symbol flag keys to their values (default: { empty: nil }).
@@ -20,8 +20,8 @@ module Shell
     #
     # Returns nothing.
     def write(title, dir, package)
-      Shell::ShellOperations.writeToFile(dir, title, ".mms", package[:src])
-      Shell::ShellOperations.writeToFile(dir, title, ".mmo", package[:bin])
+      Shell::ShellOperations.write_to_file(dir, title, ".mms", package[:src])
+      Shell::ShellOperations.write_to_file(dir, title, ".mmo", package[:bin])
     end
 
     # Public: Run the simulator against the executable inside a bubblewrap
@@ -30,11 +30,11 @@ module Shell
     # dir     - String path to the working directory containing executable.mmo.
     # timeout - Integer seconds before the command is killed.
     #
-    # Returns the result of ShellOperations.executeWithTimeout.
+    # Returns the result of ShellOperations.execute_with_timeout.
     def run(title, dir, timeout)
       command = [ "bwrap-seccomp", "-e", "mmix", *parse_flags, "#{title}.mmo" ]
 
-      Shell::ShellOperations.executeWithTimeout(dir, command, timeout)
+      Shell::ShellOperations.execute_with_timeout(dir, command, timeout)
     end
 
     private

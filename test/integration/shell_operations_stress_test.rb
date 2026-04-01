@@ -4,11 +4,11 @@ class ShellOperationsStressIntegrationTest < SandboxIntegrationTest
   test "sandbox enforces memory and disk limits on stress program" do
     source = File.binread("test/fixtures/mmix_code/stress.mms")
 
-    strategy_a = Shell::MmixStrategyAssembler.new
-    assembled_code = Shell::ShellOperations.shellOut("stress", strategy_a, source, 5)
+    strategy_a = Shell::MMIXStrategyAssembler.new
+    assembled_code = Shell::ShellOperations.shell_out("stress", strategy_a, source, 5)
 
-    strategy_s = Shell::MmixStrategySimulator.new
-    output =Shell::ShellOperations.shellOut("stress", strategy_s, { src: source, bin: assembled_code }, 30)
+    strategy_s = Shell::MMIXStrategySimulator.new
+    output =Shell::ShellOperations.shell_out("stress", strategy_s, { src: source, bin: assembled_code }, 30)
 
     stdout = output[0]
 

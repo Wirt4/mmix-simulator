@@ -2,7 +2,7 @@
 # strategies. Subclasses implement writing source/binary files and running
 # the corresponding MMIX tool (assembler or simulator).
 module Shell
-  class AbstractMmixStrategy
+  class AbstractMMIXStrategy
     # Public: Write program content to a file in the given directory.
     # title   - String title of the document to write, no file extensions
     # dir     - String path to the working directory.

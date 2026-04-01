@@ -4,11 +4,11 @@ class ShellOperationsJailbreakIntegrationTest < SandboxIntegrationTest
   test "jailbreak code cannot write files outside the sandbox" do
     source = File.binread("test/fixtures/mmix_code/jailbreak.mms")
 
-    strategy_a = Shell::MmixStrategyAssembler.new
-    assembled_code = Shell::ShellOperations.shellOut("jailbreak", strategy_a, source, 5)
+    strategy_a = Shell::MMIXStrategyAssembler.new
+    assembled_code = Shell::ShellOperations.shell_out("jailbreak", strategy_a, source, 5)
 
-    strategy_s = Shell::MmixStrategySimulator.new
-    Shell::ShellOperations.shellOut("jailbreak", strategy_s, { src: source, bin: assembled_code }, 5)
+    strategy_s = Shell::MMIXStrategySimulator.new
+    Shell::ShellOperations.shell_out("jailbreak", strategy_s, { src: source, bin: assembled_code }, 5)
 
     # The sandbox should prevent the path traversal write.
     # No "jailbreak" file should exist in the default tmpdir parent or working directory.

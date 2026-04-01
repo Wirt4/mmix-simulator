@@ -14,11 +14,11 @@ class ShellOperationsIntegrationTest < SandboxIntegrationTest
       \tTRAP\t0,Halt,0
     MMIX
 
-    strategy_a = Shell::MmixStrategyAssembler.new
-    assembled_code = Shell::ShellOperations.shellOut("hello_world", strategy_a, source, 5)
+    strategy_a = Shell::MMIXStrategyAssembler.new
+    assembled_code = Shell::ShellOperations.shell_out("hello_world", strategy_a, source, 5)
 
-    strategy_s = Shell::MmixStrategySimulator.new
-    output = Shell::ShellOperations.shellOut("hello_world", strategy_s, { src: source, bin: assembled_code }, 5)
+    strategy_s = Shell::MMIXStrategySimulator.new
+    output = Shell::ShellOperations.shell_out("hello_world", strategy_s, { src: source, bin: assembled_code }, 5)
 
     assert_equal "Hello World\n", output[0]
   end

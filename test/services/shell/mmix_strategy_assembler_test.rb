@@ -1,9 +1,9 @@
 require "test_helper"
 
-class MmixStrategyAssemblerTest < ActiveSupport::TestCase
+class MMIXStrategyAssemblerTest < ActiveSupport::TestCase
   setup do
     @title = "good_code_doc"
-    @strategy = Shell::MmixStrategyAssembler.new
+    @strategy = Shell::MMIXStrategyAssembler.new
     @dir = "/tmp/fake_dir"
 
     @contents = "	LOC	Data_Segment\n
@@ -32,7 +32,7 @@ Main	LDA	$255,Text\n
 
   def stub_execute_with_timeout(stub_binread: true)
     args = {}
-    Shell::ShellOperations.stub :executeWithTimeout, proc { |dir, command, timeout|
+    Shell::ShellOperations.stub :execute_with_timeout, proc { |dir, command, timeout|
       args[:directory] = dir
       args[:command] = command
       args[:timeout] = timeout
@@ -48,7 +48,7 @@ Main	LDA	$255,Text\n
   end
 
   test "is a subclass of AbstractMMIXStrategy" do
-    assert Shell::MmixStrategyAssembler < Shell::AbstractMmixStrategy
+    assert Shell::MMIXStrategyAssembler < Shell::AbstractMMIXStrategy
   end
 
   test "create file program.mms in the given directory" do
@@ -89,7 +89,7 @@ Main	LDA	$255,Text\n
     end
   end
 
-  test "run passes timeout to executeWithTimeout" do
+  test "run passes timeout to execute_with_timeout" do
     timeout = 10
     stub_execute_with_timeout do |args|
       @strategy.run(@title, @dir, timeout)
@@ -97,7 +97,7 @@ Main	LDA	$255,Text\n
     end
   end
 
-  test "run passes different timeout to executeWithTimeout" do
+  test "run passes different timeout to execute_with_timeout" do
     timeout = 5
     stub_execute_with_timeout do |args|
       @strategy.run(@title, @dir, timeout)
@@ -129,7 +129,7 @@ Main	LDA	$255,Text\n
     end
   end
 
-  test "passes dir to executeWithTimeout" do
+  test "passes dir to execute_with_timeout" do
     stub_execute_with_timeout do |args|
       @strategy.run(@title, @dir, 1)
       assert_match args[:directory], @dir
