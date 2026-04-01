@@ -104,7 +104,6 @@ RUN ln -s /rails/script/bwrap_seccomp.py /usr/local/bin/bwrap-seccomp
 USER 1000:1000
 
 # Entrypoint prepares the database.
-## note: shouldn't that start with `./bin/rails` ??
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
 # Start server via Thruster by default, this can be overwritten at runtime
