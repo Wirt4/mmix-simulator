@@ -10,7 +10,7 @@ module Shell
     #
     # Raises RuntimeError (abstract method).
     def write(title, dir, content)
-      raise "abstract method"
+      raise NotImplementedError, "#{self.class}#write must be implemented"
     end
 
     # Public: Run the MMIX tool against the written file.
@@ -20,7 +20,7 @@ module Shell
     #
     # Raises RuntimeError (abstract method).
     def run(title, dir, timeout)
-      raise "abstract method"
+       raise NotImplementedError, "#{self.class}#run must be implemented"
     end
   end
 end
