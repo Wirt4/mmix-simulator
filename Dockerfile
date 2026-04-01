@@ -84,11 +84,6 @@ COPY . .
 
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
-# ─────────────────────────────────────────────────────────────
-# App code (comes AFTER expensive steps)
-# ─────────────────────────────────────────────────────────────
-COPY . .
-
 # Bootsnap app code
 RUN bundle exec bootsnap precompile -j $(nproc) app/ lib/
 
@@ -110,7 +105,11 @@ RUN --mount=type=cache,target=/var/cache/apt \
 ARG GO_VERSION=1.24.2
 RUN curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-$(dpkg --print-architecture).tar.gz" \
     | tar -C /usr/local -xz
-ENV PATH="/usr/local/go/bin:${PATH}"
+ENV PATH="/usr/local/go/bin:/root/go/bin:${PATH}"
+
+# Landrun (Landlock sandboxing)
+ARG LANDRUN_VERSION=0.1.14
+RUN go install "github.com/zouuup/landrun/cmd/landrun@v${LANDRUN_VERSION}"
 
 # Reuse gems instead of reinstalling
 COPY --from=build /usr/local/bundle /usr/local/bundle
