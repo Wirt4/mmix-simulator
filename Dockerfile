@@ -13,7 +13,7 @@ WORKDIR /rails
 RUN --mount=type=cache,target=/var/cache/apt \
     apt-get update -qq && \
     apt-get install --no-install-recommends -y \
-      bubblewrap curl libjemalloc2 libvips python3-seccomp sqlite3 && \
+      curl libjemalloc2 libvips sqlite3 && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
@@ -112,8 +112,6 @@ COPY --from=build /usr/local/bundle /usr/local/bundle
 RUN --mount=type=cache,target=/root/.npm \
     npm install
 
-RUN ln -s /rails/script/bwrap_seccomp.py /usr/local/bin/bwrap-seccomp
-
 CMD ["bin/ci"]
 
 # ─────────────────────────────────────────────────────────────
@@ -132,8 +130,6 @@ COPY --from=mmix /usr/local/bin/mmixal /usr/local/bin/mmixal
 COPY --chown=rails:rails --from=build /usr/local/bundle /usr/local/bundle
 COPY --chown=rails:rails --from=build /rails /rails
 
-USER root
-RUN ln -s /rails/script/bwrap_seccomp.py /usr/local/bin/bwrap-seccomp
 USER 1000:1000
 
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]

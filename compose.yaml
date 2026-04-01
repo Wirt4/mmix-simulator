@@ -9,6 +9,6 @@ services:
   dev:
     build:
       target: test
-    environment:
-      RUN_SANDBOX_TESTS: "true"
+    cap_add:
+    - SYSLOG
     profiles: [dev]
