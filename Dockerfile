@@ -10,7 +10,7 @@ FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 WORKDIR /rails
 
 # System deps (cached via BuildKit)
-RUN --mount=type=cache,target=/var/cache/apt \
+RUN --mount=type=cache,id=apt-base,target=/var/cache/apt \
     apt-get update -qq && \
     apt-get install --no-install-recommends -y \
       curl libjemalloc2 libvips sqlite3 && \
@@ -28,7 +28,7 @@ ENV RAILS_ENV="production" \
 # ─────────────────────────────────────────────────────────────
 FROM base AS mmix
 
-RUN --mount=type=cache,target=/var/cache/apt \
+RUN --mount=type=cache,id=apt-mmix,target=/var/cache/apt \
     apt-get update -qq && \
     apt-get install --no-install-recommends -y \
       build-essential texlive-binaries && \
@@ -58,7 +58,7 @@ RUN cd /tmp/mmixware && \
 FROM base AS build
 
 # Build deps
-RUN --mount=type=cache,target=/var/cache/apt \
+RUN --mount=type=cache,id=apt-build,target=/var/cache/apt \
     apt-get update -qq && \
     apt-get install --no-install-recommends -y \
       build-essential git libyaml-dev pkg-config && \
@@ -90,15 +90,18 @@ RUN bundle exec bootsnap precompile -j $(nproc) app/ lib/
 # ─────────────────────────────────────────────────────────────
 # Test stage
 # ─────────────────────────────────────────────────────────────
-FROM build AS test
+FROM base AS test
 
 ENV RAILS_ENV="test" \
     BUNDLE_WITHOUT="" \
     BUNDLE_DEPLOYMENT="0"
 
-RUN --mount=type=cache,target=/var/cache/apt \
+# Heavy tool installs first — these layers are cached unless
+# the tool versions or base image change.
+RUN --mount=type=cache,id=apt-test,target=/var/cache/apt \
     apt-get update -qq && \
-    apt-get install --no-install-recommends -y nodejs npm && \
+    apt-get install --no-install-recommends -y \
+      build-essential git libyaml-dev pkg-config nodejs npm && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Go (needed for landrun)
@@ -111,11 +114,22 @@ ENV PATH="/usr/local/go/bin:/root/go/bin:${PATH}"
 ARG LANDRUN_VERSION=0.1.14
 RUN go install "github.com/zouuup/landrun/cmd/landrun@v${LANDRUN_VERSION}"
 
-# Reuse gems instead of reinstalling
+# Gems (cached unless Gemfile changes)
+COPY Gemfile Gemfile.lock ./
 COPY --from=build /usr/local/bundle /usr/local/bundle
+RUN bundle install
 
+# npm deps (cached unless package.json changes)
+COPY package.json package-lock.json* ./
 RUN --mount=type=cache,target=/root/.npm \
     npm install
+
+# MMIX binaries
+COPY --from=mmix /usr/local/bin/mmix /usr/local/bin/mmix
+COPY --from=mmix /usr/local/bin/mmixal /usr/local/bin/mmixal
+
+# App code copied LAST — only this layer rebuilds on code changes
+COPY . .
 
 CMD ["bin/ci"]
 
