@@ -31,5 +31,7 @@ module MMIXSimulator
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+    config.assembler_timeout = 8
+    config.simulator_timeout = 45
   end
 end
