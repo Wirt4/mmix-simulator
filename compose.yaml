@@ -1,0 +1,14 @@
+services:
+  web:
+    build:
+      target: production
+    ports:
+    - "80:80"
+    environment:
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+  dev:
+    build:
+      target: test
+    cap_add:
+    - SYSLOG
+    profiles: [dev]
