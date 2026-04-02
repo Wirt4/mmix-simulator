@@ -6,7 +6,7 @@ class LandrunWrapperTest < SandboxIntegrationTest
   private
 
   def landrun_wrap(*args, command)
-    out, err, status = Open3.capture3("ruby", WRAPPER, *args, "--", *command)
+    out, err, status = Open3.capture3("ruby", WRAPPER, *args, *command)
     { stdout: out, stderr: err, status: status }
   end
 
@@ -247,6 +247,45 @@ class LandrunWrapperTest < SandboxIntegrationTest
         assert result[:status].success?, "Expected reading from both paths to succeed, got: #{result[:stderr]}"
         assert_equal "aaabbb", result[:stdout]
       end
+    end
+  end
+
+  # ── --rlimit-as (address-space limit via prlimit) ─────────────────
+
+  test "--rlimit-as enforces a virtual memory ceiling on the sandboxed process" do
+    # Allocate ~2 MB inside a 1 MB address-space limit — should be killed.
+    alloc = 'ruby -e "a = \"x\" * (2 * 1024 * 1024)"'
+    result = landrun_wrap("--rox", "/usr", "--rox", "/lib", "--ro", "/etc",
+                          "--rlimit-as", "#{1_048_576}", [ "sh", "-c", alloc ])
+    refute result[:status].success?, "Expected process to be killed by RLIMIT_AS"
+  end
+
+  test "--rlimit-as allows processes that stay within the limit" do
+    result = landrun_wrap("--rox", "/usr", "--rox", "/lib", "--ro", "/etc",
+                          "--rlimit-as", "#{512 * 1024 * 1024}", [ "echo", "ok" ])
+    assert result[:status].success?, "Expected process within limit to succeed, got: #{result[:stderr]}"
+    assert_equal "ok\n", result[:stdout]
+  end
+
+  # ── --rlimit-fsize (file-size limit via prlimit) ────────────────
+
+  test "--rlimit-fsize enforces a file size ceiling on the sandboxed process" do
+    Dir.mktmpdir do |dir|
+      write_cmd = "dd if=/dev/zero of=#{dir}/big.bin bs=1024 count=200 2>&1"
+      result = landrun_wrap("--rox", "/usr", "--rox", "/lib", "--ro", "/etc",
+                            "--rw", dir, "--rlimit-fsize", "#{1024}", [ "sh", "-c", write_cmd ])
+      refute result[:status].success?, "Expected process to be killed by RLIMIT_FSIZE"
+    end
+  end
+
+  test "--rlimit-fsize allows writes that stay within the limit" do
+    Dir.mktmpdir do |dir|
+      target = File.join(dir, "small.txt")
+      result = landrun_wrap("--rox", "/usr", "--rox", "/lib", "--ro", "/etc",
+                            "--rw", dir, "--rlimit-fsize", "#{1_048_576}",
+                            [ "sh", "-c", "echo ok > #{target}" ])
+      assert result[:status].success?, "Expected write within limit to succeed, got: #{result[:stderr]}"
+      assert_equal "ok\n", File.read(target)
     end
   end
 

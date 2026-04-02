@@ -53,6 +53,14 @@ RUN cd /tmp/mmixware && \
     rm -rf /tmp/mmixware
 
 # ─────────────────────────────────────────────────────────────
+# Landrun build (Go binary, rarely changes → isolate for caching)
+# ─────────────────────────────────────────────────────────────
+FROM docker.io/library/golang:1.24.2 AS landrun
+
+ARG LANDRUN_VERSION=0.1.14
+RUN go install "github.com/zouuup/landrun/cmd/landrun@v${LANDRUN_VERSION}"
+
+# ─────────────────────────────────────────────────────────────
 # Build stage (gems + app compilation)
 # ─────────────────────────────────────────────────────────────
 FROM base AS build
@@ -101,18 +109,11 @@ ENV RAILS_ENV="test" \
 RUN --mount=type=cache,id=apt-test,target=/var/cache/apt \
     apt-get update -qq && \
     apt-get install --no-install-recommends -y \
-      build-essential git libyaml-dev pkg-config nodejs npm && \
+      build-essential git libyaml-dev pkg-config nodejs npm strace && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-# Go (needed for landrun)
-ARG GO_VERSION=1.24.2
-RUN curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-$(dpkg --print-architecture).tar.gz" \
-    | tar -C /usr/local -xz
-ENV PATH="/usr/local/go/bin:/root/go/bin:${PATH}"
-
 # Landrun (Landlock sandboxing)
-ARG LANDRUN_VERSION=0.1.14
-RUN go install "github.com/zouuup/landrun/cmd/landrun@v${LANDRUN_VERSION}"
+COPY --from=landrun /go/bin/landrun /usr/local/bin/landrun
 
 # Gems (cached unless Gemfile changes)
 COPY Gemfile Gemfile.lock ./
@@ -131,6 +132,9 @@ COPY --from=mmix /usr/local/bin/mmixal /usr/local/bin/mmixal
 # App code copied LAST — only this layer rebuilds on code changes
 COPY . .
 
+RUN ln -s /rails/script/landrun_wrapper.rb /usr/local/bin/landrun-wrap && \
+    chmod +x /rails/script/landrun_wrapper.rb
+
 CMD ["bin/ci"]
 
 # ─────────────────────────────────────────────────────────────
@@ -145,9 +149,15 @@ RUN groupadd --system --gid 1000 rails && \
 COPY --from=mmix /usr/local/bin/mmix /usr/local/bin/mmix
 COPY --from=mmix /usr/local/bin/mmixal /usr/local/bin/mmixal
 
+# Landrun (Landlock sandboxing)
+COPY --from=landrun /go/bin/landrun /usr/local/bin/landrun
+
 # Copy app + gems
 COPY --chown=rails:rails --from=build /usr/local/bundle /usr/local/bundle
 COPY --chown=rails:rails --from=build /rails /rails
+
+RUN ln -s /rails/script/landrun_wrapper.rb /usr/local/bin/landrun-wrap && \
+    chmod +x /rails/script/landrun_wrapper.rb
 
 USER 1000:1000
 

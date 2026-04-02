@@ -32,7 +32,16 @@ module Shell
     #
     # Returns the result of ShellOperations.execute_with_timeout.
     def run(title, dir, timeout)
-      command = [ "bwrap-seccomp", "-e", "mmix", *parse_flags, "#{title}.mmo" ]
+      command = [
+        "landrun-wrap",
+        "--rox", "/usr",
+        "--rox", "/lib",
+        "--ro", "/etc",
+        "--ro", dir,
+        "--rlimit-as", "78643200",
+        "--rlimit-fsize", "134217728",
+        "mmix", *parse_flags, "#{title}.mmo"
+      ]
 
       Shell::ShellOperations.execute_with_timeout(dir, command, timeout)
     end

@@ -80,7 +80,9 @@ class MMIXStrategySimulatorTest < ActiveSupport::TestCase
       strategy = Shell::MMIXStrategySimulator.new
       strategy.run(@title, @dir, 30)
 
-      assert_equal args[:command], [ "bwrap-seccomp", "-e", "mmix", "#{@title}.mmo" ]
+      assert_equal args[:command], [ "landrun-wrap", "--rox", "/usr", "--rox", "/lib", "--ro", "/etc", "--ro", @dir,
+        "--rlimit-as", "78643200", "--rlimit-fsize", "134217728",
+        "mmix", "#{@title}.mmo" ]
     end
   end
 
@@ -89,7 +91,9 @@ class MMIXStrategySimulatorTest < ActiveSupport::TestCase
       strategy = Shell::MMIXStrategySimulator.new({ t: 2 })
       strategy.run(@title, @dir, 30)
 
-      assert_equal args[:command], [ "bwrap-seccomp", "-e", "mmix", "-t2", "#{@title}.mmo" ]
+      assert_equal args[:command], [ "landrun-wrap", "--rox", "/usr", "--rox", "/lib", "--ro", "/etc", "--ro", @dir,
+        "--rlimit-as", "78643200", "--rlimit-fsize", "134217728",
+        "mmix", "-t2", "#{@title}.mmo" ]
     end
   end
 

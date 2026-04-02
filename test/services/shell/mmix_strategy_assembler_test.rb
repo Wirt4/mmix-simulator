@@ -108,23 +108,30 @@ Main	LDA	$255,Text\n
     end
   end
 
-  test "run calls command line utility `bwrap-seccomp`" do
+  test "run calls command line utility `landrun-wrap`" do
     stub_execute_with_timeout do |args|
       @strategy.run("program", @dir, 1)
-      assert_equal args[:command], [ "bwrap-seccomp", "-a", "mmixal", "program.mms" ]
+      assert_equal args[:command], [  "landrun-wrap",
+        "--rox", "/usr",
+        "--rox", "/lib",
+        "--ro", "/etc",
+        "--rw", @dir, "mmixal", "program.mms" ]
     end
   end
 
-  test "run calls command line utility `bwrap-seccomp` with different name" do
+  test "run calls command line utility `landrun-wrap` with different name" do
     stub_execute_with_timeout do |args|
       @strategy.run("my_code", @dir, 1)
-      assert_equal args[:command], [ "bwrap-seccomp", "-a", "mmixal", "my_code.mms" ]
+      assert_equal args[:command], [  "landrun-wrap",
+        "--rox", "/usr",
+        "--rox", "/lib",
+        "--ro", "/etc",
+        "--rw", @dir, "mmixal", "my_code.mms" ]
     end
   end
 
   test "run returns variable contents of the compiled.mmo" do
     mmo_contents = 01101001001001110110110100100000011000100110000101110100011011010110000101101110
-    dir = @dir
     stub_execute_with_timeout(stub_binread: false) do |_args|
       File.stub :binread, mmo_contents do
         assert_equal @strategy.run("expected", @dir, 1), mmo_contents

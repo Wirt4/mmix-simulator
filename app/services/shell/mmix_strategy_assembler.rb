@@ -22,7 +22,14 @@ module Shell
     #
     # Returns String binary contents of the assembled program.mmo.
     def run(title, dir, timeout)
-      command = [ "bwrap-seccomp", "-a", "mmixal", "#{title}.mms" ]
+      command = [
+        "landrun-wrap",
+        "--rox", "/usr",
+        "--rox", "/lib",
+        "--ro", "/etc",
+        "--rw", dir,
+        "mmixal", "#{title}.mms"
+      ]
       result = Shell::ShellOperations.execute_with_timeout(dir, command, timeout)
       if !result[2].success?
         raise result[1]
