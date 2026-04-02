@@ -3,6 +3,8 @@ class MMIXStrategySimulatorTest < ActiveSupport::TestCase
   setup do
     @title = "code_doc_title"
     @dir = "/some/dir"
+    @rlimit = Rails.application.config.mmix_virtual_memory_limit_bytes
+    @fsize  = Rails.application.config.mmix_file_size_limit_bytes
   end
 
   private
@@ -81,7 +83,7 @@ class MMIXStrategySimulatorTest < ActiveSupport::TestCase
       strategy.run(@title, @dir, 30)
 
       assert_equal args[:command], [ "landrun-and-limit", "--rox", "/usr", "--rox", "/lib", "--ro", "/etc", "--ro", @dir,
-        "--rlimit-as", "78643200", "--rlimit-fsize", "134217728",
+        "--rlimit-as", "#{@rlimit}", "--rlimit-fsize", "#{@fsize}",
         "mmix", "#{@title}.mmo" ]
     end
   end
@@ -92,7 +94,7 @@ class MMIXStrategySimulatorTest < ActiveSupport::TestCase
       strategy.run(@title, @dir, 30)
 
       assert_equal args[:command], [ "landrun-and-limit", "--rox", "/usr", "--rox", "/lib", "--ro", "/etc", "--ro", @dir,
-        "--rlimit-as", "78643200", "--rlimit-fsize", "134217728",
+        "--rlimit-as", "#{@rlimit}", "--rlimit-fsize", "#{@fsize}",
         "mmix", "-t2", "#{@title}.mmo" ]
     end
   end

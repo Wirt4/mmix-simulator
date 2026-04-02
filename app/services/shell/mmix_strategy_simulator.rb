@@ -39,8 +39,8 @@ module Shell
         "--rox", "/lib",
         "--ro", "/etc",
         "--ro", dir,
-        "--rlimit-as", "78643200",
-        "--rlimit-fsize", "134217728",
+        "--rlimit-as", "#{ Rails.application.config.mmix_virtual_memory_limit_bytes}",
+        "--rlimit-fsize", "#{ Rails.application.config.mmix_file_size_limit_bytes}",
         "mmix", *parse_flags, "#{title}.mmo"
       ]
 
