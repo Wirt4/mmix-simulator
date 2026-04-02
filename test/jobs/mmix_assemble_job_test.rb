@@ -24,6 +24,13 @@ class MMIXAssembleJobTest < ActiveJob::TestCase
     end
   end
 
+ test "job raises if program and are not associated" do
+    mismatched_executable = executables(:two)
+    assert_raises(ArgumentError) do
+      MMIXAssembleJob.perform_now(@program, mismatched_executable)
+    end
+  end
+
   test "perform passes the config value to timeout" do
     stub_shell_out do |called_with|
       MMIXAssembleJob.perform_now(@program, @executable)
@@ -33,8 +40,9 @@ class MMIXAssembleJobTest < ActiveJob::TestCase
 
   test "perform passes variable arguments to shell_out" do
     alt_program = programs(:two)
+    alt_executable = executables(:two)
     stub_shell_out do |called_with|
-      MMIXAssembleJob.perform_now(alt_program, @executable)
+      MMIXAssembleJob.perform_now(alt_program, alt_executable)
       assert_equal 1, called_with.size
       assert_equal called_with.first[:title], alt_program.title
       assert_equal called_with.first[:input], alt_program.body

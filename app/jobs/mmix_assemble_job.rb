@@ -8,6 +8,9 @@ class MMIXAssembleJob < ApplicationJob
    #
    # Returns none.
    def perform(program, executable)
+     if executable.program != program
+      raise ArgumentError
+     end
      begin
        result = Shell::ShellOperations.shell_out(
          program.title,

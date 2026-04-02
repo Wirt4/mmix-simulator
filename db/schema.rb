@@ -17,7 +17,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_02_144212) do
     t.integer "program_id", null: false
     t.boolean "successfully_assembled"
     t.datetime "updated_at", null: false
-    t.index ["program_id"], name: "index_executables_on_program_id"
+    t.index [ "program_id" ], name: "index_executables_on_program_id"
   end
 
   create_table "outputs", force: :cascade do |t|
@@ -28,7 +28,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_02_144212) do
     t.string "flags"
     t.text "trace_output"
     t.datetime "updated_at", null: false
-    t.index ["executable_id"], name: "index_outputs_on_executable_id"
+    t.index [ "executable_id" ], name: "index_outputs_on_executable_id"
   end
 
   create_table "programs", force: :cascade do |t|
@@ -37,7 +37,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_02_144212) do
     t.string "title"
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
-    t.index ["user_id"], name: "index_programs_on_user_id"
+    t.index [ "user_id" ], name: "index_programs_on_user_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -46,7 +46,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_02_144212) do
     t.datetime "updated_at", null: false
     t.string "user_agent"
     t.integer "user_id", null: false
-    t.index ["user_id"], name: "index_sessions_on_user_id"
+    t.index [ "user_id" ], name: "index_sessions_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -56,8 +56,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_02_144212) do
     t.integer "role", default: 1, null: false
     t.datetime "updated_at", null: false
     t.string "user_name"
-    t.index ["email_address"], name: "index_users_on_email_address", unique: true
-    t.index ["user_name"], name: "index_users_on_user_name", unique: true
+    t.index [ "email_address" ], name: "index_users_on_email_address", unique: true
+    t.index [ "user_name" ], name: "index_users_on_user_name", unique: true
   end
 
   add_foreign_key "executables", "programs"
