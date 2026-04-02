@@ -10,11 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_24_043138) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_02_144212) do
   create_table "executables", force: :cascade do |t|
     t.binary "bin"
     t.datetime "created_at", null: false
     t.integer "program_id", null: false
+    t.boolean "successfully_assembled"
     t.datetime "updated_at", null: false
     t.index ["program_id"], name: "index_executables_on_program_id"
   end
@@ -48,15 +49,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_043138) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
-  create_table "sources", force: :cascade do |t|
-    t.text "body"
-    t.datetime "created_at", null: false
-    t.string "title"
-    t.datetime "updated_at", null: false
-    t.integer "user_id", null: false
-    t.index ["user_id"], name: "index_sources_on_user_id"
-  end
-
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address"
@@ -72,5 +64,4 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_043138) do
   add_foreign_key "outputs", "executables"
   add_foreign_key "programs", "users"
   add_foreign_key "sessions", "users"
-  add_foreign_key "sources", "users"
 end
