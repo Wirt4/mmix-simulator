@@ -132,8 +132,8 @@ COPY --from=mmix /usr/local/bin/mmixal /usr/local/bin/mmixal
 # App code copied LAST — only this layer rebuilds on code changes
 COPY . .
 
-RUN ln -s /rails/script/landrun_wrapper.rb /usr/local/bin/landrun-wrap && \
-    chmod +x /rails/script/landrun_wrapper.rb
+RUN ln -s /rails/script/landrun_and_limit.rb /usr/local/bin/landrun-and-limit&& \
+    chmod +x /rails/script/landrun_and_limit.rb
 
 CMD ["bin/ci"]
 
@@ -156,8 +156,8 @@ COPY --from=landrun /go/bin/landrun /usr/local/bin/landrun
 COPY --chown=rails:rails --from=build /usr/local/bundle /usr/local/bundle
 COPY --chown=rails:rails --from=build /rails /rails
 
-RUN ln -s /rails/script/landrun_wrapper.rb /usr/local/bin/landrun-wrap && \
-    chmod +x /rails/script/landrun_wrapper.rb
+RUN ln -s /rails/script/landrun_and_limit.rb /usr/local/bin/landrun-and-limit && \
+    chmod +x /rails/script/landrun_and_limit.rb
 
 USER 1000:1000
 

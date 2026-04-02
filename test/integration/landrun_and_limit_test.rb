@@ -1,7 +1,7 @@
 require "test_helper"
 
-class LandrunWrapperTest < SandboxIntegrationTest
-  WRAPPER = Rails.root.join("script", "landrun_wrapper.rb").to_s
+class LandrunAndLimitTest < SandboxIntegrationTest
+  WRAPPER = Rails.root.join("script", "landrun_and_limit.rb").to_s
 
   private
 
@@ -291,7 +291,7 @@ class LandrunWrapperTest < SandboxIntegrationTest
 
   #  ── Wrapper script existence ───────────────────────────────────────
 
-  test "landrun_wrapper.rb script exists" do
+  test "script exists" do
     assert File.exist?(WRAPPER), "Expected #{WRAPPER} to exist"
   end
 end

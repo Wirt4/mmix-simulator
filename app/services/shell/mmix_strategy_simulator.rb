@@ -33,7 +33,7 @@ module Shell
     # Returns the result of ShellOperations.execute_with_timeout.
     def run(title, dir, timeout)
       command = [
-        "landrun-wrap",
+        "landrun-and-limit",
         "--rox", "/usr",
         "--rox", "/lib",
         "--ro", "/etc",

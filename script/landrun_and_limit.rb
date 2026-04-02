@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Thin wrapper around the `landrun` Landlock sandbox CLI.
+# Thin wrapper around the `landrun` Landlock sandbox CLI with an extension of rlimit flags.
 # Usage: ruby landrun_wrapper.rb [OPTIONS] -- COMMAND [ARGS...]
 
 landrun_flags = []

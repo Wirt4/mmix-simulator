@@ -108,10 +108,10 @@ Main	LDA	$255,Text\n
     end
   end
 
-  test "run calls command line utility `landrun-wrap`" do
+  test "run calls command line utility `landrun-and-limit`" do
     stub_execute_with_timeout do |args|
       @strategy.run("program", @dir, 1)
-      assert_equal args[:command], [  "landrun-wrap",
+      assert_equal args[:command], [  "landrun-and-limit",
         "--rox", "/usr",
         "--rox", "/lib",
         "--ro", "/etc",
@@ -119,10 +119,10 @@ Main	LDA	$255,Text\n
     end
   end
 
-  test "run calls command line utility `landrun-wrap` with different name" do
+  test "run calls command line utility `landrun-and-limit` with different name" do
     stub_execute_with_timeout do |args|
       @strategy.run("my_code", @dir, 1)
-      assert_equal args[:command], [  "landrun-wrap",
+      assert_equal args[:command], [  "landrun-and-limit",
         "--rox", "/usr",
         "--rox", "/lib",
         "--ro", "/etc",
