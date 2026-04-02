@@ -8,6 +8,7 @@ module Shell
     #
     # config - Hash of Symbol flag keys to their values (default: { empty: nil }).
     #          Keys must be members of SANCTIONED_FLAGS to be included.
+    #        Check https://mmix.cs.hm.edu/doc/mmix-sim.pdf for the full list
     def initialize(config = { empty: nil })
       @config = config
     end
