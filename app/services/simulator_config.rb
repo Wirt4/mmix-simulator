@@ -1,5 +1,10 @@
+# maps human-readable options to command-line flags for the mmix simulator
+# interactive mode not available
+# see full docs at https://mmix.cs.hm.edu/doc/mmix-sim.pdf
 class SimulatorConfig
   MAX_FILE_NAME_SIZE = 256
+  FILE_NAME_PATTERN = /^(?!.*(?:^|\/)\.{1,2}(?:\/|$))[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*(?:\.[A-Za-z0-9_-]+)?$/
+
   def initialize
     @trace_n_times = nil
     @trace_arithmetic_exceptions = nil
@@ -41,7 +46,7 @@ class SimulatorConfig
   # Alternatively Pass `true` to set all.
   def trace_arithmetic_exceptions=(new_value)
     verify_integer_or_boolean(new_value)
-    if new_value.is_a?(Integer) and (new_value < 0 or new_value > 0xFF)
+    if new_value.is_a?(Integer) && (new_value < 0 || new_value > 0xFF)
       raise ArgumentError, "bitmask must be hexidecmal value between 0x00 and 0xFF"
     end
     @trace_arithmetic_exceptions = new_value
@@ -49,7 +54,7 @@ class SimulatorConfig
 
   # boolean
   # Set true to trace register stack
-  # The option shows all the “hidden” loads and stores that occur.
+  # The option shows all the "hidden" loads and stores that occur.
   # It also shows the full details of SAVE and UNSAVE operations.
   def trace_register_stack=(new_value)
     @trace_register_stack = verify_boolean(new_value)
@@ -84,7 +89,7 @@ class SimulatorConfig
   # turns on all options
   # equivalent to trace_n_times: 9999999999 trace_arithmetic_exceptions: true trace_register_stack: true, show_running_time_statistics: true,  list_source_lines: 10,and list_profile_source_lines: 10.
   def verbose=(new_value)
-   @verbose = verify_boolean(new_value)
+    @verbose = verify_boolean(new_value)
   end
 
   # boolean
@@ -122,75 +127,47 @@ class SimulatorConfig
   # Converts members to an array of command-line flags
   # returns array of strings
   def to_flags
-    result = []
-    if not not @trace_n_times
-      result.push("-t#{@trace_n_times}")
-    end
-
-    if not not @trace_arithmetic_exceptions
-      result.push("-e#{convert_arithmetic_exceptions}")
-    end
-
-    if @trace_register_stack
-      result.push("-r")
-    end
-
-    if not not @list_source_lines
-      result.push(parse_flag("-l", @list_source_lines))
-    end
-
-    if @show_running_time_statistics
-      result.push("-s")
-    end
-
-    if @show_program_profile
-      result.push("-P")
-    end
-
-    if not not @list_profile_source_lines
-      result.push(parse_flag("-L", @list_profile_source_lines))
-    end
-
-    if @verbose
-      result.push("-v")
-    end
-
-    if @quiet
-      result.push("-q")
-    end
-
-    if not not @buffer_size
-      result.push("-b#{@buffer_size}")
-    end
-
-    if not not @register_ring_capacity
-      result.push("-c#{@register_ring_capacity}")
-    end
-
-    if not not @in_file
-      result.push("-f#{@in_file}")
-    end
-
-    if not not @out_file
-      result.push("-D#{@out_file}")
-    end
-
-    result
+    flags = []
+    append_value_flag(flags, "-t", @trace_n_times)
+    append_arithmetic_flag(flags)
+    flags << "-r" if @trace_register_stack
+    append_boolean_or_value_flag(flags, "-l", @list_source_lines)
+    flags << "-s" if @show_running_time_statistics
+    flags << "-P" if @show_program_profile
+    append_boolean_or_value_flag(flags, "-L", @list_profile_source_lines)
+    flags << "-v" if @verbose
+    flags << "-q" if @quiet
+    append_value_flag(flags, "-b", @buffer_size)
+    append_value_flag(flags, "-c", @register_ring_capacity)
+    append_value_flag(flags, "-f", @in_file)
+    append_value_flag(flags, "-D", @out_file)
+    flags
   end
 
   private
 
+  def append_value_flag(flags, flag, value)
+    flags << "#{flag}#{value}" if value
+  end
+
+  def append_boolean_or_value_flag(flags, flag, value)
+    return unless value
+    flags << (value == true ? flag : "#{flag}#{value}")
+  end
+
+  def append_arithmetic_flag(flags)
+    return unless @trace_arithmetic_exceptions
+    suffix = @trace_arithmetic_exceptions == true ? "" : @trace_arithmetic_exceptions.to_s(16).rjust(2, "0")
+    flags << "-e#{suffix}"
+  end
+
   def verify_file_name(val)
-    if val == ""
-      nil
-    else
+    return nil if val == ""
     verify_type(val, String)
-    file_name_whitelist = /^(?!.*(?:^|\/)\.{1,2}(?:\/|$))[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*(?:\.[A-Za-z0-9_-]+)?$/
-    unless file_name_whitelist.match?(val) && val.length < MAX_FILE_NAME_SIZE
+    unless FILE_NAME_PATTERN.match?(val) && val.length < MAX_FILE_NAME_SIZE
       raise ArgumentError, "invalid file name"
     end
     val
-    end
   end
 
   def verify_non_negative_integer(label, val)
@@ -207,52 +184,32 @@ class SimulatorConfig
     parse_boolean_or_number(val)
   end
 
-  def parse_flag(flag, val)
-    val == true ? flag : "#{flag}#{val}"
-  end
-
   def parse_boolean_or_number(val)
-    val === 0? nil : val
-  end
-
-  def convert_arithmetic_exceptions
-    if @trace_arithmetic_exceptions == true
-      ""
-    else
-      @trace_arithmetic_exceptions.to_s(16).rjust(2, "0")
-    end
+    val === 0 ? nil : val
   end
 
   def verify_type(val, type)
-    if not val.is_a?(type)
-      raise TypeError, "Expected #{type}, got #{val.class}"
-    else
-      val
-    end
+    raise TypeError, "Expected #{type}, got #{val.class}" unless val.is_a?(type)
+    val
   end
 
   def verify_non_negative(val, name)
-    if val.is_a?(Integer) and val < 0
-      raise ArgumentError, "#{name} may not be negative"
-    end
+    raise ArgumentError, "#{name} may not be negative" if val.is_a?(Integer) && val < 0
     val
   end
 
   def verify_boolean(val)
-    if not is_boolean?(val)
-      raise TypeError, "Expected boolean, got #{val.class}"
-    else
-      val
-    end
+    raise TypeError, "Expected boolean, got #{val.class}" unless boolean?(val)
+    val
   end
 
-  def verify_integer_or_boolean (val)
-    if not(val.is_a?(Integer) or is_boolean?(val))
+  def verify_integer_or_boolean(val)
+    unless val.is_a?(Integer) || boolean?(val)
       raise TypeError, "Expected Integer or boolean, got #{val.class}"
     end
   end
 
-  def is_boolean?(val)
-    [ true, false ].include?(val)
+  def boolean?(val)
+    val == true || val == false
   end
 end
