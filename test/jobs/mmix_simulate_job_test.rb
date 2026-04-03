@@ -97,7 +97,7 @@ class MMIXSimulateJobTest < ActiveJob::TestCase
   end
 
   test "if configs are present, initalize strategy twice with different constructors" do
-        constructor_mock = Minitest::Mock.new
+    constructor_mock = Minitest::Mock.new
     constructor_mock.expect(:call, "instance_1", [])
     constructor_mock.expect(:call, "instance_2", [ { t: 7 } ])
     Shell::MMIXStrategySimulator.stub(:new, constructor_mock) do
@@ -105,7 +105,7 @@ class MMIXSimulateJobTest < ActiveJob::TestCase
         MMIXSimulateJob.perform_now(@executable, @output, { t: 7 })
       end
     end
-    constructor_mock.verify
+    assert constructor_mock.verify
   end
 
   test "if configs are not present, call shell_out once" do
