@@ -6,19 +6,7 @@ class MMIXSimulateJob < ApplicationJob
   #
   # executable - Executable
   # output     - Output
-  # config     - Hash options used to define trace state
-  #   :t - The Integer to trace each instruction the first n times it is executed.
-  #   :e - The Hexidecicmal number representing a bit pattern to each instruction that raises an arithmetic exception belonging to the bit pattern DVWIOUZX. :e defaults to #FF
-  #   :r - The boolean describing whether to trace details of the register stack. This option shows all the “hidden” loads and stores that occur when octabytes are written from the ring of local registers into memory, or read from memory into that ring. It also shows the full details of SAVE and UNSAVE operations. •
-  #   :l - The Integer to list the source line corresponding to each traced instruction, filling gaps of length :l or less.
-  #   :s - The Boolean to show statistics of running time with each traced instruction.
-  #   :P - The Boolean to show the program profile (that is, the frequency counts of each instruction that was executed) when the simulation ends.
-  #   :L - The Integer to list the source lines corresponding to each instruction that appears in the program profile, filling gaps of length n or less. This option implies −P.
-  #   :v - The boolean signaling to be verbose:Turn on all options. (More precisely, the −v option is shorthand for −t9999999999 −e −r −s −l10 −L10.)
-  #   :q - The boolean signaling to be quiet: Cancel all previously specified options.
-  #   :c - The integer to set the capacity of the local register ring to max(256,n); this number must be a power of 2.
-  #   :f - The String filename to use for standard input to the simulated program. This option should be used whenever the simulator is not being used interactively, because the simulator will not recognize end of f ile when standard input has been defined in any other way.
-  #   :D - The String filename to Prepare the named file for use by other simulators, instead of actually doing a simulation.
+  # config     - SimulatorConfig
   #
   #   Example:
   #      MMIXSimulateJob.perform_later(executable, output)
