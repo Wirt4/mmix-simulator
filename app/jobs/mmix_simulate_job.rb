@@ -14,27 +14,24 @@ class MMIXSimulateJob < ApplicationJob
   #
   #    Returns nothing
   def perform(executable, output, config = nil)
-    if output.executable != executable
-      raise ArgumentError
-    end
-    std_output = get_output(executable.program.title, executable.bin)
+    raise ArgumentError if output.executable != executable
 
-  if std_output[:success] && config != nil
-    trace_output = get_output(executable.program.title, executable.bin, config)
-    output.update(trace_output: trace_output[:result])
-  end
+    title = executable.program.title
+    bin = executable.bin
+
+    run_simulation(title, bin)
+    return if config.nil?
+
+    result = run_simulation(title, bin, config)
+    output.update(trace_output: result)
   end
 
   private
-  def get_output(title, bin, config = nil)
-    strategy = config == nil ? Shell::MMIXStrategySimulator.new : Shell::MMIXStrategySimulator.new(config)
-    success = true
-    begin
-      result = Shell::ShellOperations.shell_out(title, strategy, bin)
-    rescue StandardError => e
-      success = false
-      result = e.message
-    end
-    { result: result, success: success }
+
+  def run_simulation(title, bin, config = nil)
+    strategy = config.nil? ? Shell::MMIXStrategySimulator.new : Shell::MMIXStrategySimulator.new(config)
+    Shell::ShellOperations.shell_out(title, strategy, bin)
+  rescue StandardError => e
+    e.message
   end
 end
