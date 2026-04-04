@@ -3,17 +3,20 @@
 class UsersController< ApplicationController
   require_role :admin
 
-  # Public: only the admin may view the users information
+  # Public GET /users
+  # only the admin may view the users information
   def index
     @users = User.all
   end
 
-  # Public: Loads the user and renders the edit form.
+  # Public: GET /users/:id/edit
+  # Loads the user and renders the edit form.
   def edit
     @user = User.find(params[:id])
   end
 
-  # Public: updates the role of a given user
+  # Public: PUT users/:id
+  # updates the role of a given user
   def update
     edit
     new_role = params.require(:user).permit(:role)[:role]
@@ -27,7 +30,8 @@ class UsersController< ApplicationController
     redirect_to users_url
   end
 
-  # Public: deletes selected user. Editing users may not delete themselves
+  # Public: DELETE /users/:id
+  # deletes selected user. Editing users may not delete themselves
   def destroy
     @user = User.find(params[:id])
     if @user == Current.session.user
