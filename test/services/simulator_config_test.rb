@@ -4,6 +4,7 @@ class SimulatorConfigTest < ActiveSupport::TestCase
     @config = SimulatorConfig.new
   end
 
+  # Happy path tests
   test "an empty instance returns an empty array for to_flags" do
     flags = @config.to_flags
     assert_equal [], flags
@@ -78,6 +79,7 @@ class SimulatorConfigTest < ActiveSupport::TestCase
     assert_equal [ "-DMy_validFileName56.txt" ], @config.to_flags
   end
 
+  # Edge and error cases
   test "setting trace_n_times with alternate trace value" do
     @config.trace_n_times = 6
     assert_equal [ "-t6" ], @config.to_flags

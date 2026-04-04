@@ -6,7 +6,7 @@ module Shell
     #
     # config - SimulatorConfig object (default: nil).
     def initialize(config = nil)
-      raise TypeError, "Expected SimulatorConfig, got #{config.class}" if config && !config.is_a?(SimulatorConfig)
+      verify_config(config)
       @config = config || SimulatorConfig.new
     end
 
@@ -30,20 +30,30 @@ module Shell
     #
     # Returns the result of ShellOperations.execute_with_timeout.
     def run(title, dir, timeout)
+      memory_bytes_limit = Rails.application.config.mmix_virtual_memory_limit_bytes
+      file_bytes_limit = Rails.application.config.mmix_file_size_limit_bytes
+
       command = [
         "landrun-and-limit",
         "--rox", "/usr",
         "--rox", "/lib",
         "--ro", "/etc",
         "--ro", dir,
-        "--rlimit-as", "#{Rails.application.config.mmix_virtual_memory_limit_bytes}",
-        "--rlimit-fsize", "#{Rails.application.config.mmix_file_size_limit_bytes}",
+        "--rlimit-as", "#{memory_bytes_limit}",
+        "--rlimit-fsize", "#{file_bytes_limit}",
         "mmix",
         *@config.to_flags,
         "#{title}.mmo"
       ]
 
       Shell::ShellOperations.execute_with_timeout(dir, command, timeout)
+    end
+
+    private
+    def verify_config(config)
+      if config && !config.is_a?(SimulatorConfig)
+        raise TypeError, "Expected SimulatorConfig, got #{config.class}"
+      end
     end
   end
 end

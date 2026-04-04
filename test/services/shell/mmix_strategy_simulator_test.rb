@@ -119,8 +119,11 @@ class MMIXStrategySimulatorTest < ActiveSupport::TestCase
       "--rlimit-fsize",
       "#{@fsize}",
       "mmix",
-      "-t2", "-l", "-L",
-      "#{@title}.mmo" ]
+      "-t2",
+      "-l",
+      "-L",
+      "#{@title}.mmo"
+    ]
 
     stub_execute_with_timeout do |args|
       config = SimulatorConfig.new
