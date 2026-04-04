@@ -18,10 +18,10 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create for an unknown user redirects but sends no mail" do
-    post passwords_path, params: { email_address: "missing-user@example.com" }
-    assert_enqueued_emails 0 # #Why exactly?
+    post passwords_path, params: { email_address: "not-a-user@example.com" }
+    assert_enqueued_emails 0
     assert_redirected_to new_session_path
-
+    # same notice as with a real user: do not want to break poker face to a bad actor by confirming a user doesn't exist
     follow_redirect!
     assert_notice "reset instructions sent"
   end

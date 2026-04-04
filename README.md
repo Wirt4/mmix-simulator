@@ -19,11 +19,10 @@ Things you may want to cover:
 
 Localhosting
 
-# Build and start the containers                       
+# Build the containers                       
   docker compose build dev                                              
   # Shell into the rails-app container without build
-`docker compose run --rm --service-ports dev bash`
-
+    docker compose run --rm --service-ports dev 
                   
 __alternatively__  run `sh scripts/setup` to get up, running and in the shell.
 
