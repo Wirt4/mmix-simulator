@@ -1,16 +1,13 @@
 # Public: Strategy for running MMIX machine code through the mmix simulator.
-# Accepts optional configuration flags that map to mmix command-line options.
-# Only single-run flags are permitted; interactive mode and help flags are
-# excluded for security.
+# Accepts optional SimulatorConfig object.
 module Shell
   class MMIXStrategySimulator < Shell::AbstractMMIXStrategy
     # Public: Initialize the simulator strategy.
     #
-    # config - Hash of Symbol flag keys to their values (default: { empty: nil }).
-    #          Keys must be members of SANCTIONED_FLAGS to be included.
-    #        Check https://mmix.cs.hm.edu/doc/mmix-sim.pdf for the full list
-    def initialize(config = { empty: nil })
-      @config = config
+    # config - SimulatorConfig object (default: nil).
+    def initialize(config = nil)
+      verify_config(config)
+      @config = config || SimulatorConfig.new
     end
 
     # Public: Write MMIX machine code to an executable file in the working
@@ -33,48 +30,29 @@ module Shell
     #
     # Returns the result of ShellOperations.execute_with_timeout.
     def run(title, dir, timeout)
+      memory_bytes_limit = Rails.application.config.mmix_virtual_memory_limit_bytes
+      file_bytes_limit = Rails.application.config.mmix_file_size_limit_bytes
+
       command = [
         "landrun-and-limit",
         "--rox", "/usr",
         "--rox", "/lib",
         "--ro", "/etc",
         "--ro", dir,
-        "--rlimit-as", "#{ Rails.application.config.mmix_virtual_memory_limit_bytes}",
-        "--rlimit-fsize", "#{ Rails.application.config.mmix_file_size_limit_bytes}",
-        "mmix", *parse_flags, "#{title}.mmo"
+        "--rlimit-as", "#{memory_bytes_limit}",
+        "--rlimit-fsize", "#{file_bytes_limit}",
+        "mmix",
+        *@config.to_flags,
+        "#{title}.mmo"
       ]
 
       Shell::ShellOperations.execute_with_timeout(dir, command, timeout)
     end
 
     private
-    SANCTIONED_FLAGS = %i[t e r l s P L v q b c f D].freeze
-
-    # Private: Converts the config hash into command-line flag strings,
-    # filtering to only SANCTIONED_FLAGS and validating value types.
-    #
-    # Returns Array of String flags (e.g. ["-t100", "-v"]).
-    def parse_flags
-      @config.except(:empty).filter_map do |key, value|
-        next unless SANCTIONED_FLAGS.include?(key)
-        case key
-        when :t, :b, :c
-            next unless value.is_a?(Integer)
-            "-#{key}#{value}"
-        when :e
-            next unless value.is_a?(Integer) || value == true
-            next if value.is_a?(Integer) && value.to_s(16) !~ /[a-f]/
-            value == true ? "-#{key}" : "-#{key}#{value.to_s(16)}"
-        when :r, :s, :P, :v, :q
-            next unless value == true
-            "-#{key}"
-        when :L, :l
-            next unless value == true || value.is_a?(Integer)
-            value == true ? "-#{key}" : "-#{key}#{value}"
-        when :f, :D
-            next unless value.is_a?(String)
-            "-#{key}#{value}"
-        end
+    def verify_config(config)
+      if config && !config.is_a?(SimulatorConfig)
+        raise TypeError, "Expected SimulatorConfig, got #{config.class}"
       end
     end
   end

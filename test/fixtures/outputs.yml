@@ -3,3 +3,9 @@ one:
   executable: one
   exit_value: 0
   trace_output: nil
+
+two:
+  console_output: "Excelsior!"
+  executable: two
+  exit_value: 0
+  trace_output: nl
