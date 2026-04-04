@@ -17,7 +17,7 @@ Rails.application.routes.draw do
   # GET    /passwords/:token/edit → passwords#edit  (new password form)
   # PATCH  /passwords/:token     → passwords#update (submit new password)
   # DELETE /passwords/:token     → passwords#destroy
-  resources :passwords, param: :token
+  resources :passwords, param: :token, only: [ :new, :create, :update, :edit ]
 
   # ── User management (all HTML) ─────────────────────────────────
   # GET    /users           → users#index          (user list)
