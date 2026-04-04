@@ -10,7 +10,6 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   test "should allow admin to access index" do
     sign_in_as(@admin)
     get users_url
-    raise "need to double-check users API through Postman to get a handle on it"
     assert_response :success
   end
 
