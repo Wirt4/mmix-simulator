@@ -12,3 +12,5 @@ services:
     cap_add:
     - SYSLOG
     profiles: [dev]
+    ports:
+      - "3000:3000"
