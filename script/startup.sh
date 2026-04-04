@@ -1,2 +1,2 @@
 #!/bin/sh
-docker compose build dev && docker compose run --rm dev bash
+docker compose up dev && docker compose run --rm --service-ports dev bash
