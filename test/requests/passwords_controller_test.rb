@@ -18,10 +18,10 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create for an unknown user redirects but sends no mail" do
-    post passwords_path, params: { email_address: "missing-user@example.com" }
+    post passwords_path, params: { email_address: "not-a-user@example.com" }
     assert_enqueued_emails 0
     assert_redirected_to new_session_path
-
+    # same notice as with a real user: do not want to break poker face to a bad actor by confirming a user doesn't exist
     follow_redirect!
     assert_notice "reset instructions sent"
   end
@@ -49,7 +49,7 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     assert_notice "Password has been reset"
   end
 
-  test "update with non matching passwords" do
+  test "attempted edit with non matching passwords" do
     token = @user.password_reset_token
     assert_no_changes -> { @user.reload.password_digest } do
       put password_path(token), params: { password: "no", password_confirmation: "match" }
@@ -59,6 +59,12 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_notice "Passwords did not match"
   end
+
+ test "index is not routable" do
+  assert_raises(ActionController::RoutingError) do
+    Rails.application.routes.recognize_path("/passwords", method: :get)
+  end
+end
 
   private
     def assert_notice(text)

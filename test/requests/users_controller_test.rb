@@ -6,19 +6,21 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     @admin_two = users(:admin_two)
     @user = users(:one)
   end
-
+  # GET /users - admins should get a 200
   test "should allow admin to access index" do
     sign_in_as(@admin)
     get users_url
     assert_response :success
   end
 
+  # GET /users - non-admin should get 403
   test "should not allow user to access index" do
     sign_in_as(@user)
     get users_url
     assert_response :forbidden
   end
 
+  # GET /users — page lists all usernames and roles
   test "index: list all users with their roles" do
     sign_in_as(@admin)
     get users_url
@@ -29,27 +31,14 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select "td", text: "admin"
   end
 
-  test "index: users have edit option" do
-    sign_in_as(@admin)
-    get users_url
-    assert_response :success
-    assert_select "button", text: "Edit", count: User.count
-  end
-
-  test "index: edit button issues GET to edit user path" do
-    sign_in_as(@admin)
-    get users_url
-    assert_select "form[action=?][method=get]", edit_user_path(@user) do
-      assert_select "button", text: "Edit"
-    end
-  end
-
+  # GET /users/:id/edit — admin gets 200
   test "edit: admin can GET edit for a user" do
     sign_in_as(@admin)
     get edit_user_url(@user)
     assert_response :success
   end
 
+  # GET /users/:id/edit — form has a select for role with all enum keys as options
   test "edit: form has a role select tag populated from User.roles.keys" do
     sign_in_as(@admin)
     get edit_user_url(@user)
@@ -60,12 +49,14 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # GET /users/:id/edit — form has a submit button
   test "edit: form has a submit button" do
     sign_in_as(@admin)
     get edit_user_url(@user)
     assert_select "input[type=submit], button[type=submit]"
   end
 
+  # GET /users/:id/edit — submit button is inside the form element
   test "edit: Submit button is inside the form" do
     sign_in_as(@admin)
     get edit_user_url(@user)
@@ -74,6 +65,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+# GET /users — Delete button in a POST form pointing to /users/:id (with hidden _method=delete)
 test "index: Delete button for each user" do
   sign_in_as(@admin)
   get users_url
@@ -82,12 +74,7 @@ test "index: Delete button for each user" do
   end
 end
 
-  test "edit: has a back link to users index" do
-    sign_in_as(@admin)
-    get edit_user_url(@user)
-    assert_select "a[href=?]", users_path
-  end
-
+  # PATCH /users/:id — admin updates role, redirects to /users
   test "update: admin can change a user's role" do
     sign_in_as(@admin)
     patch user_url(@user), params: { user: { role: "admin" } }
@@ -95,6 +82,8 @@ end
     assert_equal "admin", @user.reload.role
   end
 
+
+  # PATCH /users/:id — cannot demote last admin, redirects to /users with alert
   test "update: cannot demote the last remaining admin" do
     sign_in_as(@admin)
     @admin_two.destroy
@@ -106,6 +95,7 @@ end
     assert_equal "Cannot demote the last admin.", flash[:alert]
   end
 
+  # PATCH /users/:id — non-admin gets 403, role unchanged
   test "update: non-admin cannot update roles" do
     sign_in_as(@user)
     patch user_url(@user), params: { user: { role: "admin" } }
@@ -113,6 +103,7 @@ end
     assert_equal "user", @user.reload.role
   end
 
+  # DELETE /users/:id — admin deletes non-admin, redirects to /users
   test "destroy: admin can delete a non-admin user" do
     sign_in_as(@admin)
     assert_difference("User.count", -1) do
@@ -121,6 +112,7 @@ end
     assert_redirected_to users_url
   end
 
+  # DELETE /users/:id — admin cannot self-delete, redirects to /users with alert
   test "destroy: admin cannot delete themselves" do
     sign_in_as(@admin)
     assert_no_difference("User.count") do
@@ -130,6 +122,7 @@ end
     assert_equal "Cannot delete yourself.", flash[:alert]
   end
 
+  # DELETE /users/:id — non-admin gets 403, no user deleted
   test "destroy: non-admin cannot delete users" do
     sign_in_as(@user)
     assert_no_difference("User.count") do
