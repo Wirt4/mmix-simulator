@@ -10,34 +10,36 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_02_144212) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_06_185356) do
   create_table "executables", force: :cascade do |t|
     t.binary "bin"
     t.datetime "created_at", null: false
-    t.integer "program_id", null: false
+    t.integer "mmixal_program_id", null: false
     t.boolean "successfully_assembled"
     t.datetime "updated_at", null: false
-    t.index [ "program_id" ], name: "index_executables_on_program_id"
+    t.index ["mmixal_program_id"], name: "index_executables_on_mmixal_program_id"
+  end
+
+  create_table "mmixal_programs", force: :cascade do |t|
+    t.binary "binary"
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.boolean "successfully_assembled"
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_mmixal_programs_on_user_id"
   end
 
   create_table "outputs", force: :cascade do |t|
     t.text "console_output"
     t.datetime "created_at", null: false
-    t.integer "executable_id", null: false
     t.integer "exit_value"
     t.string "flags"
+    t.integer "mmixal_program_id", null: false
     t.text "trace_output"
     t.datetime "updated_at", null: false
-    t.index [ "executable_id" ], name: "index_outputs_on_executable_id"
-  end
-
-  create_table "programs", force: :cascade do |t|
-    t.text "body"
-    t.datetime "created_at", null: false
-    t.string "title"
-    t.datetime "updated_at", null: false
-    t.integer "user_id", null: false
-    t.index [ "user_id" ], name: "index_programs_on_user_id"
+    t.index ["mmixal_program_id"], name: "index_outputs_on_mmixal_program_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -46,7 +48,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_02_144212) do
     t.datetime "updated_at", null: false
     t.string "user_agent"
     t.integer "user_id", null: false
-    t.index [ "user_id" ], name: "index_sessions_on_user_id"
+    t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -56,12 +58,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_02_144212) do
     t.integer "role", default: 1, null: false
     t.datetime "updated_at", null: false
     t.string "user_name"
-    t.index [ "email_address" ], name: "index_users_on_email_address", unique: true
-    t.index [ "user_name" ], name: "index_users_on_user_name", unique: true
+    t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.index ["user_name"], name: "index_users_on_user_name", unique: true
   end
 
-  add_foreign_key "executables", "programs"
-  add_foreign_key "outputs", "executables"
-  add_foreign_key "programs", "users"
+  add_foreign_key "executables", "mmixal_programs"
+  add_foreign_key "mmixal_programs", "users"
+  add_foreign_key "outputs", "mmixal_programs"
   add_foreign_key "sessions", "users"
 end

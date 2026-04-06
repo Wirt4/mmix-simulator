@@ -4,6 +4,8 @@ one:
     LOC #100
     Main TRAP 0,Fputs,StdOut
   user: one
+  binary: 1001
+
 
 two:
   title: Goodbye World

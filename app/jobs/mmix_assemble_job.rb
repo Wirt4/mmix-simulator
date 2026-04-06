@@ -3,18 +3,15 @@ class MMIXAssembleJob < ApplicationJob
   discard_on ActiveRecord::RecordNotFound
    # Public: passes the program body to shell_out and updates executable with the result.
    #
-   # program  - The ActiveRecord containing the source code to be assembled.
-   # executable - The ActiveRecord to contain the assembled binary.
+   # program  - The ActiveRecord containing the source code to be assembled and rewritten to the binary field
    #
    # Returns none.
-   def perform(program, executable)
-     raise ArgumentError if executable.program != program
-
+   def perform(mmixal_program)
      begin
        result = Shell::ShellOperations.shell_out(
-         program.title,
+         mmixal_program.title,
          Shell::MMIXStrategyAssembler.new,
-         program.body,
+         mmixal_program.body,
          Rails.configuration.assembler_timeout,)
      rescue
        result = [ -1 ].pack("q>")
@@ -22,7 +19,7 @@ class MMIXAssembleJob < ApplicationJob
      else
        success = true
      ensure
-       executable.update(successfully_assembled: success, bin: result)
+       mmixal_program.update(successfully_assembled: success, binary: result)
      end
    end
 end

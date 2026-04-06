@@ -12,4 +12,5 @@
 
 ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym "MMIX"
+  inflect.acronym "MMIXAL"
 end

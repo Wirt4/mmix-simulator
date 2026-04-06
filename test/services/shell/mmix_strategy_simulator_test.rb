@@ -77,7 +77,7 @@ class MMIXStrategySimulatorTest < ActiveSupport::TestCase
     end
   end
 
-  test "a strategy with no intialized flags calls the executable with proper wrapping" do
+  test "a strategy with no intialized flags runs the command with proper wrapping" do
     stub_execute_with_timeout do |args|
       strategy = Shell::MMIXStrategySimulator.new
       strategy.run(@title, @dir, 30)

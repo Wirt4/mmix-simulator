@@ -1,11 +1,11 @@
 one:
   console_output: "Hello, World!"
-  executable: one
+  mmixal_program: one
   exit_value: 0
   trace_output: nil
 
 two:
   console_output: "Excelsior!"
-  executable: two
+  mmixal_program: two
   exit_value: 0
   trace_output: nl

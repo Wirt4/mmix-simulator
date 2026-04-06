@@ -2,9 +2,12 @@
 #
 # title - The String title of the program.
 # body  - The String MMIX source code.
-class Program < ApplicationRecord
+
+# TODO: change name to MMIXALProgram
+#  - update db accordingly
+class MMIXALProgram < ApplicationRecord
   belongs_to :user
-  has_many :executables, dependent: :destroy
+  has_one :output, dependent: :destroy
   validates :title, presence: true
   validates :body, presence: true
 end

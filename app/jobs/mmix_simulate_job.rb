@@ -4,20 +4,18 @@ class MMIXSimulateJob < ApplicationJob
 
   # Internal: run the executable's binary in MMIX and write output to db
   #
-  # executable - Executable
+  # program - MMIXALProgram
   # output     - Output
   # config     - SimulatorConfig
   #
   #   Example:
-  #      MMIXSimulateJob.perform_later(executable, output)
-  #      MMIXSimulateJob.perform_later(executable, output, config)
+  #      MMIXSimulateJob.perform_later(program, output)
+  #      MMIXSimulateJob.perform_later(program, output, config)
   #
   #    Returns nothing
-  def perform(executable, output, config = nil)
-    raise ArgumentError if output.executable != executable
-
-    title = executable.program.title
-    bin = executable.bin
+  def perform(mmixal_program, output, config = nil)
+    title = mmixal_program.title
+    bin = mmixal_program.binary
 
     run_simulation(title, bin)
     return if config.nil?
