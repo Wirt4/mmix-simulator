@@ -1,123 +1,76 @@
 /*
- * This is a manifest file that'll be compiled into application.css.
- *
- * With Propshaft, assets are served efficiently without preprocessing steps. You can still include
- * application-wide styles in this file, but keep in mind that CSS precedence will follow the standard
- * cascading order, meaning styles declared later in the document or manifest will override earlier ones,
- * depending on specificity.
- *
- * Consider organizing styles into separate files for maintainability.
+ * Application styles. Kept intentionally minimal — the goal is a blank slate
+ * with just enough structure to be readable.
  */
-:root {
-  --editor-bg: #1e1e1e;
-  --editor-fg: #d4d4d4;
-  --editor-gutter: #2d2d2d;
-  --editor-gutter-fg: #858585;
-  --editor-border: #3c3c3c;
-  --editor-header-bg: #252526;
-  --editor-selection: #264f78;
-}
-
-{
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 
 body {
-  background: #1a1a1a;
-  color: var(--editor-fg);
-  font-family: system-ui, -apple-system, sans-serif;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin: 1em;
+  font-family: sans-serif;
 }
 
-.editor-container {
-  width: min(90vw, 900px);
-  height: 70vh;
-  border: 1px solid var(--editor-border);
-  border-radius: 6px;
-  overflow: hidden;
+/* Code editor: needs monospace + aligned line numbers to be usable. */
+.editor-container,
+.output-container {
+  border: 1px solid #000;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  margin-top: 1em;
 }
 
-.editor-header {
-  background: var(--editor-header-bg);
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--editor-border);
-  font-size: 13px;
-  color: var(--editor-gutter-fg);
+.editor-header,
+.output-header {
+  border-bottom: 1px solid #000;
+  padding: 4px 8px;
 }
 
-.editor-title {
-  font-weight: 500;
+.editor-footer {
+  border-top: 1px solid #000;
+  padding: 4px 8px;
 }
 
-.editor-body {
+.editor-body,
+.output-body {
   display: flex;
-  flex: 1;
-  overflow: hidden;
-  background: var(--editor-bg);
 }
-.line-numbers {
-  display: flex;
-  flex-direction: column;
-  padding: 8px 0;
-  background: var(--editor-gutter);
-  color: var(--editor-gutter-fg);
-  font-family: "SF Mono", "Fira Code", "Cascadia Code", "Menlo", "Consolas", monospace;
+
+.line-numbers,
+.editor-textarea,
+.output-gutter,
+.output-pre {
+  font-family: monospace;
   font-size: 14px;
   line-height: 1.5;
+}
+
+.line-numbers,
+.output-gutter {
   text-align: right;
+  padding: 8px 4px;
+  border-right: 1px solid #000;
   user-select: none;
-  overflow: hidden;
-  min-width: 50px;
-  border-right: 1px solid var(--editor-border);
+  min-width: 2em;
 }
 
 .line-numbers span {
   display: block;
-  padding: 0 12px 0 8px;
 }
 
-.editor-textarea {
+.editor-textarea,
+.output-textarea {
   flex: 1;
-  background: var(--editor-bg);
-  color: var(--editor-fg);
-  font-family: "SF Mono", "Fira Code", "Cascadia Code", "Menlo", "Consolas", monospace;
-  font-size: 14px;
-  line-height: 1.5;
-  padding: 8px 12px;
+  padding: 8px;
   border: none;
   outline: none;
   resize: none;
-  overflow-y: auto;
   tab-size: 2;
   white-space: pre;
+  min-height: 20em;
 }
 
-input[type="email"],
-input[type="password"] {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-a {
-  color: #6cb6ff;
-}
-
-a:visited {
-  color: #b392f0;
-}
-
-.editor-textarea::placeholder {
-  color: var(--editor-gutter-fg);
-}
-
-.editor-textarea::selection {
-  background: var(--editor-selection);
+.output-pre {
+  flex: 1;
+  padding: 8px;
+  margin: 0;
+  white-space: pre;
+  min-height: 20em;
 }
