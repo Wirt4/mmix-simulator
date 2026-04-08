@@ -5,7 +5,7 @@ class CreateOutputs < ActiveRecord::Migration[8.1]
       t.text :trace_output
       t.integer :exit_value
       t.string :flags
-      t.references :executable, null: false, foreign_key: true
+      t.references :mmixal_program, null: false, foreign_key: true
 
       t.timestamps
     end

@@ -10,16 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_06_185356) do
-  create_table "executables", force: :cascade do |t|
-    t.binary "bin"
-    t.datetime "created_at", null: false
-    t.integer "mmixal_program_id", null: false
-    t.boolean "successfully_assembled"
-    t.datetime "updated_at", null: false
-    t.index ["mmixal_program_id"], name: "index_executables_on_mmixal_program_id"
-  end
-
+ActiveRecord::Schema[8.1].define(version: 2026_04_02_144212) do
   create_table "mmixal_programs", force: :cascade do |t|
     t.binary "binary"
     t.text "body"
@@ -62,7 +53,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_185356) do
     t.index ["user_name"], name: "index_users_on_user_name", unique: true
   end
 
-  add_foreign_key "executables", "mmixal_programs"
   add_foreign_key "mmixal_programs", "users"
   add_foreign_key "outputs", "mmixal_programs"
   add_foreign_key "sessions", "users"
