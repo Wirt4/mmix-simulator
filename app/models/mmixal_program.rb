@@ -3,8 +3,6 @@
 # title  - The String title of the program.
 # source - The String MMIX source code.
 
-# TODO: change name to MMIXALProgram
-#  - update db accordingly
 class MMIXALProgram < ApplicationRecord
   belongs_to :user
   has_one :output, dependent: :destroy
