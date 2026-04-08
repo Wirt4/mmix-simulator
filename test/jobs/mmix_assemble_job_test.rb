@@ -19,7 +19,7 @@ class MMIXAssembleJobTest < ActiveJob::TestCase
       MMIXAssembleJob.perform_now(@mmixal_program)
       assert_equal 1, called_with.size
       assert_equal called_with.first[:title], @mmixal_program.title
-      assert_equal called_with.first[:input], @mmixal_program.body
+      assert_equal called_with.first[:input], @mmixal_program.source
     end
   end
 
@@ -36,7 +36,7 @@ class MMIXAssembleJobTest < ActiveJob::TestCase
       MMIXAssembleJob.perform_now(alt_program)
       assert_equal 1, called_with.size
       assert_equal called_with.first[:title], alt_program.title
-      assert_equal called_with.first[:input], alt_program.body
+      assert_equal called_with.first[:input], alt_program.source
     end
   end
 

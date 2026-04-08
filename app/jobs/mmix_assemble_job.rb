@@ -1,7 +1,7 @@
 class MMIXAssembleJob < ApplicationJob
   queue_as :default
   discard_on ActiveRecord::RecordNotFound
-   # Public: passes the program body to shell_out and updates executable with the result.
+   # Public: passes the program source to shell_out and updates executable with the result.
    #
    # program  - The ActiveRecord containing the source code to be assembled and rewritten to the binary field
    #
@@ -11,7 +11,7 @@ class MMIXAssembleJob < ApplicationJob
        result = Shell::ShellOperations.shell_out(
          mmixal_program.title,
          Shell::MMIXStrategyAssembler.new,
-         mmixal_program.body,
+         mmixal_program.source,
          Rails.configuration.assembler_timeout,)
      rescue
        result = [ -1 ].pack("q>")

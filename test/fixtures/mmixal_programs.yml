@@ -1,6 +1,6 @@
 one:
   title: Hello World
-  body: |
+  source: |
     LOC #100
     Main TRAP 0,Fputs,StdOut
   user: one
@@ -9,7 +9,7 @@ one:
 
 two:
   title: Goodbye World
-  body: |
+  source: |
     LOC #100
     Main TRAP 0,Halt,0
   user: one

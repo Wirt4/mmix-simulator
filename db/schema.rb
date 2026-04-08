@@ -10,10 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_02_144212) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_24_040532) do
   create_table "mmixal_programs", force: :cascade do |t|
     t.binary "binary"
-    t.text "body"
+    t.text "source"
     t.datetime "created_at", null: false
     t.boolean "successfully_assembled"
     t.string "title"

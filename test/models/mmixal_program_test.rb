@@ -15,10 +15,10 @@ class MMIXALProgramTest < ActiveSupport::TestCase
     assert @program.errors[:title].any?
   end
 
-  test "requires body" do
-    @program.body = nil
+  test "requires source" do
+    @program.source = nil
     assert_not @program.valid?
-    assert @program.errors[:body].any?
+    assert @program.errors[:source].any?
   end
 
   test "program has one output" do
