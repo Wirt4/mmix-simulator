@@ -4,9 +4,8 @@
 # trace_output   - The String trace output of the simulation run (optional).
 # exit_value     - The Integer exit value of the simulation run.
 # flags          - The String flags passed to the simulation run (optional).
-# executable     - The Executable that produced this output.
 class Output < ApplicationRecord
-  belongs_to :executable
+  belongs_to :mmixal_program
 
   validate :console_output_must_be_text
   validate :trace_output_must_be_text

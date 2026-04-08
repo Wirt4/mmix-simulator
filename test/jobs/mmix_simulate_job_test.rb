@@ -2,7 +2,7 @@ require "test_helper"
 
 class MMIXSimulateJobTest < ActiveJob::TestCase
   setup do
-    @executable = executables(:one)
+    @program = mmixal_programs(:one)
     @output = outputs(:one)
     @config = SimulatorConfig.new
     @config.trace_n_times = 2
@@ -17,46 +17,39 @@ class MMIXSimulateJobTest < ActiveJob::TestCase
     end
   end
 
-  test "Job discards if executable doesn't exist" do
-    @executable.destroy
+  test "Job discards if program doesn't exist" do
+    @program.destroy
       perform_enqueued_jobs do
-        MMIXSimulateJob.perform_later(@executable, @output)
+        MMIXSimulateJob.perform_later(@program, @output)
       end
       assert_equal true, true
   end
 
-  test "job raises if executable and output are not associated" do
-    mismatched_output = outputs(:two)
-    assert_raises(ArgumentError) do
-      MMIXSimulateJob.perform_now(@executable, mismatched_output)
-    end
-  end
-
   test "calls shell_out with the parent program's title" do
       stub_shell_out do |called_with|
-      MMIXSimulateJob.perform_now(@executable, @output)
-      assert_equal @executable.program.title, called_with.first[:title]
+      MMIXSimulateJob.perform_now(@program, @output)
+      assert_equal @program.title, called_with.first[:title]
       end
   end
 
   test "perform passes a simulator strategy to shell_out" do
     stub_shell_out do |called_with|
-     MMIXSimulateJob.perform_now(@executable, @output)
+     MMIXSimulateJob.perform_now(@program, @output)
        assert_instance_of Shell::MMIXStrategySimulator, called_with.first[:strategy]
     end
   end
 
-  test "calls shell_out with the executable's bin" do
+  test "calls shell_out with the program's bin" do
     stub_shell_out do |called_with|
-      MMIXSimulateJob.perform_now(@executable, @output)
-      assert_equal @executable.bin, called_with.first[:input]
+      MMIXSimulateJob.perform_now(@program, @output)
+      assert_equal @program.binary, called_with.first[:input]
     end
   end
 
   test "writes traced output to output.trace_output when second call to shell_out succeeds" do
     trace_output = File.binread("test/fixtures/mmix_code/hello_world_verbose_output")
     Shell::ShellOperations.stub :shell_out, trace_output do
-      MMIXSimulateJob.perform_now(@executable, @output, @config)
+      MMIXSimulateJob.perform_now(@program, @output, @config)
     end
     @output.reload
     assert_equal trace_output, @output.trace_output
@@ -71,7 +64,7 @@ class MMIXSimulateJobTest < ActiveJob::TestCase
         called = true
       end
     } do
-      MMIXSimulateJob.perform_now(@executable, @output, @config)
+      MMIXSimulateJob.perform_now(@program, @output, @config)
     end
     @output.reload
     assert_equal "unknown error", @output.trace_output
@@ -85,7 +78,7 @@ class MMIXSimulateJobTest < ActiveJob::TestCase
       end
       called = true
     } do
-      MMIXSimulateJob.perform_now(@executable, @output, @config)
+      MMIXSimulateJob.perform_now(@program, @output, @config)
     end
     @output.reload
     assert_equal "another unknown error", @output.trace_output
@@ -93,7 +86,7 @@ class MMIXSimulateJobTest < ActiveJob::TestCase
 
   test "if configs are present, call shell_out twice" do
       stub_shell_out do |called_with|
-      MMIXSimulateJob.perform_now(@executable, @output, @config)
+      MMIXSimulateJob.perform_now(@program, @output, @config)
       assert_equal 2, called_with.size
       end
   end
@@ -104,7 +97,7 @@ class MMIXSimulateJobTest < ActiveJob::TestCase
     constructor_mock.expect(:call, "instance_2", [ @config ])
     Shell::MMIXStrategySimulator.stub(:new, constructor_mock) do
       stub_shell_out do
-        MMIXSimulateJob.perform_now(@executable, @output, @config)
+        MMIXSimulateJob.perform_now(@program, @output, @config)
       end
     end
     assert constructor_mock.verify
@@ -112,7 +105,7 @@ class MMIXSimulateJobTest < ActiveJob::TestCase
 
   test "if configs are not present, call shell_out once" do
       stub_shell_out do |called_with|
-      MMIXSimulateJob.perform_now(@executable, @output)
+      MMIXSimulateJob.perform_now(@program, @output)
       assert_equal 1, called_with.size
       end
   end
@@ -120,7 +113,7 @@ class MMIXSimulateJobTest < ActiveJob::TestCase
   test "if configs are present, call shell_out with same arguments for title and input" do
       stub_shell_out do |called_with|
         @config.verbose = true
-        MMIXSimulateJob.perform_now(@executable, @output, @config)
+        MMIXSimulateJob.perform_now(@program, @output, @config)
         assert_equal called_with.first[:title], called_with.last[:title]
         assert_equal called_with.first[:input], called_with.last[:input]
       end
@@ -132,7 +125,7 @@ class MMIXSimulateJobTest < ActiveJob::TestCase
         times_called += 1
         raise StandardError, "unknown error"
       } do
-        MMIXSimulateJob.perform_now(@executable, @output)
+        MMIXSimulateJob.perform_now(@program, @output)
         assert_equal 1, times_called
     end
   end

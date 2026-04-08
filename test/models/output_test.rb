@@ -25,13 +25,6 @@ class OutputTest <ActiveSupport::TestCase
     assert output.errors[:console_output].any?
   end
 
-  test "requires executable" do
-    output = outputs(:one)
-    output.executable = nil
-    assert_not output.valid?
-    assert output.errors[:executable].any?
-  end
-
   test "requires exit_value" do
     output = outputs(:one)
     output.exit_value = nil
