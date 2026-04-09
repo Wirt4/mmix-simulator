@@ -13,8 +13,8 @@
 ActiveRecord::Schema[8.1].define(version: 2026_03_24_040532) do
   create_table "mmixal_programs", force: :cascade do |t|
     t.binary "binary"
-    t.text "source"
     t.datetime "created_at", null: false
+    t.text "source"
     t.boolean "successfully_assembled"
     t.string "title"
     t.datetime "updated_at", null: false
