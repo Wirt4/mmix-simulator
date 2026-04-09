@@ -2,6 +2,7 @@ services:
   web:
     build:
       target: production
+    profiles: [prod]
     ports:
     - "80:80"
     environment:
@@ -16,21 +17,6 @@ services:
       RAILS_ENV: development
     ports:
       - "3000:3000"
-    tty: true
     volumes:
       - .:/rails
-    command: bash
-    stdin_open: true
-  test:
-    build:
-      target: dev
-    cap_add:
-    - SYSLOG
-    profiles: [test]
-    environment:
-      RAILS_ENV: test
-    tty: true
-    volumes:
-      - .:/rails
-    command: bash
-    stdin_open: true
+    command: bin/rails server -b 0.0.0.0

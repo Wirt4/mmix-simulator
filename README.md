@@ -1,43 +1,16 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+The project maintains two environments: development and web
+# Development environment
+The development ("dev") environment is for testing User Interface and manual Quality Assurance. 
+Database records in this environment should persist (user accounts, user's assets and records).
+## Usage
+ Run `docker compose --profile dev up` to start the server at `localhost:3000`
+ Run `docker compose --profile dev run --rm --service-ports development bash` to shell into the environment
+(Alternatively, there are the scripts 'localhost' and 'dev_env' in the `script` directory for a little quality of life)
 
-Things you may want to cover:
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
-
-Localhosting
-
-# Build the containers                       
-  docker compose build dev                                              
-  # Shell into the rails-app container without build
-    docker compose run --rm --service-ports dev 
-                  
-__alternatively__  run `sh scripts/setup` to get up, running and in the shell.
-
-# Inside the container
-  * bin/rails server
-
-# Testing
-## All
-With the container running and working from inside `workspaces/mmix-simulator`,
-`bin/rake test`
-## Ruby only
-Inside the container, run `bin/rails test`
-## JS only (verbose)
-(requires npm)
-run `npx vitest run` to get verbose output
+# Web environment
+This is production
 
 # Attributions
 
