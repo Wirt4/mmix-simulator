@@ -1,16 +1,16 @@
 require "test_helper"
 
-# Public: Unit tests for ConsoleController.
+# Public: Unit tests for MMIXALProgramController.
 #
 # Verifies the controller's inheritance and that it requires
 # authentication for all actions.
-class ConsoleControllerTest < ActiveSupport::TestCase
+class MMIXALProgramControllerTest < ActiveSupport::TestCase
   test "inherits from ApplicationController" do
-    assert ConsoleController < ApplicationController
+    assert MMIXALProgramController < ApplicationController
   end
 
   test "requires authentication" do
-    auth_callback = ConsoleController._process_action_callbacks.find do |cb|
+    auth_callback = MMIXALProgramController._process_action_callbacks.find do |cb|
       cb.kind == :before && cb.filter == :require_authentication
     end
 

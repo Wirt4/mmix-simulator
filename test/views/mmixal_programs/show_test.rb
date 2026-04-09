@@ -1,8 +1,8 @@
 require "test_helper"
 
-class ConsoleIndexTest < ActionView::TestCase
+class MMIXALProgramsShowTest < ActionView::TestCase
   setup do
-    render template: "console/index"
+    render template: "mmixal_programs/show"
   end
 
   test "renders an Assemble button" do

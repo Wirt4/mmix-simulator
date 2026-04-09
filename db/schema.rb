@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_24_040532) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_10_010405) do
   create_table "mmixal_programs", force: :cascade do |t|
     t.binary "binary"
     t.datetime "created_at", null: false

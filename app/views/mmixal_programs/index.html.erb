@@ -1,0 +1,11 @@
+<table>
+  <% @mmixal_programs.each do |program| %>
+    <tr>
+      <td><%= program.title %></td>
+    </tr>
+  <% end %>
+</table>
+
+<%= form_with url: mmixal_programs_path do |f| %>
+  <button>Create New</button>
+<% end %>

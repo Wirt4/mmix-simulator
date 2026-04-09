@@ -6,6 +6,14 @@
 class MMIXALProgram < ApplicationRecord
   belongs_to :user
   has_one :output, dependent: :destroy
-  validates :title, presence: true
-  validates :source, presence: true
+  validates :title, presence: true, uniqueness: { scope: :user_id }
+
+  def self.default_title_for(user)
+    base = "Untitled"
+    return base unless user.mmixal_programs.exists?(title: base)
+
+    n = 2
+    n += 1 while user.mmixal_programs.exists?(title: "#{base} (#{n})")
+    "#{base} (#{n})"
+  end
 end

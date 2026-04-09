@@ -33,18 +33,10 @@ module Shell
       memory_bytes_limit = Rails.application.config.mmix_virtual_memory_limit_bytes
       file_bytes_limit = Rails.application.config.mmix_file_size_limit_bytes
 
-      command = [
-        "landrun-and-limit",
-        "--rox", "/usr",
-        "--rox", "/lib",
-        "--ro", "/etc",
-        "--ro", dir,
+      command = sandbox_command(dir, dir_mode: "--ro", extra_flags: [
         "--rlimit-as", "#{memory_bytes_limit}",
-        "--rlimit-fsize", "#{file_bytes_limit}",
-        "mmix",
-        *@config.to_flags,
-        "#{title}.mmo"
-      ]
+        "--rlimit-fsize", "#{file_bytes_limit}"
+      ]) + [ "mmix", *@config.to_flags, "#{title}.mmo" ]
 
       Shell::ShellOperations.execute_with_timeout(dir, command, timeout)
     end
