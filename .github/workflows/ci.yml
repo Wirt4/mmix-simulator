@@ -79,7 +79,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
-          target: test
+          target: dev
           load: true
           tags: mmix-simulator:test
           cache-from: type=gha

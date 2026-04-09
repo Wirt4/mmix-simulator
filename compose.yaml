@@ -6,14 +6,29 @@ services:
     - "80:80"
     environment:
       RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
-  dev:
+  development:
     build:
-      target: test
+      target: dev
     cap_add:
     - SYSLOG
     profiles: [dev]
+    environment:
+      RAILS_ENV: development
     ports:
       - "3000:3000"
+    tty: true
+    volumes:
+      - .:/rails
+    command: bash
+    stdin_open: true
+  test:
+    build:
+      target: dev
+    cap_add:
+    - SYSLOG
+    profiles: [test]
+    environment:
+      RAILS_ENV: test
     tty: true
     volumes:
       - .:/rails

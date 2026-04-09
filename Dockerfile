@@ -96,9 +96,9 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 RUN bundle exec bootsnap precompile -j $(nproc) app/ lib/
 
 # ─────────────────────────────────────────────────────────────
-# Test stage
+# Dev/test stage
 # ─────────────────────────────────────────────────────────────
-FROM base AS test
+FROM base AS dev
 
 ENV RAILS_ENV="test" \
     BUNDLE_WITHOUT="" \
