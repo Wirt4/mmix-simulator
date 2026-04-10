@@ -35,6 +35,11 @@ class MMIXALProgramTest < ActiveSupport::TestCase
     assert_equal "Untitled (3)", third.title
   end
 
+  test "source defaults to placeholder value" do
+    program = @program.user.mmixal_programs.create!(title: "Default Source Test")
+    assert_equal "% write your MMIXAL code here", program.source
+  end
+
   test "destroying program destroys associated output" do
     output = @program.create_output!(mmixal_program_id: @program.id, console_output: "Hello World", exit_value: 0)
     @program.destroy!

@@ -8,6 +8,8 @@ class MMIXALProgram < ApplicationRecord
   has_one :output, dependent: :destroy
   validates :title, presence: true, uniqueness: { scope: :user_id }
 
+  attribute :source, :string, default: "% write your MMIXAL code here"
+
   def self.default_title_for(user)
     base = "Untitled"
     return base unless user.mmixal_programs.exists?(title: base)
