@@ -1,6 +1,5 @@
 <% content_for(:title, "MMIX Simulator") %>
-<nav><%= render "layouts/navbar" %></nav>
-
+<nav><%= render "layouts/navbar" %><%= link_to "back", mmixal_programs_path %></nav>
   <%= form_with model: @mmixal_program do |form|%>
       <%= form.submit "Save" %>
 <div class="editor-container" data-controller="editor">

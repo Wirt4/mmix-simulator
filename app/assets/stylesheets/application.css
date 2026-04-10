@@ -36,7 +36,10 @@ body {
 .output-body {
   display: flex;
 }
-
+nav {
+  display: flex;
+  align-items: center;
+}
 .line-numbers,
 .editor-textarea,
 .output-gutter,

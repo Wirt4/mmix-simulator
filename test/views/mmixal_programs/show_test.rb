@@ -12,6 +12,13 @@ class MMIXALProgramsShowTest < ActionView::TestCase
     assert_select "span.editor-title input[type=text][value=?]", @mmixal_program.title
   end
 
+  test "renders a link named 'back'" do
+    assert_select "a" do
+      assert_select "a[href=?]", mmixal_programs_path, text: "back", count: 1
+      end
+  end
+
+
   test "the title field is inside a form" do
     assert_select "form input[type=text][value=?]", @mmixal_program.title
   end
