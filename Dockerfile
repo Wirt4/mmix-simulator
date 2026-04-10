@@ -69,7 +69,7 @@ FROM base AS build
 RUN --mount=type=cache,id=apt-build,target=/var/cache/apt \
     apt-get update -qq && \
     apt-get install --no-install-recommends -y \
-      build-essential git libyaml-dev pkg-config && \
+      build-essential git libyaml-dev pkg-config nodejs npm && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Gems (max cache reuse)
@@ -83,6 +83,10 @@ RUN --mount=type=cache,target=/usr/local/bundle/cache \
 
 # Bootsnap for gems (parallelized)
 RUN bundle exec bootsnap precompile -j $(nproc) --gemfile
+
+# npm deps for JS bundling
+COPY package.json package-lock.json* ./
+RUN --mount=type=cache,target=/root/.npm npm install
 
 # ─────────────────────────────────────────────────────────────
 # Assets precompile
