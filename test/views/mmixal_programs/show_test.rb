@@ -29,10 +29,17 @@ class MMIXALProgramsShowTest < ActionView::TestCase
     assert_select "button", text: "Log Out", count: 1
   end
 
-  test " renders a Log Out button has correct path to sign out user" do
+  test "renders a Log Out button has correct path to sign out user" do
     assert_select "form[action=?][method=?]", session_path, "post" do
       assert_select "input[name=?][value=?]", "_method", "delete"
       assert_select "button", "Log Out"
+    end
+  end
+
+  test "renders the navbar partial" do
+    assert_select "nav" do
+      assert_select "button", text: "Log Out"
+      assert_select ".editor-container", count: 0
     end
   end
 

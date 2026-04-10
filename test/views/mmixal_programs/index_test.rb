@@ -5,6 +5,13 @@ class MMIXALProgramsIndexTest < ActionView::TestCase
     render template: "mmixal_programs/index"
   end
 
+  test "renders a Log Out button has correct path to sign out user" do
+    assert_select "form[action=?][method=?]", session_path, "post" do
+      assert_select "input[name=?][value=?]", "_method", "delete"
+      assert_select "button", "Log Out"
+    end
+  end
+
   test "Renders a 'Create New' button" do
     assert_select "button", text: "Create New", count: 1
   end

@@ -1,5 +1,6 @@
 <% content_for(:title, "MMIX Simulator") %>
-<div style="display:flex; justify-content:left">    <%= button_to "Log Out", session_path, method: :delete %>
+<nav><%= render "layouts/navbar" %></nav>
+<div style="display:flex; justify-content:left">
   <%= button_to "Save", mmixal_program_path(@mmixal_program), method: :patch %>
 </div>
 
