@@ -22,25 +22,5 @@ module Shell
     def run(title, dir, timeout)
        raise NotImplementedError, "#{self.class}#run must be implemented"
     end
-
-    private
-
-    # Private: Build the common landrun-and-limit sandbox prefix.
-    #
-    # dir         - String path to the working directory.
-    # dir_mode    - String sandbox permission for dir ("--rw" or "--ro").
-    # extra_flags - Array of additional sandbox flags (e.g. rlimit flags).
-    #
-    # Returns an Array of Strings.
-    def sandbox_command(dir, dir_mode: "--rw", extra_flags: [])
-      [
-        "landrun-and-limit",
-        "--rox", "/usr",
-        "--rox", "/lib",
-        "--ro", "/etc",
-        dir_mode, dir,
-        *extra_flags
-      ]
-    end
   end
 end
