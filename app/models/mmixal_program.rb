@@ -10,6 +10,8 @@ class MMIXALProgram < ApplicationRecord
 
   attribute :source, :string, default: "% write your MMIXAL code here"
 
+  # a user can't have more than one project named "untitled"
+  # This gets tricky when the default title is "untitled", so add a simple numbering scheme
   def self.default_title_for(user)
     base = "Untitled"
     return base unless user.mmixal_programs.exists?(title: base)
