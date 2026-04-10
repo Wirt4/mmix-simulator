@@ -24,6 +24,20 @@ class MMIXALProgramsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to mmixal_program_url(MMIXALProgram.last)
   end
 
+  test "DELETE /mmixal_programs/:token destroys the program" do
+    sign_in_as(@user)
+    program = mmixal_programs(:one)
+    assert_difference "MMIXALProgram.count", -1 do
+      delete mmixal_program_url(program)
+    end
+  end
+
+  test "DELETE /mmixal_programs/:token redirects to index" do
+    sign_in_as(@user)
+    delete mmixal_program_url(mmixal_programs(:one))
+    assert_redirected_to mmixal_programs_url
+  end
+
   # GET /mmixal_programs — page lists all user's programs and title
   test "index: list all users with their roles" do
     sign_in_as(@user)

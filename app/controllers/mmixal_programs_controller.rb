@@ -12,4 +12,9 @@ class MMIXALProgramsController < ApplicationController
   def show
     @mmixal_program = MMIXALProgram.find(params[:token])
   end
+
+  def destroy
+    Current.user.mmixal_programs.find(params[:token]).destroy
+    redirect_to mmixal_programs_url, status: :see_other
+  end
 end
