@@ -1,27 +1,20 @@
 import { describe, it, expect, beforeEach } from "vitest"
 import Editor from "../../app/javascript/editor"
 
-/**
- * Creates a textarea DOM element with an optional initial value.
- * @param {string} [value=""] - The initial text content.
- * @returns {HTMLTextAreaElement} The created textarea element.
- */
-function createTextarea(value = "") {
+function createTextarea(value = ""): HTMLTextAreaElement {
   const textarea = document.createElement("textarea")
   textarea.value = value
   return textarea
 }
 
-/**
- * Creates a div element to serve as the line number gutter.
- * @returns {HTMLDivElement} The created div element.
- */
-function createLineNumbers() {
+function createLineNumbers(): HTMLDivElement {
   return document.createElement("div")
 }
 
 describe("Editor", () => {
-  let textarea, lineNumbers, editor
+  let textarea: HTMLTextAreaElement
+  let lineNumbers: HTMLDivElement
+  let editor: Editor
 
   beforeEach(() => {
     textarea = createTextarea()
@@ -151,13 +144,13 @@ describe("Editor", () => {
 
       expect(lineNumbers.innerHTML).toBe("<span>1</span>")
     })
-    /*     
+    /*
              it("does nothing for non-Tab keys", () => {
                textarea.value = "hello"
-         
+
                const enterEvent = new KeyboardEvent("keydown", { key: "Enter", cancelable: true })
                editor.handleKeydown(enterEvent)
-         
+
                expect(textarea.value).toBe("hello")
                expect(enterEvent.defaultPrevented).toBe(false)
              })
