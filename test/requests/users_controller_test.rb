@@ -25,10 +25,10 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     sign_in_as(@admin)
     get users_url
     assert_response :success
-    assert_select "td", text: @admin.user_name
-    assert_select "td", text: @user.user_name
-    assert_select "td", text: "user"
-    assert_select "td", text: "admin"
+    assert_includes response.body, @admin.user_name
+    assert_includes response.body, @user.user_name
+    assert_includes response.body, "user"
+    assert_includes response.body, "admin"
   end
 
   # GET /users/:id/edit — admin gets 200

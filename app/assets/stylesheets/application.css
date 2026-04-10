@@ -16,6 +16,10 @@ body {
   flex-direction: column;
   margin-top: 1em;
 }
+.editor-form input,
+.editor-form textarea {
+  border-width: 0;
+}
 
 .editor-header,
 .output-header {
@@ -32,7 +36,10 @@ body {
 .output-body {
   display: flex;
 }
-
+nav {
+  display: flex;
+  align-items: center;
+}
 .line-numbers,
 .editor-textarea,
 .output-gutter,
