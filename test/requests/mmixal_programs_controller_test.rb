@@ -60,5 +60,6 @@ test "updates mmixal_program source code" do
   }
 
   assert_equal "new content", program.reload.source
+  assert_redirected_to mmixal_program_url(program)
 end
 end

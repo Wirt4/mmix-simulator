@@ -6,47 +6,60 @@ class MMIXALProgramsShowTest < ActionView::TestCase
     render template: "mmixal_programs/show"
   end
 
-  test "renders an Assemble button" do
-    assert_select "button", text: "Assemble", count: 1
+  # -- Title display and editability --
+
+  test "renders the program title in a text field" do
+    assert_select "span.editor-title input[type=text][value=?]", @mmixal_program.title
   end
 
+  test "the title field is inside a form" do
+    assert_select "form input[type=text][value=?]", @mmixal_program.title
+  end
+
+  # -- Save button calls update with the program's title --
+
   test "renders a Save button" do
-    assert_select "button", text: "Save", count: 1
+    assert_select "input[type=submit][value=?]", "Save", count: 1
+  end
+
+  test "Save button submits a PATCH to the program's update path" do
+    assert_select "form[action=?][method=?]", mmixal_program_path(@mmixal_program), "post" do
+      assert_select "input[name=?][value=?]", "_method", "patch"
+      assert_select "input[type=submit][value=?]", "Save"
+    end
+  end
+
+  # -- Editor --
+
+  test "renders an Assemble button" do
+    assert_select "button", text: "Assemble", count: 1
   end
 
   test "renders a Run button" do
     assert_select "button", text: "Run", count: 1
   end
 
-  test "renders an Output editor panel with a `pre` area for output" do
+  # -- Output panel --
+
+  test "renders an Output panel with a pre area" do
     assert_select "div.output-container" do
       assert_select ".output-header .output-title", text: "Output"
       assert_select ".output-body pre.output-pre"
     end
   end
 
-  test "renders one 'Log Out' button" do
-    assert_select "button", text: "Log Out", count: 1
+  # -- Navbar --
+
+  test "renders the navbar with Log Out" do
+    assert_select "nav" do
+      assert_select "button", text: "Log Out"
+    end
   end
 
-  test "renders a Log Out button has correct path to sign out user" do
+  test "Log Out submits a DELETE to the session path" do
     assert_select "form[action=?][method=?]", session_path, "post" do
       assert_select "input[name=?][value=?]", "_method", "delete"
       assert_select "button", "Log Out"
-    end
-  end
-
-  test "renders the navbar partial" do
-    assert_select "nav" do
-      assert_select "button", text: "Log Out"
-      assert_select ".editor-container", count: 0
-    end
-  end
-
-  test " renders a Save button has correct path to update the mmixal_program" do
-    assert_select "form[action=?][method=?]", mmixal_program_path(@mmixal_program), "post" do
-      assert_select "input[name=?][value=?]", "_method", "patch"
-      assert_select "button", "Save"
     end
   end
 end

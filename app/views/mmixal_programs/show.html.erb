@@ -1,12 +1,11 @@
 <% content_for(:title, "MMIX Simulator") %>
 <nav><%= render "layouts/navbar" %></nav>
-<div style="display:flex; justify-content:left">
-  <%= button_to "Save", mmixal_program_path(@mmixal_program), method: :patch %>
-</div>
 
+  <%= form_with model: @mmixal_program do |form|%>
+      <%= form.submit "Save" %>
 <div class="editor-container" data-controller="editor">
   <div class="editor-header">
-    <span class="editor-title">MMIX Assembly</span>
+    <span class="editor-title" contenteditable="true">  <div class="editor-form"><%= form.text_field :title %></div></span>
   </div>
   <div class="editor-body">
     <!-- note the data-editor target: line numbers is manipulated by the js editor-->
@@ -14,22 +13,24 @@
       <span>1</span>
     </div>
        <!-- the editor also adjusts the text area: currently for tab logic -->
-    <textarea
-      class="editor-textarea"
-      data-editor-target="textarea"
-      data-action="input->editor#updateLineNumbers scroll->editor#syncScroll keydown->editor#handleKeydown"
-      spellcheck="false"
-      autocomplete="off"
-      autocorrect="off"
-      autocapitalize="off"
-      placeholder="Enter MMIX assembly here..."
-    ></textarea>
+    <%= form.text_area :source,
+      class: "editor-textarea",
+      data: {
+        editor_target: "textarea",
+        action: "input->editor#updateLineNumbers scroll->editor#syncScroll keydown->editor#handleKeydown"
+      },
+      spellcheck: false,
+      autocomplete: "off",
+      autocorrect: "off",
+      autocapitalize: "off"
+    %>
   </div>
   <div class="editor-footer">
     <button type="button">Assemble</button>
     <button type="button">Run</button>
   </div>
   </div>
+<% end %>
   <div class="output-container">
     <div class ="output-header">
       <span class="output-title">Output</span>

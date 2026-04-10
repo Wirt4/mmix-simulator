@@ -17,6 +17,7 @@ class MMIXALProgramsController < ApplicationController
       @mmixal_program = MMIXALProgram.find params[:id]
       @mmixal_program.update(params.expect(mmixal_program: [ :title, :source ]))
       @mmixal_program.save!
+      redirect_to mmixal_program_url(@mmixal_program)
   end
 
 
