@@ -33,7 +33,6 @@ Rails.application.routes.draw do
   # ──  Mmixal program management (all HTML) ─────────────────────────
   resources :mmixal_programs, only: [ :index, :create, :show, :destroy, :update ]
 
-
   # ── Root ───────────────────────────────────────────────────────
   # GET /                   → mmixal_program#index        (main page)
   root "mmixal_programs#index"
