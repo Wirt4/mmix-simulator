@@ -20,7 +20,6 @@ class MMIXALProgramsController < ApplicationController
       redirect_to mmixal_program_url(@mmixal_program)
   end
 
-
   def destroy
     Current.user.mmixal_programs.find(params[:id]).destroy
     redirect_to mmixal_programs_url, status: :see_other

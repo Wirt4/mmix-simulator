@@ -13,7 +13,6 @@ class MMIXALProgramsEditor < ActionView::TestCase
     # assert_includes rendered, @mmixal_program.title
   end
 
-
   test "the program source in a form text area" do
     assert_select "form" do
       assert_select "textarea[spellcheck='false'][autocomplete='off'][autocorrect='off'][autocapitalize='off']", @mmixal_program.source
