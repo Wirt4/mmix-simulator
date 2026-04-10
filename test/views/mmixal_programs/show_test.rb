@@ -2,11 +2,16 @@ require "test_helper"
 
 class MMIXALProgramsShowTest < ActionView::TestCase
   setup do
+    @mmixal_program = mmixal_programs(:one)
     render template: "mmixal_programs/show"
   end
 
   test "renders an Assemble button" do
     assert_select "button", text: "Assemble", count: 1
+  end
+
+  test "renders a Save button" do
+    assert_select "button", text: "Save", count: 1
   end
 
   test "renders a Run button" do
@@ -28,6 +33,13 @@ class MMIXALProgramsShowTest < ActionView::TestCase
     assert_select "form[action=?][method=?]", session_path, "post" do
       assert_select "input[name=?][value=?]", "_method", "delete"
       assert_select "button", "Log Out"
+    end
+  end
+
+  test " renders a Save button has correct path to update the mmixal_program" do
+    assert_select "form[action=?][method=?]", mmixal_program_path(@mmixal_program), "post" do
+      assert_select "input[name=?][value=?]", "_method", "patch"
+      assert_select "button", "Save"
     end
   end
 end

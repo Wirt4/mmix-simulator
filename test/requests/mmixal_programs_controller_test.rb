@@ -39,11 +39,26 @@ class MMIXALProgramsControllerTest < ActionDispatch::IntegrationTest
   end
 
   # GET /mmixal_programs — page lists all user's programs and title
-  test "index: list all users with their roles" do
+  test "index: list all user's saved programs" do
     sign_in_as(@user)
     get mmixal_programs_url
     assert_response :success
     assert_includes response.body, mmixal_programs(:one).title
     assert_includes response.body, mmixal_programs(:two).title
   end
+
+# PATCH /mmixal_programs/:id updates the program
+test "updates mmixal_program source code" do
+  sign_in_as(@user)
+  program = mmixal_programs(:one)
+
+  patch mmixal_program_url(program), params: {
+    mmixal_program: {
+      title: "new title",
+      source: "new content"
+    }
+  }
+
+  assert_equal "new content", program.reload.source
+end
 end

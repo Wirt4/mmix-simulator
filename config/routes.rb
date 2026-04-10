@@ -31,7 +31,7 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   # ──  Mmixal program management (all HTML) ─────────────────────────
-  resources :mmixal_programs, param: :token, only: [ :index, :create, :show, :destroy ]
+  resources :mmixal_programs, only: [ :index, :create, :show, :destroy, :update ]
 
 
   # ── Root ───────────────────────────────────────────────────────

@@ -4,7 +4,7 @@ require "test_helper"
 #
 # Verifies the controller's inheritance and that it requires
 # authentication for all actions.
-class MMIXALProgramControllerTest < ActiveSupport::TestCase
+class MMIXALProgramControllerTest < ActionDispatch::IntegrationTest
   test "inherits from ApplicationController" do
     assert MMIXALProgramController < ApplicationController
   end

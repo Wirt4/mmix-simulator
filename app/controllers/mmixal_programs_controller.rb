@@ -10,11 +10,18 @@ class MMIXALProgramsController < ApplicationController
   end
 
   def show
-    @mmixal_program = MMIXALProgram.find(params[:token])
+    @mmixal_program = MMIXALProgram.find(params[:id])
   end
 
+  def update
+      @mmixal_program = MMIXALProgram.find params[:id]
+      @mmixal_program.update(params.expect(mmixal_program: [ :title, :source ]))
+      @mmixal_program.save!
+  end
+
+
   def destroy
-    Current.user.mmixal_programs.find(params[:token]).destroy
+    Current.user.mmixal_programs.find(params[:id]).destroy
     redirect_to mmixal_programs_url, status: :see_other
   end
 end
