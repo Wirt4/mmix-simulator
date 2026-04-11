@@ -61,6 +61,24 @@ ARG LANDRUN_VERSION=0.1.14
 RUN go install "github.com/zouuup/landrun/cmd/landrun@v${LANDRUN_VERSION}"
 
 # ─────────────────────────────────────────────────────────────
+# Emscripten SDK (isolated for caching)
+# ─────────────────────────────────────────────────────────────
+FROM docker.io/library/debian:bookworm-slim AS emscripten
+
+ARG EMSDK_VERSION=4.0.8
+
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+      git python3 xz-utils ca-certificates && \
+    rm -rf /var/lib/apt/lists
+
+RUN git clone --depth 1 https://github.com/emscripten-core/emsdk.git /opt/emsdk && \
+    cd /opt/emsdk && \
+    ./emsdk install ${EMSDK_VERSION} && \
+    ./emsdk activate ${EMSDK_VERSION} && \
+    rm -rf /opt/emsdk/.git
+
+# ─────────────────────────────────────────────────────────────
 # Build stage (gems + app compilation)
 # ─────────────────────────────────────────────────────────────
 FROM base AS build
@@ -118,6 +136,10 @@ RUN --mount=type=cache,id=apt-test,target=/var/cache/apt \
 
 # Landrun (Landlock sandboxing)
 COPY --from=landrun /go/bin/landrun /usr/local/bin/landrun
+
+# Emscripten SDK
+COPY --from=emscripten /opt/emsdk /opt/emsdk
+ENV PATH="/opt/emsdk:/opt/emsdk/upstream/emscripten:${PATH}"
 
 # Gems (cached unless Gemfile changes)
 COPY Gemfile Gemfile.lock ./
