@@ -41,7 +41,7 @@ jobs:
         run: npm ci
 
       - name: TypeScript Type Checkting
-        run: npm tsc --noEmit
+        run: npx tsc --noEmit
 
       - name: Audit JS dependencies
         run: npm audit --omit=dev
