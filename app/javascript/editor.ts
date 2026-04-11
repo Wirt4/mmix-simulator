@@ -1,13 +1,17 @@
+interface SelectionRange {
+  start: number
+  end: number
+}
+
 /**
  * A code editor that pairs a textarea with a line number gutter.
  * Supports Tab-key indentation and synchronized scrolling.
  */
 export default class Editor {
-  /**
-   * @param {HTMLTextAreaElement} textarea - The textarea element for code input.
-   * @param {HTMLElement} lineNumbers - The element that displays line numbers.
-   */
-  constructor(textarea, lineNumbers) {
+  private readonly textarea: HTMLTextAreaElement
+  private readonly lineNumbers: HTMLElement
+
+  constructor(textarea: HTMLTextAreaElement, lineNumbers: HTMLElement) {
     this.textarea = textarea
     this.lineNumbers = lineNumbers
   }
@@ -15,7 +19,7 @@ export default class Editor {
   /**
    * Recalculates and renders line numbers to match the current textarea content.
    */
-  updateLineNumbers() {
+  updateLineNumbers(): void {
     const numLines = this.textarea.value.split("\n").length
     this.lineNumbers.innerHTML = this._generateLineNumbers(numLines)
   }
@@ -23,20 +27,19 @@ export default class Editor {
   /**
    * Synchronizes the line number gutter scroll position with the textarea.
    */
-  syncScroll() {
+  syncScroll(): void {
     this.lineNumbers.scrollTop = this.textarea.scrollTop
   }
 
   /**
    * Handles keydown events on the textarea. Intercepts Tab to insert spaces
    * instead of the default focus change.
-   * @param {KeyboardEvent} event - The keydown event.
    */
-  handleKeydown(event) {
+  handleKeydown(event: KeyboardEvent): void {
     if (event.key === "Tab") {
       const numSpaces = 2
       event.preventDefault()
-      const selection = { start: this.textarea.selectionStart, end: this.textarea.selectionEnd }
+      const selection: SelectionRange = { start: this.textarea.selectionStart, end: this.textarea.selectionEnd }
       this._insertChars(selection, numSpaces, " ")
       this._advanceSelection(selection.start, numSpaces)
       this.updateLineNumbers()
@@ -45,12 +48,9 @@ export default class Editor {
 
   /**
    * Generates HTML span elements for each line number.
-   * @param {number} numLines - The total number of lines.
-   * @returns {string} HTML string of numbered spans.
-   * @private
    */
-  _generateLineNumbers(numLines) {
-    const numbers = []
+  private _generateLineNumbers(numLines: number): string {
+    const numbers: string[] = []
     for (let i = 1; i <= numLines; i++) {
       numbers.push(`<span>${i}</span>`)
     }
@@ -59,14 +59,8 @@ export default class Editor {
 
   /**
    * Replaces the current selection with repeated characters.
-   * @param {Object} selection - The selection range.
-   * @param {number} selection.start - Start index of the selection.
-   * @param {number} selection.end - End index of the selection.
-   * @param {number} delimiterCount - Number of times to repeat the character.
-   * @param {string} char - The character to insert.
-   * @private
    */
-  _insertChars({ start, end }, delimiterCount, char) {
+  private _insertChars({ start, end }: SelectionRange, delimiterCount: number, char: string): void {
     const { value } = this.textarea
     const space = char.repeat(delimiterCount)
     const newValue = value.substring(0, start) + space + value.substring(end)
@@ -75,11 +69,8 @@ export default class Editor {
 
   /**
    * Moves the cursor forward after an insertion.
-   * @param {number} start - The original cursor position.
-   * @param {number} numChars - Number of characters inserted.
-   * @private
    */
-  _advanceSelection(start, numChars) {
+  private _advanceSelection(start: number, numChars: number): void {
     this.textarea.selectionStart = this.textarea.selectionEnd = start + numChars
   }
 }

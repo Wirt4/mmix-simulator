@@ -31,13 +31,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          bundler-cache: true
+          cache: 'npm'
+          node-version: '20'
+      
+      - name: Install JS dependencies
+        run: npm ci
 
-      - name: Scan for security vulnerabilities in JavaScript dependencies
-        run: bin/importmap audit
+      - name: Audit JS dependencies
+        run: npm audit --omit=dev
+
+      - name: Lint typescript
+        run: npm run lint
 
   lint:
     runs-on: ubuntu-24.04
@@ -89,4 +96,4 @@ jobs:
         run: >
           docker run --rm
           mmix-simulator:test
-          bash -c "bin/setup --skip-server && bin/rails test"
+          bash -c "bin/setup --skip-server && bin/rake test"

@@ -10,6 +10,15 @@ Database records in this environment should persist (user accounts, user's asset
  Run `docker compose --profile dev run --rm --service-ports development bash` to shell into the environment
 (Alternatively, there are the scripts 'localhost' and 'dev_env' in the `script` directory for a little quality of life)
 
+## Testing
+`bin/rails test` for Ruby
+`npm run test` for TypeScript
+or `bin/rake test` for the whole suite (includes `npm run typecheck`) 
+
+## Linting
+`bin/rubocop` for Ruby
+`npm run lint` for TypeScript
+
 # Web environment
 The web environment is for production
 

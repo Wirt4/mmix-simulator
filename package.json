@@ -8,7 +8,10 @@
     "test": "test"
   },
   "scripts": {
-    "test": "vitest run"
+    "build": "esbuild app/javascript/application.ts --bundle --sourcemap --format=esm --outdir=app/assets/builds --public-path=/assets",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -22,9 +25,17 @@
     "url": "https://github.com/Wirt4/mmix-simulator/issues"
   },
   "homepage": "https://github.com/Wirt4/mmix-simulator#readme",
-  "devDependencies": {
+  "dependencies": {
     "@hotwired/stimulus": "^3.2.2",
+    "@hotwired/turbo-rails": "^8.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "esbuild": "^0.25.0",
+    "eslint": "^10.2.0",
     "jsdom": "^28.1.0",
-    "vitest": "^4.1.0"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.58.1",
+    "vitest": "^4.1.4"
   }
 }
