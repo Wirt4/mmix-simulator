@@ -144,16 +144,14 @@ describe("Editor", () => {
 
       expect(lineNumbers.innerHTML).toBe("<span>1</span>")
     })
-    /*
-             it("does nothing for non-Tab keys", () => {
-               textarea.value = "hello"
+    it("does nothing for non-Tab keys", () => {
+      textarea.value = "hello"
 
-               const enterEvent = new KeyboardEvent("keydown", { key: "Enter", cancelable: true })
-               editor.handleKeydown(enterEvent)
+      const enterEvent = new KeyboardEvent("keydown", { key: "Enter", cancelable: true })
+      editor.handleKeydown(enterEvent)
 
-               expect(textarea.value).toBe("hello")
-               expect(enterEvent.defaultPrevented).toBe(false)
-             })
-             */
+      expect(textarea.value).toBe("hello")
+      expect(enterEvent.defaultPrevented).toBe(false)
+    })
   })
 })
