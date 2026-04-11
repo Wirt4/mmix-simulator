@@ -12,12 +12,12 @@ Database records in this environment should persist (user accounts, user's asset
 
 ## Testing
 `bin/rails test` for Ruby
-`npx vitest` for TypeScript
-or `bin/rake test` for the whole suite 
+`npm run test` for TypeScript
+or `bin/rake test` for the whole suite (includes `npm run typecheck`) 
 
 ## Linting
 `bin/rubocop` for Ruby
-`npx eslint .` for TypeScript
+`npm run lint` for TypeScript
 
 # Web environment
 The web environment is for production

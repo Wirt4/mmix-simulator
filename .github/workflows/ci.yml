@@ -40,14 +40,11 @@ jobs:
       - name: Install JS dependencies
         run: npm ci
 
-      - name: TypeScript Type Checkting
-        run: npx tsc --noEmit
-
       - name: Audit JS dependencies
         run: npm audit --omit=dev
 
-      - name: Run ESLint
-        run: npx eslint .
+      - name: Lint typescript
+        run: npm run lint
 
   lint:
     runs-on: ubuntu-24.04
