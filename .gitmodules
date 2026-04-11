@@ -1,0 +1,12 @@
+[submodule "wasm/vendor/unity"]
+	path = wasm/vendor/unity
+	url = https://github.com/ThrowTheSwitch/Unity.git
+[submodule "wasm/vendor/cmock"]
+	path = wasm/vendor/cmock
+	url = https://github.com/ThrowTheSwitch/CMock.git
+[submodule "wasm/vendor/mmixware"]
+	path = wasm/vendor/mmixware
+	url = https://gitlab.lrz.de/mmix/mmixware.git
+[submodule "wasm/vendor/mmixlib"]
+	path = wasm/vendor/mmixlib
+	url = https://gitlab.lrz.de/mmix/mmixlib.git

@@ -38,3 +38,12 @@
 /node_modules
 /package-lock.json
 
+# WASM build artifacts
+/wasm/build/
+/wasm/test_unit
+/wasm/test_integration
+/wasm/mmix.js
+/wasm/mmix.wasm
+/wasm/src/*.o
+/wasm/test/unit/mocks/mock_*
+

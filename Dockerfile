@@ -131,7 +131,7 @@ ENV RAILS_ENV="test" \
 RUN --mount=type=cache,id=apt-test,target=/var/cache/apt \
     apt-get update -qq && \
     apt-get install --no-install-recommends -y \
-      build-essential git libyaml-dev pkg-config nodejs npm strace && \
+      build-essential git libyaml-dev pkg-config nodejs npm strace texlive-binaries && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Landrun (Landlock sandboxing)
