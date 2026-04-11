@@ -1,0 +1,27 @@
+<%= form_with model: mmixal_program do |form|%>
+<div class="editor-container" data-controller="editor">
+  <div class="editor-header">
+    <span class="editor-title editor-form"><%= form.text_field :title %></span>
+  </div>
+  <div class="editor-body">
+    <!-- note the data-editor target: line numbers is manipulated by the js editor-->
+    <div class="line-numbers" data-editor-target="lineNumbers">
+      <span>1</span>
+    </div>
+       <!-- the editor also adjusts the text area: currently for tab logic -->
+    <%= form.text_area :source,
+      class: "editor-textarea",
+      data: {
+        editor_target: "textarea",
+        action: "input->editor#updateLineNumbers scroll->editor#syncScroll keydown->editor#handleKeydown"
+      },
+      spellcheck: false,
+      autocomplete: "off",
+      autocorrect: "off",
+      autocapitalize: "off"
+    %>
+  </div>
+</div>
+<%= form.submit "Save" %>
+<% end %>
+

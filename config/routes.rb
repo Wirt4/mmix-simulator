@@ -30,7 +30,10 @@ Rails.application.routes.draw do
   # GET /up                 → rails/health#show    (returns HTTP status)
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # ──  Mmixal program management (all HTML) ─────────────────────────
+  resources :mmixal_programs, only: [ :index, :create, :show, :destroy, :update ]
+
   # ── Root ───────────────────────────────────────────────────────
-  # GET /                   → console#index        (main page)
-  root "console#index"
+  # GET /                   → mmixal_program#index        (main page)
+  root "mmixal_programs#index"
 end
