@@ -37,6 +37,57 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[type='submit'], button[type='submit']"
   end
 
+  test "create with valid params redirects to root" do
+    post registration_path, params: {
+      user: {
+        user_name: "newuser",
+        email_address: "newuser@example.com",
+        password: "password",
+        password_confirmation: "password"
+      }
+    }
+    assert_redirected_to root_path
+  end
+
+  test "create with missing user_name renders errors" do
+    post registration_path, params: {
+      user: {
+        user_name: "",
+        email_address: "newuser@example.com",
+        password: "password",
+        password_confirmation: "password"
+      }
+    }
+    assert_response :unprocessable_entity
+    assert_select "#error_explanation li", /User name/
+  end
+
+  test "create with duplicate email renders errors" do
+    post registration_path, params: {
+      user: {
+        user_name: "newuser",
+        email_address: users(:one).email_address,
+        password: "password",
+        password_confirmation: "password"
+      }
+    }
+    assert_response :unprocessable_entity
+    assert_select "#error_explanation li", /Email address/
+  end
+
+  test "create with mismatched password confirmation renders errors" do
+    post registration_path, params: {
+      user: {
+        user_name: "newuser",
+        email_address: "newuser@example.com",
+        password: "password",
+        password_confirmation: "different"
+      }
+    }
+    assert_response :unprocessable_entity
+    assert_select "#error_explanation li", /Password confirmation/
+  end
+
   test "create is rate limited after 10 requests" do
     11.times do |i|
       post registration_path, params: {
