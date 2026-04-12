@@ -25,6 +25,10 @@
     "url": "https://github.com/Wirt4/mmix-simulator/issues"
   },
   "homepage": "https://github.com/Wirt4/mmix-simulator#readme",
+  "engines":  {
+    "node": ">=20.19.2",
+    "npm": ">=9.2.0" 
+  },
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",
     "@hotwired/turbo-rails": "^8.0.0"
