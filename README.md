@@ -1,5 +1,9 @@
 # README
-The project maintains two environments: development and web
+The project maintains two development environments and three different programming language domains
+The environments are `development` and `web`.
+The frameworks are Ruby on Rails for the app structure, Node + Typescript for the JS, and C + web assembly for the MMIX Simulator itself.
+
+Basically the idea is to compile the MMIX Simulator to WASM, which in turn the TS layer accesses and updates the DOM in the Rails View. The heavy lifting and machine simulation is contained in the wasm, and Rails can do what it does best: manage sessions, user accounts and document tracking.
 
 # Development environment
 The development ("dev") environment is for testing User Interface and manual Quality Assurance. 
