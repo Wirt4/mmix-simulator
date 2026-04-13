@@ -2,7 +2,10 @@
 :cmock:
   :mock_path: test/unit/mocks
   :mock_prefix: mock_
+  :treat_as:
+    FILE*: PTR
   :plugins:
     - :expect
     - :expect_any_args
+    - :ignore_arg
     - :return_thru_ptr

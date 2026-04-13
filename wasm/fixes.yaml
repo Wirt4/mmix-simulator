@@ -1,0 +1,80 @@
+---
+MainSourceFile:  '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm/src/glue.c'
+Diagnostics:
+  - DiagnosticName:  readability-non-const-parameter
+    DiagnosticMessage:
+      Message:         'pointer parameter ''pointer'' can be pointer to const'
+      FilePath:        '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm/src/glue.c'
+      FileOffset:      578
+      Replacements:
+        - FilePath:        '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm/src/glue.h'
+          Offset:          772
+          Length:          0
+          ReplacementText: 'const '
+        - FilePath:        '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm/src/glue.c'
+          Offset:          572
+          Length:          0
+          ReplacementText: 'const '
+    Level:           Warning
+    BuildDirectory:  '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm'
+  - DiagnosticName:  readability-identifier-length
+    DiagnosticMessage:
+      Message:         'variable name ''g'' is too short, expected at least 3 characters'
+      FilePath:        '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm/src/mmix_interface.h'
+      FileOffset:      1260
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm'
+  - DiagnosticName:  readability-magic-numbers
+    DiagnosticMessage:
+      Message:         '256 is a magic number; consider replacing it with a named constant'
+      FilePath:        '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm/src/mmix_interface.h'
+      FileOffset:      1262
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm'
+  - DiagnosticName:  readability-identifier-length
+    DiagnosticMessage:
+      Message:         'variable name ''l'' is too short, expected at least 3 characters'
+      FilePath:        '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm/src/mmix_interface.h'
+      FileOffset:      1281
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm'
+  - DiagnosticName:  readability-identifier-length
+    DiagnosticMessage:
+      Message:         'variable name ''G'' is too short, expected at least 3 characters'
+      FilePath:        '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm/src/mmix_interface.h'
+      FileOffset:      1295
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm'
+  - DiagnosticName:  readability-identifier-length
+    DiagnosticMessage:
+      Message:         'variable name ''L'' is too short, expected at least 3 characters'
+      FilePath:        '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm/src/mmix_interface.h'
+      FileOffset:      1298
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm'
+  - DiagnosticName:  readability-identifier-length
+    DiagnosticMessage:
+      Message:         'variable name ''O'' is too short, expected at least 3 characters'
+      FilePath:        '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm/src/mmix_interface.h'
+      FileOffset:      1301
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm'
+  - DiagnosticName:  clang-diagnostic-error
+    DiagnosticMessage:
+      Message:         '''stdio.h'' file not found'
+      FilePath:        '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm/src/stdio_wrapper.h'
+      FileOffset:      313
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm/src/stdio_wrapper.h'
+          FileOffset:      313
+          Length:          9
+    Level:           Error
+    BuildDirectory:  '/Users/wirtsalthouse/Code/Ruby/mmix-simulator/wasm'
+...
