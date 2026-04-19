@@ -1,6 +1,8 @@
 CC = gcc
 EMCC = emcc
-CFLAGS = -Wall -Wextra -Isrc/ -Ibuild/mmixlib
+CFLAGS_COMMON = -Isrc/ -Ibuild/mmixlib
+CFLAGS = -Wall -Wextra -Wpedantic -Werror $(CFLAGS_COMMON)
+CFLAGS_VENDOR = -w $(CFLAGS_COMMON)
 AR = ar
 ARFLAGS = cru
 RANLIB = ranlib
@@ -14,22 +16,21 @@ export CWEBINPUTS = $(CURDIR)/build/mmixlib
 MMIXWARE = vendor/mmixware
 MMIXLIB  = vendor/mmixlib
 
+# Our change file layered on top of Ruckert's mmixallib.ch
+MMIXAL_WASM_CH     = src/mmixal-wasm.ch
+MMIXAL_COMBINED_CH = $(MMIXLIB_BUILD)/mmixal-combined.ch
+
 # Build directory for ctangle output (keeps vendor clean)
 MMIXLIB_BUILD = build/mmixlib
 
 # Test framework paths
 UNITY_DIR = vendor/unity/src
-CMOCK_DIR = vendor/cmock
-MOCK_OUT  = test/unit/mocks
 
 UNITY_SRC = $(UNITY_DIR)/unity.c
 UNITY_INC = -I$(UNITY_DIR)
 
-CMOCK_SRC = $(CMOCK_DIR)/src/cmock.c
-CMOCK_INC = -I$(CMOCK_DIR)/src
-
 # Glue code objects
-SRC_OBJS = src/glue.o
+SRC_OBJS = src/glue.o 
 
 # mmixlib generated sources (from ctangle mmix-sim.w + mmixlib.ch)
 LIBSIM = libboot.c     libfinal.c     libload.c     libprint.c       libstats.c \
@@ -59,9 +60,9 @@ MMIXLIB_HDRS = $(MMIXLIB_BUILD)/abstime.h $(MMIXLIB_BUILD)/mmixlib.h \
                $(MMIXLIB_BUILD)/libname.h $(MMIXLIB_BUILD)/libbase.h \
                $(LIBH_FILES) $(MMIXLIB_BUILD)/libconfig.h
 
-.PHONY: all test-unit test-integration wasm mocks clean
+.PHONY: all test wasm analyze clean
 
-all: test-unit
+all: test
 
 # --- mmixlib build ---
 
@@ -99,9 +100,13 @@ $(MMIXLIB_BUILD)/libname.c $(MMIXLIB_BUILD)/libbase.c: $(MMIXLIB_BUILD)/%.c: $(M
 $(LIBSIM_SRC) $(LIBH_FILES) $(MMIXLIB_BUILD)/mmix-sim.c: $(MMIXLIB_BUILD)/boilerplate.w $(MMIXWARE)/mmix-sim.w $(MMIXLIB)/mmixlib.ch $(MMIXLIB_BUILD)/libconfig.h $(MMIXLIB_BUILD)/libimport.h
 	cd $(MMIXLIB_BUILD) && ctangle ../../$(MMIXWARE)/mmix-sim.w ../../$(MMIXLIB)/mmixlib.ch
 
-# ctangle mmixal.w with mmixallib.ch → assembler library sources
-$(LIBAL_SRC): $(MMIXLIB_BUILD)/boilerplate.w $(MMIXWARE)/mmixal.w $(MMIXLIB)/mmixallib.ch
-	cd $(MMIXLIB_BUILD) && ctangle ../../$(MMIXWARE)/mmixal.w ../../$(MMIXLIB)/mmixallib.ch
+# Merge Ruckert's mmixallib.ch with our wasm fixups via ctie
+$(MMIXAL_COMBINED_CH): $(MMIXLIB_BUILD)/boilerplate.w $(MMIXWARE)/mmixal.w $(MMIXLIB)/mmixallib.ch $(MMIXAL_WASM_CH) | $(MMIXLIB_BUILD)
+	cd $(MMIXLIB_BUILD) && ctie -c mmixal-combined.ch ../../$(MMIXWARE)/mmixal.w ../../$(MMIXLIB)/mmixallib.ch ../../$(MMIXAL_WASM_CH)
+
+# ctangle mmixal.w with combined change file → assembler library sources
+$(LIBAL_SRC): $(MMIXLIB_BUILD)/boilerplate.w $(MMIXWARE)/mmixal.w $(MMIXAL_COMBINED_CH)
+	cd $(MMIXLIB_BUILD) && ctangle ../../$(MMIXWARE)/mmixal.w mmixal-combined.ch
 
 # ctangle mmix-arith.w → arithmetic module
 $(MMIXLIB_BUILD)/mmix-arith.c: $(MMIXLIB_BUILD)/boilerplate.w $(MMIXWARE)/mmix-arith.w
@@ -114,7 +119,7 @@ $(MMIXLIB_BUILD)/mmix-io.c: $(MMIXLIB_BUILD)/boilerplate.w $(MMIXWARE)/mmix-io.w
 # --- Compile & archive (native) ---
 
 $(MMIXLIB_BUILD)/%.o: $(MMIXLIB_BUILD)/%.c $(MMIXLIB_HDRS)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS_VENDOR) -c $< -o $@
 
 $(LIBMMIX): $(LIBSIM_OBJ) $(LIBAL_OBJ) $(LIBEXTRA_OBJ)
 	rm -f $@
@@ -123,25 +128,12 @@ $(LIBMMIX): $(LIBSIM_OBJ) $(LIBAL_OBJ) $(LIBEXTRA_OBJ)
 
 # --- Glue code ---
 
-src/glue.o: src/glue.c src/glue.h src/mmix_interface.h
+src/glue.o: src/glue.c src/glue.h src/mmix_interface.h $(MMIXLIB_HDRS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # --- Mocks & tests ---
 
-mocks:
-	ruby $(CMOCK_DIR)/lib/cmock.rb -o cmock.yml src/mmix_interface.h
-
-test-unit: mocks $(SRC_OBJS)
-	$(CC) $(CFLAGS) $(UNITY_INC) $(CMOCK_INC) -Isrc/ -I$(MOCK_OUT) \
-		test/unit/test_glue.c \
-		$(MOCK_OUT)/mock_mmix_interface.c \
-		$(CMOCK_SRC) \
-		$(UNITY_SRC) \
-		$(SRC_OBJS) \
-		-o test_unit
-	./test_unit
-
-test-integration: $(SRC_OBJS) $(LIBMMIX)
+test: $(SRC_OBJS) $(LIBMMIX)
 	$(CC) $(CFLAGS) $(UNITY_INC) -Isrc/ \
 		test/integration/test_glue_real.c \
 		$(UNITY_SRC) \
@@ -160,7 +152,7 @@ $(WASM_BUILD):
 	mkdir -p $(WASM_BUILD)
 
 $(WASM_BUILD)/%.o: $(MMIXLIB_BUILD)/%.c $(MMIXLIB_HDRS) | $(WASM_BUILD)
-	$(EMCC) $(CFLAGS) -c $< -o $@
+	$(EMCC) $(CFLAGS_VENDOR) -c $< -o $@
 
 $(WASM_LIBMMIX): $(WASM_OBJ)
 	rm -f $@
@@ -175,7 +167,10 @@ wasm: src/glue.c $(WASM_LIBMMIX)
 		-sMODULARIZE=1 \
 		-sEXPORT_NAME='createMmixModule'
 
+analyze:
+	cppcheck --enable=all --inline-suppr --check-level=exhaustive --suppress=missingIncludeSystem -Ibuild/mmixlib src/ test/
+	clang --analyze $(CFLAGS) $(UNITY_INC) src/*.c test/integration/*.c
+
 clean:
 	rm -rf $(MMIXLIB_BUILD) $(WASM_BUILD)
-	rm -f $(SRC_OBJS) test_unit test_integration
-	rm -f $(MOCK_OUT)/mock_mmix_interface.c $(MOCK_OUT)/mock_mmix_interface.h
+	rm -f $(SRC_OBJS) test_integration

@@ -47,7 +47,7 @@ After cloning, run `git submodule update --init --recursive` to fetch:
 3. `make test-unit` — compiles and runs unit tests linked against mocks
 4. `make test-integration` — links against the real `libmmix.a`
 5. `make wasm` — compiles to WASM via emcc
-
+6. `make analyze` - runs static code analysis against the C code
 ### Project layout
 - `src/glue.c` / `src/glue.h` — public API exported to WASM
 - `src/mmix_interface.h` — mmixlib function declarations (CMock mocks this)

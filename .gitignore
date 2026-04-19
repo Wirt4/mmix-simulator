@@ -46,4 +46,5 @@
 /wasm/mmix.wasm
 /wasm/src/*.o
 /wasm/test/unit/mocks/mock_*
-
+/wasm/src/*.plist
+/wasm/*.plist
