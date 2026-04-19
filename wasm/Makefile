@@ -128,7 +128,7 @@ $(LIBMMIX): $(LIBSIM_OBJ) $(LIBAL_OBJ) $(LIBEXTRA_OBJ)
 
 # --- Glue code ---
 
-src/glue.o: src/glue.c src/glue.h src/mmix_interface.h $(MMIXLIB_HDRS)
+src/glue.o: src/glue.c src/glue.h $(MMIXLIB_HDRS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # --- Mocks & tests ---

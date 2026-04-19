@@ -48,3 +48,4 @@
 /wasm/test/unit/mocks/mock_*
 /wasm/src/*.plist
 /wasm/*.plist
+/wasm/compile_commands.json
