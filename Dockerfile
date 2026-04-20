@@ -158,6 +158,8 @@ COPY --from=mmix /usr/local/bin/mmixal /usr/local/bin/mmixal
 # App code copied LAST — only this layer rebuilds on code changes
 COPY . .
 
+RUN cd wasm && make wasm
+
 RUN ln -s /rails/script/landrun_and_limit.rb /usr/local/bin/landrun-and-limit&& \
     chmod +x /rails/script/landrun_and_limit.rb
 
