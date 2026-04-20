@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-// necessary for Unity
 // cppcheck-suppress unusedFunction
 void setUp(void) {
 }
@@ -35,11 +34,10 @@ static const char *hello_world_source =
     "\tTRAP\t0,Fputs,StdOut\n"
     "\tTRAP\t0,Halt,0\n";
 
-// static const char*expected_stdout ="Hello world!";
-// /* Bytes 4-7 are a timestamp in the .mmo preamble and change each run */
+// Bytes 4-7 are a timestamp in the .mmo preamble and change each run *
 #define TIMESTAMP_OFFSET 4
 #define TIMESTAMP_SIZE 4
-//
+
 static const unsigned char expected_binary[] = {
     0x98,0x09,0x01,0x01,0x00,0x00,0x00,0x00,0x98,0x01,0x20,0x01,0x00,0x00,0x00,0x00,
     0x48,0x65,0x6c,0x6c,0x6f,0x20,0x77,0x6f,0x72,0x6c,0x64,0x21,0x0a,0x00,0x00,0x00,
@@ -102,7 +100,10 @@ static void test_assemble_mmixal_is_non_null(void){
     int len =(int)strlen(hello_world_source);
     char unsigned *buf = get_source_code_pointer();
     memcpy(buf, hello_world_source, len + 1);
-    TEST_ASSERT_EQUAL(0, assemble_mmixal(len));
+
+    int result = assemble_mmixal(len);
+
+    TEST_ASSERT_EQUAL(0, result);
 }
 
 static void test_assemble_mmixal_output_binary(void) {
@@ -142,7 +143,9 @@ static void test_assemble_mmixal_output_listing(void){
 static void test_mmix_simulate_hello_world_clean_return(void){
     char unsigned *buf = get_binary_pointer();
     memcpy(buf, expected_binary, expected_binary_size);
+
     int result = mmix_simulate(expected_binary_size);
+
     TEST_ASSERT_EQUAL_INT(0, result);
 }
 
@@ -161,9 +164,11 @@ static void test_mmix_simulate_stderr(void) {
     memcpy(buf, stderr_program_source, len + 1);
     assemble_mmixal(len);
     size_t bin_size = get_binary_size();
+
     mmix_simulate(bin_size);
     size_t stderr_size = get_stderr_size();
     unsigned char *stderr = get_stderr_pointer();
+
     TEST_ASSERT_EQUAL(strlen(expected_stderr), stderr_size);
     TEST_ASSERT_EQUAL_STRING(expected_stderr, stderr);
 }
@@ -175,6 +180,7 @@ static void  test_mmix_simulate_hello_world_std_out(void) {
     mmix_simulate(expected_binary_size);
     char unsigned *stdout = get_stdout_pointer();
     size_t stdout_size = get_stdout_size();
+
     TEST_ASSERT_EQUAL(strlen(expected_output), stdout_size);
     TEST_ASSERT_EQUAL_STRING(expected_output, stdout);
 }
@@ -195,9 +201,9 @@ static void test_assemble_mmixal_error_output(void) {
     memcpy(buf, bad_mmixal_source, len + 1);
 
     assemble_mmixal(len);
-
     size_t stderr_size = get_stderr_size();
     unsigned char *stderr_buf = get_stderr_pointer();
+
     TEST_ASSERT_EQUAL(strlen(expected_assembly_stderr), stderr_size);
     TEST_ASSERT_EQUAL_STRING(expected_assembly_stderr, stderr_buf);
 }

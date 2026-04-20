@@ -29,7 +29,7 @@ UNITY_DIR = vendor/unity/src
 UNITY_SRC = $(UNITY_DIR)/unity.c
 UNITY_INC = -I$(UNITY_DIR)
 
-# Glue code objects
+# Glue code object
 SRC_OBJS = src/glue.o 
 
 # mmixlib generated sources (from ctangle mmix-sim.w + mmixlib.ch)
