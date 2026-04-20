@@ -61,4 +61,3 @@ The web environment is for production
 - **[MMIX](https://www-cs-faculty.stanford.edu/~knuth/mmix.html)** — A 64-bit RISC architecture designed by [Donald E. Knuth](https://www-cs-faculty.stanford.edu/~knuth/) as the successor to MIX for *The Art of Computer Programming*.
 - **[MMIXware](https://www-cs-faculty.stanford.edu/~knuth/mmix.html)** — The official MMIX software package (assembler, simulator, and related tools) by Donald E. Knuth, distributed as CWEB literate programs. Also available on [CTAN](https://ctan.org/pkg/mmixware) and [GitLab](https://gitlab.lrz.de/mmix/mmixware).
 - **[mmixlib](https://gitlab.lrz.de/mmix/mmixlib)** — Change files by Martin Ruckert that decompose mmixware into a reusable C library with a fetch/execute API.
-- **[landrun](https://github.com/zouuup/landrun)** — A lightweight Linux sandbox using the kernel's native Landlock LSM, by [@Zouuup](https://github.com/zouuup).
