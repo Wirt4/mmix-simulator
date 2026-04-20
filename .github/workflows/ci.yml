@@ -108,7 +108,7 @@ jobs:
           submodules: recursive
 
       - name: Install cweb
-        run: sudo apt-get update && sudo apt-get install -y cweb
+        run: sudo apt-get update && sudo apt-get install -y texlive-binaries
 
       - name: Run C tests
         run: make test
@@ -124,7 +124,7 @@ jobs:
           submodules: recursive
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y cweb cppcheck
+        run: sudo apt-get update && sudo apt-get install -y texlive-binaries cppcheck
 
       - name: Build library
         run: make src/glue.o
