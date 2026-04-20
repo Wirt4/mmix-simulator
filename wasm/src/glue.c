@@ -50,7 +50,7 @@ static int create_file(const char*filename){
 		return -1;
 	}
 	int result = fclose(filePointer);
-	ASSERT(result == 0);
+	(void)ASSERT(result == 0);
         return result;
 }
 
@@ -67,7 +67,7 @@ static int write_text_to_file(const unsigned char * sourceStart, size_t sourceSi
 	}
 	size_t charsWritten = fwrite(sourceStart, sizeof(char), sourceSize + 1, destPointer);
 	if (charsWritten < sourceSize +1){
-		ASSERT(ferror(destPointer) || feof(destPointer));
+		(void)ASSERT(ferror(destPointer) || feof(destPointer));
 		if (ferror(destPointer)){
 			perror("Error: file write error");
 		}
@@ -99,7 +99,7 @@ static int write_bytes_to_file(const unsigned char * sourceStart, size_t sourceS
 	}
 
 	if (bytesWritten < sourceSize){
-		ASSERT(ferror(destPointer) || feof(destPointer));
+		(void)ASSERT(ferror(destPointer) || feof(destPointer));
 		if (ferror(destPointer)){
 			perror("Error: file write error");
 		}
@@ -161,7 +161,7 @@ static int copy_heap_to_file(const char* filename, size_t dataSize){
 		return -1;
 	}
 	int fileClose = fclose(filePointer);
-	ASSERT(fileClose == 0);
+	(void)ASSERT(fileClose == 0);
 	return fileClose;
 }
 
@@ -224,7 +224,7 @@ static int run_mmix_loop(void){
 			resuming = false;
 		}
 	}
-	ASSERT(cur < INT32_MAX);
+	(void)ASSERT(cur < INT32_MAX);
 	return -2;
 }
 
@@ -298,12 +298,12 @@ static struct Redirect redirect_file_directory(const char* filename, int targetF
 	FILE *capture = fopen(filename, "w");
 	if (!ASSERT(capture != NULL)){
 		int restored = restore_file_directory(savedFd, targetFileDirectory, stream);
-		ASSERT(restored == 0);
+		(void)ASSERT(restored == 0);
 	} else {
 		int duped = dup2(fileno(capture), targetFileDirectory);
-		ASSERT(duped >= 0);
+		(void)ASSERT(duped >= 0);
 		int closed = fclose(capture);
-		ASSERT(closed == 0);
+		(void)ASSERT(closed == 0);
 		redirect.success = 1;
 	}
 	return redirect;
@@ -319,7 +319,7 @@ static struct Outputs redirect_outputs(void){
 	struct Redirect stdoutCapture = redirect_file_directory(outputs.stdOutLog, STDOUT_FILENO, stdout);
 	if (!(ASSERT(success) && ASSERT(stdoutCapture.success))){
 		int restored = restore_file_directory(stderrCapture.fileno, STDERR_FILENO, stderr);
-		ASSERT(restored == 0);
+		(void)ASSERT(restored == 0);
 		success = 0;
 	}
 	outputs.stderrRedirect = stderrCapture;
@@ -481,19 +481,19 @@ size_t get_stderr_size(void){
 
 /** See glue.h */
 unsigned char* get_stdout_pointer(void){
-	ASSERT(g_stdout_pointer != NULL);
+	(void)ASSERT(g_stdout_pointer != NULL);
 	return g_stdout_pointer;
 }
 
 /** See glue.h */
 unsigned char* get_stderr_pointer(void){
-	ASSERT(g_stderr_pointer != NULL);
+	(void)ASSERT(g_stderr_pointer != NULL);
 	return g_stderr_pointer;
 }
 
 /** See glue.h */
 unsigned char* get_source_code_pointer(void){
-	ASSERT(g_source_code_pointer != NULL);
+	(void)ASSERT(g_source_code_pointer != NULL);
 	return g_source_code_pointer;
 }
 
@@ -536,7 +536,7 @@ size_t get_stdout_size(void){
 
 /** See glue.h */
 unsigned char* get_binary_pointer(void){
-	ASSERT(g_bin_pointer != NULL);
+	(void)ASSERT(g_bin_pointer != NULL);
 	return g_bin_pointer;
 }
 
