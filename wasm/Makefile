@@ -163,7 +163,8 @@ wasm: src/glue.c $(WASM_LIBMMIX)
 	$(EMCC) $(CFLAGS) src/glue.c \
 		-L$(WASM_BUILD) -lmmix \
 		-o $(WASM_BUILD)/mmix.js \
-		-sEXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' \
+		-sEXPORTED_FUNCTIONS='["_assemble_mmixal","_mmix_simulate","_get_stdout_pointer","_get_source_code_pointer","_get_binary_pointer","_get_stderr_pointer","_get_stdout_size","_get_binary_size","_get_stderr_size"]' \
+		-sEXPORTED_RUNTIME_METHODS='["ccall","cwrap","HEAPU8"]' \
 		-sMODULARIZE=1 \
 		-sEXPORT_NAME='createMmixModule'
 
