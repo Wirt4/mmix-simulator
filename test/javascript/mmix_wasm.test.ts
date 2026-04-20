@@ -1,5 +1,3 @@
-// @vitest-environment node
-
 import { describe, it, expect, beforeAll } from "vitest"
 import path from "path"
 import { createRequire } from "module"
