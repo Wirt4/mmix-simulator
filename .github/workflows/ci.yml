@@ -78,6 +78,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -97,3 +99,39 @@ jobs:
           docker run --rm
           mmix-simulator:test
           bash -c "bin/setup --skip-server && bin/rake test"
+
+  test_c:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install cweb
+        run: sudo apt-get update && sudo apt-get install -y texlive-binaries
+
+      - name: Run C tests
+        run: make test
+        working-directory: wasm
+
+  analyze_c:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y texlive-binaries cppcheck
+
+      - name: Build library
+        run: make src/glue.o
+        working-directory: wasm
+
+      - name: Run static analysis
+        run: make analyze
+        working-directory: wasm
