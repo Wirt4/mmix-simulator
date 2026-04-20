@@ -53,14 +53,6 @@ RUN cd /tmp/mmixware && \
     rm -rf /tmp/mmixware
 
 # ─────────────────────────────────────────────────────────────
-# Landrun build (Go binary, rarely changes → isolate for caching)
-# ─────────────────────────────────────────────────────────────
-FROM docker.io/library/golang:1.24.2 AS landrun
-
-ARG LANDRUN_VERSION=0.1.14
-RUN go install "github.com/zouuup/landrun/cmd/landrun@v${LANDRUN_VERSION}"
-
-# ─────────────────────────────────────────────────────────────
 # Emscripten SDK (isolated for caching)
 # ─────────────────────────────────────────────────────────────
 FROM docker.io/library/debian:bookworm-slim AS emscripten
@@ -133,9 +125,6 @@ RUN --mount=type=cache,id=apt-test,target=/var/cache/apt \
     apt-get install --no-install-recommends -y \
       build-essential git libyaml-dev pkg-config nodejs npm strace texlive-binaries cppcheck && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
-
-# Landrun (Landlock sandboxing)
-COPY --from=landrun /go/bin/landrun /usr/local/bin/landrun
 
 # Emscripten SDK
 COPY --from=emscripten /opt/emsdk /opt/emsdk
