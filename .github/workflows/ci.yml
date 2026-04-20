@@ -97,3 +97,39 @@ jobs:
           docker run --rm
           mmix-simulator:test
           bash -c "bin/setup --skip-server && bin/rake test"
+
+  test_c:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install cweb
+        run: sudo apt-get update && sudo apt-get install -y cweb
+
+      - name: Run C tests
+        run: make test
+        working-directory: wasm
+
+  analyze_c:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cweb cppcheck
+
+      - name: Build library
+        run: make src/glue.o
+        working-directory: wasm
+
+      - name: Run static analysis
+        run: make analyze
+        working-directory: wasm
