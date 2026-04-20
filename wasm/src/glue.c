@@ -24,22 +24,29 @@ static void log_error(const char *expr, const char *file, int line) {
     fprintf(stderr, "Assertion failed: %s (%s:%d)\n", expr, file, line);
 }
 
-static FILE* open_file(const char*filename, int isWriteMode){
-	if (!(ASSERT (filename[0]!='\0'))){
-		return NULL;
+static int is_valid_string(const char*string){
+	if (!(ASSERT(string != NULL)&& ASSERT(string[0] != '\0'))){
+		return 0;
 	}
-	const char* modeArg = isWriteMode ? "w" : "rb";
-	FILE* pointer = fopen(filename, modeArg);
-	ASSERT(pointer != NULL);
-	return pointer;
+	return 1;
 }
 
+// static FILE* open_file(const char*filename, int isWriteMode){
+// 	if (!is_valid_string(filename)){
+// 		return NULL;
+// 	}
+// 	const char* modeArg = isWriteMode ? "w" : "rb";
+// 	FILE* pointer = fopen(filename, modeArg);
+// 	ASSERT(pointer != NULL);
+// 	return pointer;
+// }
+
 static int create_file(const char*filename){
-	if (!ASSERT(filename[0]!='\0')) {
+	if (!is_valid_string(filename)) {
 		return -1;
 	}
-	FILE * filePointer = open_file(filename, true);
-	if (!ASSERT(filePointer != NULL)){
+	FILE * filePointer = fopen(filename, "w");
+	if (filePointer == NULL){
 		return -1;
 	}
 	int result = fclose(filePointer);
@@ -111,20 +118,11 @@ static int write_bytes_to_file(const unsigned char * sourceStart, size_t sourceS
 	return 0;
 }
 
-static int delete_file(const char* filename){
-	if (!(ASSERT(filename != NULL) && ASSERT(filename[0] != '\0'))){
-		return -1;
-	}
-	int result = remove(filename);
-	ASSERT(result == 0);
-	return result;
-}
-
 static size_t read_to_heap(const char* filename, unsigned char* heapDest){
-	if (!(ASSERT(filename[0] !='\0') && ASSERT(heapDest != NULL))){
+	if (! is_valid_string(filename) && ASSERT(heapDest != NULL)){
 		return (size_t)-1;
 	}
-	FILE* filePointer = open_file(filename, false);
+	FILE* filePointer = fopen(filename, "rb");
 	if (filePointer==NULL){
 		fprintf(stderr, "Failed read from %s: %s Does the file exist?\n", filename, strerror(errno));
 		return (size_t)-1;
@@ -143,7 +141,6 @@ static size_t read_to_heap(const char* filename, unsigned char* heapDest){
 		fprintf(stderr, "Overflow Error: %s has more memory than is available on the heap %s\n", filename, strerror(errno));
 		return -1;
 	}
-
 	return fileSize;
 }
 
@@ -151,15 +148,16 @@ static int copy_heap_to_file(const char* filename, size_t dataSize){
 	if (dataSize == 0){
 		return 0;
 	}
-	if (!(ASSERT(filename != NULL) && ASSERT(filename[0]!='\0'))){
+	if (!is_valid_string(filename)){
 		return -1;
 	}
-	FILE* filePointer = open_file(filename, true);
-	if (!ASSERT(filePointer != NULL)){
+	FILE* filePointer = fopen(filename, "w");
+	if (filePointer == NULL){
 		return -1;
 	}
 	int writeResult = write_text_to_file(g_source_code_pointer, dataSize, filePointer);
 	if (!ASSERT(writeResult == 0)){
+		fclose(filePointer);
 		return -1;
 	}
 	int fileClose = fclose(filePointer);
@@ -168,15 +166,19 @@ static int copy_heap_to_file(const char* filename, size_t dataSize){
 }
 
 static int write_input_to_file(const unsigned char* input_pointer,  size_t input_size, const char* filename){
-	if (!(ASSERT(input_size >0) && ASSERT(input_size < HEAP_SIZE))){
+	if (!is_valid_string(filename)){
 		return -1;
 	}
-	FILE* file = open_file(filename, 1);
-	if (!ASSERT(file != NULL)){
+	if (!(ASSERT(0 < input_size) && ASSERT(input_size < HEAP_SIZE))){
+		return -1;
+	}
+	FILE* file = fopen(filename, "w");
+	if (file == NULL){
 		return -1;
 	}
 	const int fileWrite = write_bytes_to_file(input_pointer, input_size, file);
 	if (!ASSERT(fileWrite == 0)){
+		fclose(file);
 		return -1;
 	}
 	const int fileClose = fclose(file);
@@ -187,6 +189,9 @@ static int write_input_to_file(const unsigned char* input_pointer,  size_t input
 }
 
 static int init_mmix(char* mmoName){
+	if (!is_valid_string(mmoName)){
+		return -1;
+	}
 	const int libInit = mmix_lib_initialize();
 	if (!ASSERT(libInit ==0)){
 		return -1;
@@ -204,6 +209,7 @@ static int init_mmix(char* mmoName){
 }
 
 static int run_mmix_loop(void){
+	//note: stdout and stderr here are redirected as user feedback
 	int cur;
 	for (cur=0; cur< INT32_MAX; cur++){
 		if (halted){
@@ -227,19 +233,19 @@ struct Redirect {
 	int fileno;
 };
 
-static int restore_fd(int savedFd, int targetFd, FILE* stream){
-	if (!(ASSERT(savedFd >= 0) && ASSERT(targetFd >=0)&& ASSERT(stream != NULL))){
+static int restore_file_directory(int savedFileDirectory, int targetFileDirectory, FILE* stream){
+	if (!(ASSERT(savedFileDirectory >= 0) && ASSERT(targetFileDirectory >=0)&& ASSERT(stream != NULL))){
 		return -1;
 	}
 	int fileFlush = fflush(stream);
 	if (!ASSERT(fileFlush==0)){
 		return -1;
 	}
-	int restored = dup2(savedFd, targetFd);
+	int restored = dup2(savedFileDirectory, targetFileDirectory);
 	if (!ASSERT(restored >=0)){
 		return -1;
 	}
-	int closed = close(savedFd);
+	int closed = close(savedFileDirectory);
 	if(!ASSERT(closed == 0)){
 		return -1;
 	}
@@ -254,34 +260,47 @@ struct Outputs{
 	int success;
 };
 
+static int is_valid_outputs(struct Outputs outputs){
+	if (!(is_valid_string(outputs.stdOutLog) && is_valid_string(outputs.stdErrLog))){
+		return 0;
+	}
+	return 1;
+}
+
 static int restore_output(struct Outputs outputs){
-	int restoredStdOut = restore_fd(outputs.stdoutRedirect.fileno, STDOUT_FILENO, stdout);
-	int restoredStdError = restore_fd(outputs.stderrRedirect.fileno, STDERR_FILENO, stderr);
+	if (!is_valid_outputs(outputs)){
+		return -1;
+	}
+	int restoredStdOut = restore_file_directory(outputs.stdoutRedirect.fileno, STDOUT_FILENO, stdout);
+	int restoredStdError = restore_file_directory(outputs.stderrRedirect.fileno, STDERR_FILENO, stderr);
         if (!(ASSERT(restoredStdOut == 0) && ASSERT(restoredStdError == 0))){
 		return -1;
 	}
 	return 0;
 }
 
-static struct Redirect redirect_fd(const char* filename, int targetFd, FILE* stream){
+static struct Redirect redirect_file_directory(const char* filename, int targetFileDirectory, FILE* stream){
 	struct Redirect redirect;
 	redirect.success = 0;
 	redirect.fileno = -1;
+	if (!(is_valid_string(filename) && ASSERT(targetFileDirectory >= 0) && ASSERT(stream != NULL))){
+		return redirect;
+	}
 	int fileFlush = fflush(stream);
 	if (!ASSERT(fileFlush == 0)){
 		return redirect;
 	}
-	int savedFd = dup(targetFd);
+	int savedFd = dup(targetFileDirectory);
 	if (!ASSERT(savedFd >= 0)){
 		return redirect;
 	}
 	redirect.fileno = savedFd;
 	FILE *capture = fopen(filename, "w");
 	if (!ASSERT(capture != NULL)){
-		int restored = restore_fd(savedFd, targetFd, stream);
+		int restored = restore_file_directory(savedFd, targetFileDirectory, stream);
 		ASSERT(restored == 0);
 	} else {
-		int duped = dup2(fileno(capture), targetFd);
+		int duped = dup2(fileno(capture), targetFileDirectory);
 		ASSERT(duped >= 0);
 		int closed = fclose(capture);
 		ASSERT(closed == 0);
@@ -295,11 +314,11 @@ static struct Outputs redirect_outputs(void){
 	outputs.stdErrLog = "stderr.txt";
 	outputs.stdOutLog = "stdout.txt";
 	int success = 1;
-	struct Redirect stderrCapture = redirect_fd(outputs.stdErrLog, STDERR_FILENO, stderr);
+	struct Redirect stderrCapture = redirect_file_directory(outputs.stdErrLog, STDERR_FILENO, stderr);
 	success = stderrCapture.success;
-	struct Redirect stdoutCapture = redirect_fd(outputs.stdOutLog, STDOUT_FILENO, stdout);
+	struct Redirect stdoutCapture = redirect_file_directory(outputs.stdOutLog, STDOUT_FILENO, stdout);
 	if (!(ASSERT(success) && ASSERT(stdoutCapture.success))){
-		int restored = restore_fd(stderrCapture.fileno, STDERR_FILENO, stderr);
+		int restored = restore_file_directory(stderrCapture.fileno, STDERR_FILENO, stderr);
 		ASSERT(restored == 0);
 		success = 0;
 	}
@@ -310,10 +329,13 @@ static struct Outputs redirect_outputs(void){
 }
 
 static int read_outputs_to_heap(struct Outputs outputs){
+	if (!is_valid_outputs(outputs)){
+		return -1;
+	}
 	int result = 0;
 	g_stdout_len = read_to_heap(outputs.stdOutLog, g_stdout_pointer);
 	if (!ASSERT(g_stdout_len < HEAP_SIZE)){
-		result =  -1;
+		result =  -2;
 	}
 	if (g_stdout_len < HEAP_SIZE){
 		g_stdout_pointer[g_stdout_len] = '\0';
@@ -329,6 +351,9 @@ static int read_outputs_to_heap(struct Outputs outputs){
 }
 
 static int remove_output_files(struct Outputs outputs){
+	if (! is_valid_outputs(outputs)){
+		return -1;
+	}
 	int removedOutputLog = remove(outputs.stdOutLog);
 	int removedErrorLog = remove(outputs.stdErrLog);
 	if (!(ASSERT(removedOutputLog == 0) && ASSERT(removedErrorLog == 0))){
@@ -352,7 +377,17 @@ struct AssemblyFileNames {
 	char* listing;
 };
 
+static int is_valid_assembly_files(struct AssemblyFileNames files){
+	if (ASSERT(is_valid_string(files.mmo)) && ASSERT(is_valid_string(files.mms)) && ASSERT(is_valid_string(files.listing))){
+		return 1;
+	}
+	return 0;
+}
+
 static int create_assembly_output_files(struct AssemblyFileNames files){
+	if (!is_valid_assembly_files(files)){
+		return -1;
+	}
 	int mmoCreate = create_file(files.mmo);
 	int txtCreate = create_file(files.listing);
 	if (!(ASSERT(txtCreate == 0) && ASSERT(mmoCreate == 0))){
@@ -370,6 +405,9 @@ static struct AssemblyFileNames init_assembly_file_names(void){
 }
 
 static int read_assembly_files_to_heap(struct AssemblyFileNames files){
+	if (!is_valid_assembly_files(files)){
+		return -1;
+	}
 	g_bin_len =read_to_heap(files.mmo, g_bin_pointer);
 	if (!(ASSERT(g_bin_len < HEAP_SIZE) && ASSERT( g_bin_len > 0))){
 		return -1;
@@ -386,17 +424,21 @@ static int read_assembly_files_to_heap(struct AssemblyFileNames files){
 }
 
 static int delete_output_files(struct AssemblyFileNames files){
-	int mmsDelete = delete_file(files.mms);
-	int mmoDelete = delete_file(files.mmo);
-	int txtDelete = delete_file(files.listing);
+	if (!is_valid_assembly_files(files)){
+		return -1;
+	}
+	int mmsDelete = remove(files.mms);
+	int mmoDelete = remove(files.mmo);
+	int txtDelete = remove(files.listing);
 	if (!(ASSERT(mmsDelete ==0) && ASSERT(mmoDelete == 0) && ASSERT(txtDelete == 0))){
 		return -1;
 	}
 	return 0;
 }
 
+/** See glue.h */
 int mmix_simulate(size_t executable_size){
-	if (!(ASSERT(executable_size > 0) && ASSERT(executable_size < HEAP_SIZE))){
+	if (!(ASSERT(0 < executable_size) && ASSERT(executable_size < HEAP_SIZE))){
 		return -1;
 	}
 	char* mmoName ="program.mmo";
@@ -428,6 +470,7 @@ int mmix_simulate(size_t executable_size){
 	return result;
 }
 
+/** See glue.h */
 size_t get_stderr_size(void){
 	if (!(ASSERT(g_stderr_len > 0) && ASSERT(g_stderr_len < HEAP_SIZE))){
 		return (size_t)-1;
@@ -436,21 +479,25 @@ size_t get_stderr_size(void){
 	return g_stderr_len;
 }
 
+/** See glue.h */
 unsigned char* get_stdout_pointer(void){
 	ASSERT(g_stdout_pointer != NULL);
 	return g_stdout_pointer;
 }
 
+/** See glue.h */
 unsigned char* get_stderr_pointer(void){
 	ASSERT(g_stderr_pointer != NULL);
 	return g_stderr_pointer;
 }
 
+/** See glue.h */
 unsigned char* get_source_code_pointer(void){
 	ASSERT(g_source_code_pointer != NULL);
 	return g_source_code_pointer;
 }
 
+/** See glue.h */
 int assemble_mmixal(size_t len){
 	if (len == 0){
 		return 0;
@@ -476,22 +523,24 @@ int assemble_mmixal(size_t len){
 	int restoredOutputsResult = restore_output(outputs);
 	int outputRemoveResult = remove_output_files(outputs);
 	int deleteResult = delete_output_files(files);
-
 	if (!(ASSERT(restoredOutputsResult == 0) && ASSERT(outputRemoveResult == 0) && ASSERT(heapResult == 0) && ASSERT(deleteResult == 0))){
 		return -1;
 	}
 	return mmixResult;
 }
 
+/** See glue.h */
 size_t get_stdout_size(void){
 	return g_stdout_len;
 }
 
+/** See glue.h */
 unsigned char* get_binary_pointer(void){
 	ASSERT(g_bin_pointer != NULL);
 	return g_bin_pointer;
 }
 
+/** See glue.h */
 size_t get_binary_size(void){
 	if (!(ASSERT(g_bin_len > 0) && ASSERT(g_bin_len < HEAP_SIZE))){
 		return (size_t)-1;

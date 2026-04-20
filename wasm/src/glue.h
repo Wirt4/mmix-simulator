@@ -9,51 +9,66 @@
  * Public API exported to WASM via Emscripten.
  */
 
-/*
- * compiles string held in `input_buffer` to machine code results readable from `binary_result`
- * input: size_t len, the length of the mmixal code that has been loaded to the heap
- * preconditions: string-formatted mmixal code is previously stored on the heap
- * postconditions: `get_binary_result_pointer` will return a pointer to the compiled binary
- * `get_binary_result_size` will return the size in bytes of the result
- * `get_listing_pointer` will return a pointer to the string-formatted listing output and 
- * `get_listing_pointer_size` will return the length of the listing 
+/**
+ * Compiles MMIXAL source code to .mmo binary.
+ *
+ * @param len  Length in bytes of the source code stored at get_source_code_pointer().
+ * @pre  MMIXAL source code has been written to the buffer at get_source_code_pointer().
+ * @post On success, get_binary_pointer()/get_binary_size() return the compiled binary;
+ *       get_stdout_pointer()/get_stdout_size() return the assembler listing.
+ *       On failure, get_stdout_pointer()/get_stdout_size() return assembler error output.
+ * @return 0 on success, non-zero on failure.
  */
 int assemble_mmixal(size_t len);
 
 /**
- * returns a pointer to to the block of memory containing the machine code to be run on the mmix_sim
+ * Returns a pointer to the buffer containing the compiled .mmo binary.
  */
 unsigned char* get_binary_pointer(void);
 
 /**
- * returns the size in bytes of the allocated block containing the binary result
+ * Returns the size in bytes of the compiled .mmo binary.
  */
 size_t get_binary_size(void);
 
-size_t get_stderr_size(void);
 /**
- * returns a pointer to the start of the information mmix writes to stdout
- * The actual stdout and std error of the application is for developer use.
- * The heap reads and writes are for the virutalized mmix machine.
- * */
+ * Returns the size in bytes of the simulator's stderr output.
+ */
+size_t get_stderr_size(void);
+
+/**
+ * Returns a pointer to the buffer containing the simulator's stdout output.
+ *
+ * After assemble_mmixal(), this holds the assembler listing.
+ * After mmix_simulate(), this holds the simulated program's stdout.
+ */
 unsigned char* get_stdout_pointer(void);
 
-unsigned char* get_source_code_pointer(void);
 /**
- * returns size in bytes of material printed to stdout
+ * Returns a pointer to the input buffer for writing MMIXAL source code.
+ */
+unsigned char* get_source_code_pointer(void);
+
+/**
+ * Returns the size in bytes of the stdout output buffer.
  */
 size_t get_stdout_size(void);
 
+/**
+ * Returns a pointer to the buffer containing the simulator's stderr output.
+ */
 unsigned char* get_stderr_pointer(void);
 
-/*
- * executes the compiled .mmo binary currently on the heap
- * input: size_t executable_size, the size in bytes of the .mmo binary
- * preconditions: compiled .mmo binary is stored on the heap at heap_start;
- *   executable_size is non-zero and within bounds of the allocated heap
- * postconditions: no temporary files remain on disk;
- *   program output is written to stdout/stderr
- * returns: 0 on success, non-zero on failure
+/**
+ * Executes a compiled .mmo binary.
+ *
+ * @param executable_size  Size in bytes of the .mmo binary at get_binary_pointer().
+ * @pre  A compiled .mmo binary has been written to the buffer at get_binary_pointer();
+ *       executable_size is non-zero and within the allocated heap bounds.
+ * @post get_stdout_pointer()/get_stdout_size() return the program's stdout;
+ *       get_stderr_pointer()/get_stderr_size() return the program's stderr.
+ *       No temporary files remain on disk.
+ * @return 0 on success, non-zero on failure.
  */
 int mmix_simulate(size_t executable_size);
 
