@@ -1,7 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
+import type { IEditorController } from "./editor_controller.interface"
 import Editor from "../editor"
 
-export default class EditorController extends Controller {
+export default class EditorController extends Controller implements IEditorController {
   static targets = ["textarea", "lineNumbers"]
 
   declare textareaTarget: HTMLTextAreaElement
