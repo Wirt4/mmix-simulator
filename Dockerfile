@@ -149,9 +149,6 @@ COPY . .
 
 RUN cd wasm && make wasm
 
-RUN ln -s /rails/script/landrun_and_limit.rb /usr/local/bin/landrun-and-limit&& \
-    chmod +x /rails/script/landrun_and_limit.rb
-
 CMD ["bin/ci"]
 
 # ─────────────────────────────────────────────────────────────
