@@ -1,6 +1,6 @@
-export interface IModuleWrapper {
-  assembleMMIXAL(sourceCode: String): void
-  getStdOut(): String
-  getStdErr(): String
-  simulateMMIXAL(): void
+export interface IModuleAdapter {
+  assembleMMIXAL(sourceCode: string): void
+  getStdOut(): string
+  getStdErr(): string
+  simulateMMIX(): void
 }
