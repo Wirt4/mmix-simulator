@@ -7,7 +7,8 @@ import tseslint from 'typescript-eslint';
 export default defineConfig(
 	{
 		ignores: [
-			'app/assets/builds'
+			'app/assets/builds',
+			'wasm/build'
 		]
 	},
 	eslint.configs.recommended,

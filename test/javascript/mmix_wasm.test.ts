@@ -1,17 +1,12 @@
 import { describe, it, expect, beforeAll } from "vitest"
 import path from "path"
 import { createRequire } from "module"
-
-interface MmixModule {
-  ccall: (name: string, returnType: string, argTypes: string[], args: unknown[]) => unknown
-  cwrap: (name: string, returnType: string, argTypes: string[]) => (...args: unknown[]) => unknown
-  HEAPU8: Uint8Array
-}
+import type { MainModule } from "../../wasm/build/wasm/module"
 
 const require_ = createRequire(import.meta.url)
 const createMmixModule = require_(
   path.resolve(process.cwd(), "wasm/build/wasm/mmix.js")
-) as () => Promise<MmixModule>
+) as () => Promise<MainModule>
 
 const helloWorldSource =
   "\tLOC\tData_Segment\n" +
@@ -34,7 +29,7 @@ const stderrProgramSource =
   "\tTRAP\t0,Halt,0\n"
 
 describe("MMIX WASM Module", () => {
-  let Module: MmixModule
+  let Module: MainModule
 
   beforeAll(async () => {
     Module = await createMmixModule()

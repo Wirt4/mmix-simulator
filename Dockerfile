@@ -139,6 +139,7 @@ RUN bundle install
 COPY package.json package-lock.json* ./
 RUN --mount=type=cache,target=/root/.npm \
     npm install
+ENV PATH="/rails/node_modules/.bin:${PATH}"
 
 # MMIX binaries
 COPY --from=mmix /usr/local/bin/mmix /usr/local/bin/mmix
@@ -148,7 +149,7 @@ COPY --from=mmix /usr/local/bin/mmixal /usr/local/bin/mmixal
 COPY . .
 
 RUN cd wasm && make wasm
-
+RUN cp wasm/build/wasm/module.d.ts app/javascript/types/module.d.ts
 CMD ["bin/ci"]
 
 # ─────────────────────────────────────────────────────────────
