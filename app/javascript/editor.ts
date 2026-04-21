@@ -12,7 +12,6 @@ export default class Editor {
   private readonly lineNumbers: HTMLElement
 
   constructor(textarea: HTMLTextAreaElement, lineNumbers: HTMLElement) {
-    console.log('editor created')
     this.textarea = textarea
     this.lineNumbers = lineNumbers
   }
