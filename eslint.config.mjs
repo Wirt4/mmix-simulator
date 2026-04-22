@@ -7,9 +7,24 @@ import tseslint from 'typescript-eslint';
 export default defineConfig(
 	{
 		ignores: [
-			'app/assets/builds'
+			'app/assets/builds/**',
+			'node_modules/**',
+			'config/**',
+			'wasm/build/**',
+			'app/views/pwa/**',
 		]
 	},
 	eslint.configs.recommended,
-	tseslint.configs.recommended,
+	tseslint.configs.strictTypeChecked,
+	tseslint.configs.stylisticTypeChecked,
+	{
+		languageOptions: {
+			parserOptions: {
+				projectService: {
+				allowDefaultProject: ['eslint.config.mjs', 'vitest.config.ts'],
+			},
+				tsconfigRootDir: import.meta.dirname,
+			},
+		},
+	},
 );
