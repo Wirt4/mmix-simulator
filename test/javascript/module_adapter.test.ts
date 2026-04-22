@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import ModuleAdapter from "../../app/javascript/module_adapter"
+import ModuleAdapter from "../../app/javascript/moduleAdapter/module_adapter"
 import type { MainModule } from "../../app/javascript/types/module"
 
 describe("Module Adapter", () => {
@@ -116,5 +116,14 @@ describe("Module Adapter", () => {
 
     expect(simSpy.mock.calls.length).toBe(1)
     expect(simSpy.mock.calls).toEqual(expect.arrayContaining([[mockBinSize]]))
+  })
+
+  it('if _assemble_mmixal returns non zero, then mmixSimulate returns false', () => {
+    vi.spyOn(mockModule, '_assemble_mmixal').mockReturnValue(5)
+
+    const adapter = new ModuleAdapter(mockModule)
+    const result = adapter.assembleMMIXAL('stub')
+
+    expect(result).toBe(false)
   })
 })

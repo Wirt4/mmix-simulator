@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import type { IIDEFacadeController } from "./ide_facade_controller.interface"
-import Editor from "../editor/editor"
+import Formatter from "../formatter/formatter"
 
 export default class IDEFacadeController extends Controller implements IIDEFacadeController {
   static targets = ["textarea", "lineNumbers"]
@@ -8,22 +8,22 @@ export default class IDEFacadeController extends Controller implements IIDEFacad
   declare textareaTarget: HTMLTextAreaElement
   declare lineNumbersTarget: HTMLElement
 
-  private editor!: Editor
+  private formatter!: Formatter
 
   connect(): void {
-    this.editor = new Editor(this.textareaTarget, this.lineNumbersTarget)
-    this.editor.updateLineNumbers()
+    this.formatter = new Formatter(this.textareaTarget, this.lineNumbersTarget)
+    this.formatter.updateLineNumbers()
   }
 
   updateLineNumbers(): void {
-    this.editor.updateLineNumbers()
+    this.formatter.updateLineNumbers()
   }
 
   syncScroll(): void {
-    this.editor.syncScroll()
+    this.formatter.syncScroll()
   }
 
   handleKeydown(event: KeyboardEvent): void {
-    this.editor.handleKeydown(event)
+    this.formatter.handleKeydown(event)
   }
 }

@@ -1,10 +1,10 @@
-import type { SelectionRange, IEditor } from "./editor.interface"
+import type { SelectionRange, IFormatter } from "./formatter.interface"
 
 /**
  * A code editor that pairs a textarea with a line number gutter.
  * Supports Tab-key indentation and synchronized scrolling.
  */
-export default class Editor implements IEditor {
+export default class Editor implements IFormatter {
   private readonly textarea: HTMLTextAreaElement
   private readonly lineNumbers: HTMLElement
 

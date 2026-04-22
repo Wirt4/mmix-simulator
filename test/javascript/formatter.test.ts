@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest"
-import Editor from "../../app/javascript/editor/editor"
+import Formatter from "../../app/javascript/formatter/formatter"
 
 function createTextarea(value = ""): HTMLTextAreaElement {
   const textarea = document.createElement("textarea")
@@ -14,24 +14,24 @@ function createLineNumbers(): HTMLDivElement {
 describe("Editor", () => {
   let textarea: HTMLTextAreaElement
   let lineNumbers: HTMLDivElement
-  let editor: Editor
+  let formatter: Formatter
 
   beforeEach(() => {
     textarea = createTextarea()
     lineNumbers = createLineNumbers()
-    editor = new Editor(textarea, lineNumbers)
+    formatter = new Formatter(textarea, lineNumbers)
   })
 
   describe("updateLineNumbers", () => {
     it("renders line numbers for a single line", () => {
       textarea.value = "hello"
-      editor.updateLineNumbers()
+      formatter.updateLineNumbers()
 
       expect(lineNumbers.innerHTML).toBe("<span>1</span>")
     })
     it("renders line numbers for multiple lines", () => {
       textarea.value = "line1\n\nline3"
-      editor.updateLineNumbers()
+      formatter.updateLineNumbers()
 
       const spans = lineNumbers.querySelectorAll("span")
       expect(spans.length).toBe(3)
@@ -44,13 +44,13 @@ describe("Editor", () => {
   describe("syncScroll", () => {
     it("syncs line numbers scrollTop with textarea scrollTop", () => {
       Object.defineProperty(textarea, "scrollTop", { value: 42, writable: true })
-      editor.syncScroll()
+      formatter.syncScroll()
 
       expect(lineNumbers.scrollTop).toBe(42)
     })
     it("syncs line numbers scrollTop with textarea scrollTop, diffeent data", () => {
       Object.defineProperty(textarea, "scrollTop", { value: 77, writable: true })
-      editor.syncScroll()
+      formatter.syncScroll()
 
       expect(lineNumbers.scrollTop).toBe(77)
     })
@@ -64,7 +64,7 @@ describe("Editor", () => {
       textarea.selectionEnd = 2
 
       const tabEvent = new KeyboardEvent("keydown", { key: "Tab", cancelable: true })
-      editor.handleKeydown(tabEvent)
+      formatter.handleKeydown(tabEvent)
 
       expect(textarea.value).toBe("he  llo")
     })
@@ -74,7 +74,7 @@ describe("Editor", () => {
       textarea.selectionEnd = 2
 
       const tabEvent = new KeyboardEvent("keydown", { key: "Tab", cancelable: true })
-      editor.handleKeydown(tabEvent)
+      formatter.handleKeydown(tabEvent)
 
       expect(textarea.value).toBe("go  dzilla")
     })
@@ -84,7 +84,7 @@ describe("Editor", () => {
       textarea.selectionEnd = 4
 
       const tabEvent = new KeyboardEvent("keydown", { key: "Tab", cancelable: true })
-      editor.handleKeydown(tabEvent)
+      formatter.handleKeydown(tabEvent)
 
       expect(textarea.value).toBe("godz  illa")
     })
@@ -95,7 +95,7 @@ describe("Editor", () => {
       textarea.selectionEnd = 4
 
       const tabEvent = new KeyboardEvent("keydown", { key: "a", cancelable: true })
-      editor.handleKeydown(tabEvent)
+      formatter.handleKeydown(tabEvent)
 
       expect(textarea.value).not.toBe("godz  illa")
     })
@@ -107,7 +107,7 @@ describe("Editor", () => {
       textarea.selectionEnd = 2
 
       const tabEvent = new KeyboardEvent("keydown", { key: "Tab", cancelable: true })
-      editor.handleKeydown(tabEvent)
+      formatter.handleKeydown(tabEvent)
 
       expect(textarea.selectionStart).toBe(4)
       expect(textarea.selectionEnd).toBe(4)
@@ -119,7 +119,7 @@ describe("Editor", () => {
       textarea.selectionEnd = 0
 
       const tabEvent = new KeyboardEvent("keydown", { key: "Tab", cancelable: true })
-      editor.handleKeydown(tabEvent)
+      formatter.handleKeydown(tabEvent)
 
       expect(tabEvent.defaultPrevented).toBe(true)
     })
@@ -130,7 +130,7 @@ describe("Editor", () => {
       //selected area is "g[odz]illa"
 
       const tabEvent = new KeyboardEvent("keydown", { key: "Tab", cancelable: true })
-      editor.handleKeydown(tabEvent)
+      formatter.handleKeydown(tabEvent)
 
       expect(textarea.value).toBe("g  illa")
     })
@@ -140,7 +140,7 @@ describe("Editor", () => {
       textarea.selectionEnd = 5
 
       const tabEvent = new KeyboardEvent("keydown", { key: "Tab", cancelable: true })
-      editor.handleKeydown(tabEvent)
+      formatter.handleKeydown(tabEvent)
 
       expect(lineNumbers.innerHTML).toBe("<span>1</span>")
     })
@@ -148,7 +148,7 @@ describe("Editor", () => {
       textarea.value = "hello"
 
       const enterEvent = new KeyboardEvent("keydown", { key: "Enter", cancelable: true })
-      editor.handleKeydown(enterEvent)
+      formatter.handleKeydown(enterEvent)
 
       expect(textarea.value).toBe("hello")
       expect(enterEvent.defaultPrevented).toBe(false)

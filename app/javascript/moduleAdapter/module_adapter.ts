@@ -8,19 +8,19 @@ export default class ModuleAdapter implements IModuleAdapter {
     this._module = module
   }
 
-  public assembleMMIXAL(sourceCode: string): void {
+  public assembleMMIXAL(sourceCode: string): boolean {
     if (sourceCode.length === 0) {
-      return
+      return true
     }
     const encoded = new TextEncoder().encode(sourceCode)
     if (encoded.length === 0 || encoded.every((value: number) => value === 0)) {
       console.error("encoded source can't be empty")
-      return
+      return false
     }
     const ptr = this._module._get_source_code_pointer()
     if (ptr <= 0) {
       console.error(`mmix module returned inalid pointer for source code (value: ${String(ptr)})`)
-      return;
+      return false
     }
     try {
       this._module.HEAPU8.set(encoded, ptr)
@@ -32,8 +32,8 @@ export default class ModuleAdapter implements IModuleAdapter {
     if (ptr + len < this._module.HEAPU8.length) {
       this._module.HEAPU8[ptr + len] = 0
     }
-    // the module has a return value, but it denotes user code errors, not simulator errors
-    this._module._assemble_mmixal(len)
+    const result = this._module._assemble_mmixal(len)
+    return result === 0
   }
 
   public getStdOut(): string {
