@@ -49,7 +49,7 @@ export default class Editor implements IEditor {
   private _generateLineNumbers(numLines: number): string {
     const numbers: string[] = []
     for (let i = 1; i <= numLines; i++) {
-      numbers.push(`<span>${i}</span>`)
+      numbers.push(`<span>${String(i)}</span>`)
     }
     return numbers.join("")
   }

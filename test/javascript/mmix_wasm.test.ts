@@ -66,7 +66,7 @@ describe("MMIX WASM Module", () => {
   })
 
   it("mmix_simulate captures stderr output", () => {
-    const expected: string = "I can't do that Dave.\n"
+    const expected = "I can't do that Dave.\n"
     const src = stderrProgramSource
 
     const ptr: number = Module._get_source_code_pointer()
@@ -87,7 +87,7 @@ describe("MMIX WASM Module", () => {
 
   it("mmix_simulate captures stdout output", () => {
     const src = helloWorldSource
-    const expected: string = "Greetings Program!\n"
+    const expected = "Greetings Program!\n"
 
     const ptr: number = Module._get_source_code_pointer()
     const encoded: Uint8Array = new TextEncoder().encode(src)
@@ -105,7 +105,7 @@ describe("MMIX WASM Module", () => {
   })
 
   it("assemble_mmixal produces nonzero result", () => {
-    const badInput: string = "\tBADOP\t\"Make me a Millionaire\"n"
+    const badInput = "\tBADOP\t\"Make me a Millionaire\"n"
 
     const ptr: number = Module._get_source_code_pointer()
     const encoded: Uint8Array = new TextEncoder().encode(badInput)
@@ -117,8 +117,8 @@ describe("MMIX WASM Module", () => {
   })
 
   it("assemble_mmixal produces correct error output", () => {
-    const badInput: string = "\tBADOP\t\"Make me a Millionaire\"n"
-    const stdErrFragment: string = '"program.mms", line 1: undefined symbol'
+    const badInput = "\tBADOP\t\"Make me a Millionaire\"n"
+    const stdErrFragment = '"program.mms", line 1: undefined symbol'
 
     const ptr: number = Module._get_source_code_pointer()
     const encoded: Uint8Array = new TextEncoder().encode(badInput)
