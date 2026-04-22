@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, MockInstance } from "vitest"
+import { describe, it, expect, vi, beforeEach } from "vitest"
 import ModuleAdapter from "../../app/javascript/module_adapter"
 import type { MainModule } from "../../wasm/build/wasm/module"
 
@@ -6,7 +6,6 @@ describe("Module Adapter", () => {
   let heap: Uint8Array
   let mockModule: MainModule
   let helloWorldSource: string
-  let heapSpy: MockInstance<(heap: Uint8Array, address: number) => void>
   beforeEach(() => {
     helloWorldSource =
       "\tLOC\tData_Segment\n" +
@@ -18,8 +17,7 @@ describe("Module Adapter", () => {
       "\tTRAP\t0,Fputs,StdOut\n" +
       "\tTRAP\t0,Halt,0\n"
 
-    heap = new Uint8Array()
-    heapSpy = vi.spyOn(heap, 'set').mockImplementation(() => { })
+    heap = new Uint8Array(250)
 
     mockModule = {
       ccall: vi.fn(),
@@ -41,7 +39,8 @@ describe("Module Adapter", () => {
     const mockPointer = 9
     vi.spyOn(mockModule, '_get_source_code_pointer').mockReturnValue(mockPointer)
     const encoded: Uint8Array = new TextEncoder().encode(helloWorldSource)
-    console.log('encodeded length', encoded.length)
+    const heapSpy = vi.spyOn(mockModule.HEAPU8, "set")
+
     const adapter = new ModuleAdapter(mockModule)
     adapter.assembleMMIXAL(helloWorldSource)
 
