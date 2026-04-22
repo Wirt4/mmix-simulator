@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest"
 import path from "path"
 import { createRequire } from "module"
-import type { MainModule } from "../../wasm/build/wasm/module"
+import type { MainModule } from "../../app/javascript/types/module"
 
 const require_ = createRequire(import.meta.url)
 const createMmixModule = require_(

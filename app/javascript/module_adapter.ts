@@ -1,5 +1,5 @@
 import type { IModuleAdapter } from './module_adapter.interface'
-import type { MainModule } from "../../wasm/build/wasm/module"
+import type { MainModule } from "./types/module"
 
 export default class ModuleAdapter implements IModuleAdapter {
   private _module: MainModule

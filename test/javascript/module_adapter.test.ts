@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import ModuleAdapter from "../../app/javascript/module_adapter"
-import type { MainModule } from "../../wasm/build/wasm/module"
+import type { MainModule } from "../../app/javascript/types/module"
 
 describe("Module Adapter", () => {
   let heap: Uint8Array
