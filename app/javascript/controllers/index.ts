@@ -1,4 +1,4 @@
 import { application } from "./application"
-import EditorController from "./editor_controller"
+import IDEFacadeController from "./ide_facade_controller"
 
-application.register("editor", EditorController)
+application.register("ide-facade", IDEFacadeController)

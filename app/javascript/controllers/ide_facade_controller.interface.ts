@@ -1,4 +1,4 @@
-export interface IEditorController {
+export interface IIDEFacadeController {
   connect(): void
   updateLineNumbers(): void
   syncScroll(): void
