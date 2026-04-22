@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import type { IIDEFacadeController } from "./ide_facade_controller.interface"
-import Editor from "../editor"
+import Editor from "../editor/editor"
 
 export default class IDEFacadeController extends Controller implements IIDEFacadeController {
   static targets = ["textarea", "lineNumbers"]

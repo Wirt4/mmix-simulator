@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest"
-import Editor from "../../app/javascript/editor"
+import Editor from "../../app/javascript/editor/editor"
 
 function createTextarea(value = ""): HTMLTextAreaElement {
   const textarea = document.createElement("textarea")
