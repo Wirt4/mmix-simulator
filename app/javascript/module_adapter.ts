@@ -13,7 +13,7 @@ export default class ModuleAdapter implements IModuleAdapter {
       return
     }
     const encoded = new TextEncoder().encode(sourceCode)
-    if (encoded.length === 0 || encoded.every(value => value === 0)) {
+    if (encoded.length === 0 || encoded.every((value: number) => value === 0)) {
       console.error("encoded source can't be empty")
       return
     }
@@ -83,7 +83,7 @@ export default class ModuleAdapter implements IModuleAdapter {
       return;
     }
     const bin = this._module.HEAPU8.slice(ptr, ptr + len)
-    if (bin.every(value => value === 0)) {
+    if (bin.every((value: number) => value === 0)) {
       console.log("can't simulate an empty executable")
     }
     // return value of simulate method denotes user errors, not simulator errors
