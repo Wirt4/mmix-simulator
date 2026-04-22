@@ -1,17 +1,12 @@
 import { describe, it, expect, beforeAll } from "vitest"
 import path from "path"
 import { createRequire } from "module"
-
-interface MmixModule {
-  ccall: (name: string, returnType: string, argTypes: string[], args: unknown[]) => unknown
-  cwrap: (name: string, returnType: string, argTypes: string[]) => (...args: unknown[]) => unknown
-  HEAPU8: Uint8Array
-}
+import type { MainModule } from "../../app/javascript/types/module"
 
 const require_ = createRequire(import.meta.url)
 const createMmixModule = require_(
   path.resolve(process.cwd(), "wasm/build/wasm/mmix.js")
-) as () => Promise<MmixModule>
+) as () => Promise<MainModule>
 
 const helloWorldSource =
   "\tLOC\tData_Segment\n" +
@@ -34,7 +29,7 @@ const stderrProgramSource =
   "\tTRAP\t0,Halt,0\n"
 
 describe("MMIX WASM Module", () => {
-  let Module: MmixModule
+  let Module: MainModule
 
   beforeAll(async () => {
     Module = await createMmixModule()
@@ -43,13 +38,13 @@ describe("MMIX WASM Module", () => {
   it("a successfull assemble_mmixal produces a listing output", () => {
     const src: string = helloWorldSource
 
-    const ptr: number = Module.cwrap("get_source_code_pointer", "number", [])() as number
+    const ptr: number = Module._get_source_code_pointer()
     const encoded: Uint8Array = new TextEncoder().encode(src)
     Module.HEAPU8.set(encoded, ptr)
     Module.HEAPU8[ptr + encoded.length] = 0
-    Module.cwrap("assemble_mmixal", "number", ["number"])(encoded.length)
-    const stdoutPtr: number = Module.cwrap("get_stdout_pointer", "number", [])() as number
-    const stdoutSize: number = Module.cwrap("get_stdout_size", "number", [])() as number
+    Module._assemble_mmixal(encoded.length)
+    const stdoutPtr: number = Module._get_stdout_pointer()
+    const stdoutSize: number = Module._get_stdout_size()
     const bytes = Module.HEAPU8.slice(stdoutPtr, stdoutPtr + stdoutSize)
     const stdoutText: string = new TextDecoder().decode(bytes)
 
@@ -61,11 +56,11 @@ describe("MMIX WASM Module", () => {
   it("given a source that's syntactically correct and  prints to stderr, when it is converted to assembly, then the assemble result will be clean", () => {
     const src: string = stderrProgramSource
 
-    const ptr: number = Module.cwrap("get_source_code_pointer", "number", [])() as number
+    const ptr: number = Module._get_source_code_pointer()
     const encoded: Uint8Array = new TextEncoder().encode(src)
     Module.HEAPU8.set(encoded, ptr)
     Module.HEAPU8[ptr + encoded.length] = 0
-    const assemblyResult = Module.cwrap("assemble_mmixal", "number", ["number"])(encoded.length) as number
+    const assemblyResult = Module._assemble_mmixal(encoded.length)
 
     expect(assemblyResult).toBe(0)
   })
@@ -74,15 +69,15 @@ describe("MMIX WASM Module", () => {
     const expected = "I can't do that Dave.\n"
     const src = stderrProgramSource
 
-    const ptr: number = Module.cwrap("get_source_code_pointer", "number", [])() as number
+    const ptr: number = Module._get_source_code_pointer()
     const encoded: Uint8Array = new TextEncoder().encode(src)
     Module.HEAPU8.set(encoded, ptr)
     Module.HEAPU8[ptr + encoded.length] = 0
-    Module.cwrap("assemble_mmixal", "number", ["number"])(encoded.length) as number
-    const binSize: number = Module.cwrap("get_binary_size", "number", [])() as number
-    Module.cwrap("mmix_simulate", "number", ["number"])(binSize)
-    const stderrSize: number = Module.cwrap("get_stderr_size", "number", [])() as number
-    const stderrPtr: number = Module.cwrap("get_stderr_pointer", "number", [])() as number
+    Module._assemble_mmixal(encoded.length)
+    const binSize: number = Module._get_binary_size()
+    Module._mmix_simulate(binSize)
+    const stderrSize: number = Module._get_stderr_size()
+    const stderrPtr: number = Module._get_stderr_pointer()
     const bytes = Module.HEAPU8.slice(stderrPtr, stderrPtr + stderrSize)
     const stderrOutput: string = new TextDecoder().decode(bytes)
 
@@ -94,15 +89,15 @@ describe("MMIX WASM Module", () => {
     const src = helloWorldSource
     const expected = "Greetings Program!\n"
 
-    const ptr: number = Module.cwrap("get_source_code_pointer", "number", [])() as number
-    const encoded: Uint8Array = new TextEncoder().encode(src);
+    const ptr: number = Module._get_source_code_pointer()
+    const encoded: Uint8Array = new TextEncoder().encode(src)
     Module.HEAPU8.set(encoded, ptr)
     Module.HEAPU8[ptr + encoded.length] = 0
-    Module.cwrap("assemble_mmixal", "number", ["number"])(encoded.length)
-    const binSize: number = Module.cwrap("get_binary_size", "number", [])() as number
-    Module.cwrap("mmix_simulate", "number", ["number"])(binSize)
-    const stdoutSize: number = Module.cwrap("get_stdout_size", "number", [])() as number
-    const stdoutPtr: number = Module.cwrap("get_stdout_pointer", "number", [])() as number
+    Module._assemble_mmixal(encoded.length)
+    const binSize: number = Module._get_binary_size()
+    Module._mmix_simulate(binSize)
+    const stdoutSize: number = Module._get_stdout_size()
+    const stdoutPtr: number = Module._get_stdout_pointer()
     const bytes = Module.HEAPU8.slice(stdoutPtr, stdoutPtr + stdoutSize)
     const stdoutOutput: string = new TextDecoder().decode(bytes)
 
@@ -112,11 +107,11 @@ describe("MMIX WASM Module", () => {
   it("assemble_mmixal produces nonzero result", () => {
     const badInput = "\tBADOP\t\"Make me a Millionaire\"n"
 
-    const ptr: number = Module.cwrap("get_source_code_pointer", "number", [])() as number
+    const ptr: number = Module._get_source_code_pointer()
     const encoded: Uint8Array = new TextEncoder().encode(badInput)
     Module.HEAPU8.set(encoded, ptr)
     Module.HEAPU8[ptr + encoded.length] = 0
-    const result: number = Module.cwrap("assemble_mmixal", "number", ["number"])(encoded.length) as number
+    const result: number = Module._assemble_mmixal(encoded.length)
 
     expect(result).not.toBe(0)
   })
@@ -125,13 +120,13 @@ describe("MMIX WASM Module", () => {
     const badInput = "\tBADOP\t\"Make me a Millionaire\"n"
     const stdErrFragment = '"program.mms", line 1: undefined symbol'
 
-    const ptr: number = Module.cwrap("get_source_code_pointer", "number", [])() as number
+    const ptr: number = Module._get_source_code_pointer()
     const encoded: Uint8Array = new TextEncoder().encode(badInput)
     Module.HEAPU8.set(encoded, ptr)
     Module.HEAPU8[ptr + encoded.length] = 0
-    Module.cwrap("assemble_mmixal", "number", ["number"])(encoded.length)
-    const stderrSize: number = Module.cwrap("get_stderr_size", "number", [])() as number
-    const stderrPtr: number = Module.cwrap("get_stderr_pointer", "number", [])() as number
+    Module._assemble_mmixal(encoded.length)
+    const stderrSize: number = Module._get_stderr_size()
+    const stderrPtr: number = Module._get_stderr_pointer()
     const bytes: Uint8Array = Module.HEAPU8.slice(stderrPtr, stderrPtr + stderrSize)
     const stderrOutput: string = new TextDecoder().decode(bytes)
 

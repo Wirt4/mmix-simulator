@@ -12,6 +12,7 @@ export default defineConfig(
 			'config/**',
 			'wasm/build/**',
 			'app/views/pwa/**',
+			'app/javascript/types/**',
 		]
 	},
 	eslint.configs.recommended,

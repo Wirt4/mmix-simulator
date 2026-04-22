@@ -1,13 +1,10 @@
-interface SelectionRange {
-  start: number
-  end: number
-}
+import type { SelectionRange, IEditor } from "./editor.interface"
 
 /**
  * A code editor that pairs a textarea with a line number gutter.
  * Supports Tab-key indentation and synchronized scrolling.
  */
-export default class Editor {
+export default class Editor implements IEditor {
   private readonly textarea: HTMLTextAreaElement
   private readonly lineNumbers: HTMLElement
 

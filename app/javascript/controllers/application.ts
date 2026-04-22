@@ -1,10 +1,5 @@
 import { Application } from "@hotwired/stimulus"
-
-declare global {
-  interface Window {
-    Stimulus: Application
-  }
-}
+import "./application.interface"
 
 const application = Application.start()
 
