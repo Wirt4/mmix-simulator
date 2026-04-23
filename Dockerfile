@@ -150,6 +150,9 @@ COPY . .
 
 RUN cd wasm && make wasm
 RUN cp wasm/build/wasm/module.d.ts app/javascript/types/module.d.ts
+RUN cp wasm/build/wasm/mmix.js wasm/build/wasm/mmix.wasm public/
+RUN mkdir -p /opt/wasm-cache && \
+    cp wasm/build/wasm/mmix.js wasm/build/wasm/mmix.wasm wasm/build/wasm/module.d.ts /opt/wasm-cache/
 CMD ["bin/ci"]
 
 # ─────────────────────────────────────────────────────────────

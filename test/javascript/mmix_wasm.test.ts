@@ -1,13 +1,19 @@
-import { describe, it, expect, beforeAll } from "vitest"
-// import path from "path"
-//import { createRequire } from "module"
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
+import { describe, it, expect, beforeAll, vi } from "vitest"
 import type { MainModule } from "../../app/javascript/types/module"
 import moduleFactory from "../../app/javascript/wasm/factory"
-// const require_ = createRequire(import.meta.url)
-// const createMmixModule = require_(
-//   path.resolve(process.cwd(), "wasm/build/wasm/mmix.js")
-// ) as () => Promise<MainModule>
-//
+
+vi.mock('../../app/javascript/wasm/factory', () => {
+  const { createRequire } = require("module")
+  const path = require("path")
+  const require_ = createRequire(import.meta.url)
+  const createMmixModule = require_(
+    path.resolve(process.cwd(), "wasm/build/wasm/mmix.js")
+  ) as () => Promise<MainModule>
+  return { default: () => createMmixModule() }
+})
 const helloWorldSource =
   "\tLOC\tData_Segment\n" +
   "\tGREG\t@\n" +

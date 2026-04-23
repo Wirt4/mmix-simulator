@@ -1,4 +1,5 @@
-import { describe, it, vi, expect, beforeAll } from "vitest"
+/* eslint-disable @typescript-eslint/unbound-method */
+import { describe, it, vi, expect } from "vitest"
 import Simulator from '../../app/javascript/simulator/simulator'
 import { IModuleAdapter } from '../../app/javascript/moduleAdapter/module_adapter.interface'
 
@@ -10,12 +11,14 @@ const mockAdapter: IModuleAdapter = vi.hoisted(() => ({
 }))
 
 vi.mock('../../app/javascript/moduleAdapter/factory', () => ({
-  default: vi.fn(async () => { return mockAdapter })
+  default: vi.fn(() => {
+    return Promise.resolve(mockAdapter)
+  })
 }))
 
 describe("Simulator tests", () => {
   it("runUserProgram calls assembleMMIXAL", async () => {
-    const simulator = new Simulator(createTextarea(), createTextarea())
+    const simulator = new Simulator(createTextarea(), createTextarea(), createButton())
     await simulator.init()
     simulator.runUserProgram()
 
@@ -25,7 +28,7 @@ describe("Simulator tests", () => {
   it("runUserProgram calls assembleMMIXAL with the code from the inText field", async () => {
     const userCode = "TRAP 0"
     const inText = createTextarea(userCode)
-    const simulator = new Simulator(inText, createTextarea())
+    const simulator = new Simulator(inText, createTextarea(), createButton())
     await simulator.init()
 
     simulator.runUserProgram()
@@ -39,7 +42,7 @@ describe("Simulator tests", () => {
     vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(false)
     vi.spyOn(mockAdapter, 'getStdErr').mockReturnValue(expected)
 
-    const simulator = new Simulator(createTextarea(), outText)
+    const simulator = new Simulator(createTextarea(), outText, createButton())
     await simulator.init()
     simulator.runUserProgram()
 
@@ -50,7 +53,7 @@ describe("Simulator tests", () => {
     const outText = createTextarea()
     vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
 
-    const simulator = new Simulator(createTextarea(), outText)
+    const simulator = new Simulator(createTextarea(), outText, createButton())
     await simulator.init()
     simulator.runUserProgram()
 
@@ -63,13 +66,20 @@ describe("Simulator tests", () => {
     vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
     vi.spyOn(mockAdapter, 'getStdOut').mockReturnValue(expected)
 
-    const simulator = new Simulator(createTextarea(), outText)
+    const simulator = new Simulator(createTextarea(), outText, createButton())
     await simulator.init()
     simulator.runUserProgram()
 
     expect(outText.value).toEqual(expect.stringContaining(expected))
   })
 
+  it("button is hidden until init resolves", async () => {
+    const button = createButton()
+    const simulator = new Simulator(createTextarea(), createTextarea(), button)
+    expect(button.hidden).toBe(true)
+    await simulator.init()
+    expect(button.hidden).toBe(false)
+  })
 })
 
 function createTextarea(value = ""): HTMLTextAreaElement {
@@ -78,4 +88,6 @@ function createTextarea(value = ""): HTMLTextAreaElement {
   return textarea
 }
 
-
+function createButton(): HTMLButtonElement {
+  return document.createElement("button")
+}

@@ -21,6 +21,8 @@
       autocapitalize: "off"
     %>
   </div>
+  <textarea data-ide-facade-target="output"></textarea>
+  <%= button_tag "Run", type: "button", data: {ide_facade_target:"runButton", action: "click->ide-facade#runUserProgram"}%>
 </div>
 <%= form.submit "Save" %>
 <% end %>

@@ -472,10 +472,6 @@ int mmix_simulate(size_t executable_size){
 
 /** See glue.h */
 size_t get_stderr_size(void){
-	if (!(ASSERT(g_stderr_len > 0) && ASSERT(g_stderr_len < HEAP_SIZE))){
-		return (size_t)-1;
-	}
-
 	return g_stderr_len;
 }
 

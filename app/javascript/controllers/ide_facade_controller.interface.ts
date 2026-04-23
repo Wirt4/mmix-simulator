@@ -3,4 +3,5 @@ export interface IIDEFacadeController {
   updateLineNumbers(): void
   syncScroll(): void
   handleKeydown(event: KeyboardEvent): void
+  runUserProgram(): void
 }

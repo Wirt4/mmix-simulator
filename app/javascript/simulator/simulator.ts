@@ -6,14 +6,22 @@ export default class Simulator implements ISimulator {
   private _inText: HTMLTextAreaElement
   private _outText: HTMLTextAreaElement
   private _moduleAdapter: IModuleAdapter | null
-  constructor(inText: HTMLTextAreaElement, outText: HTMLTextAreaElement) {
+  private _button: HTMLButtonElement
+  constructor(inText: HTMLTextAreaElement, outText: HTMLTextAreaElement, button: HTMLButtonElement) {
     this._inText = inText
     this._outText = outText
     this._moduleAdapter = null
+    this._button = button
+    this._button.hidden = true
   }
 
-  public async init(): Promise<void> {
-    this._moduleAdapter = await moduleAdapterFactory()
+  public init(): Promise<void> {
+    return moduleAdapterFactory().then((adapter: IModuleAdapter) => {
+      this._moduleAdapter = adapter
+      this._button.hidden = false
+    }).catch((err: any) => {
+      console.error('could not resolve module adapter')
+    })
   }
 
   public runUserProgram(): void {
@@ -25,6 +33,8 @@ export default class Simulator implements ISimulator {
     if (successfullyAssembled) {
       this._moduleAdapter.simulateMMIX()
     }
-    this._outText.value = `stdout: ${this._moduleAdapter.getStdOut()}\n stderr: ${this._moduleAdapter.getStdErr()}`
+    const stdout = this._moduleAdapter.getStdOut()
+    const stderr = this._moduleAdapter.getStdErr()
+    this._outText.value = `${stdout}\n\n${stderr}`
   }
 }

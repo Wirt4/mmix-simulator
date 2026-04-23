@@ -19,4 +19,4 @@ services:
       - "3000:3000"
     volumes:
       - .:/rails
-    command: bin/rails server -b 0.0.0.0
+    command: bash -c "cp /opt/wasm-cache/mmix.js /opt/wasm-cache/mmix.wasm public/ && cp /opt/wasm-cache/module.d.ts app/javascript/types/module.d.ts && bin/rails server -b 0.0.0.0"
