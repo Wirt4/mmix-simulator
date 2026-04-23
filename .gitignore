@@ -28,7 +28,6 @@
 !/tmp/storage/
 !/tmp/storage/.keep
 
-/public/mmix*
 /app/assets/builds
 
 # Ignore key files for decrypting credentials and more.
