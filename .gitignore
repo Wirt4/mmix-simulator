@@ -39,7 +39,7 @@
 /package-lock.json
 
 # WASM build artifacts
-/app/javascript/types/*
+/app/javascript/types
 /wasm/build/
 /wasm/test_unit
 /wasm/test_integration
