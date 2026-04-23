@@ -2,6 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import type { IIDEFacadeController } from "./ide_facade_controller.interface"
 import Formatter from "../formatter/formatter"
 import Simulator from "../simulator/simulator"
+import moduleAdapterFactory from "../moduleAdapter/factory"
 export default class IDEFacadeController extends Controller implements IIDEFacadeController {
   static targets = ["textarea", "lineNumbers", "output", "runButton"]
 
@@ -16,8 +17,13 @@ export default class IDEFacadeController extends Controller implements IIDEFacad
   connect(): void {
     this.formatter = new Formatter(this.textareaTarget, this.lineNumbersTarget)
     this.formatter.updateLineNumbers()
-    this.simulator = new Simulator(this.textareaTarget, this.outputTarget, this.runButtonTarget)
-    this.simulator.init().catch((err: any) => console.error(`could not initialize simulator: ${err.toString()}`))
+    this.runButtonTarget.hidden = true
+    moduleAdapterFactory().then((adapter) => {
+      this.simulator = new Simulator(this.textareaTarget, this.outputTarget, adapter)
+      this.runButtonTarget.hidden = false
+    }).catch((err: unknown) => {
+      console.error("could not initialize simulator", err)
+    })
   }
 
   updateLineNumbers(): void {

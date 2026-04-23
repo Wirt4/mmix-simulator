@@ -1,5 +1,5 @@
 import type { IModuleAdapter } from './module_adapter.interface'
-import type { MainModule } from "./types/module"
+import type { MainModule } from "../types/module"
 
 export default class ModuleAdapter implements IModuleAdapter {
   private _module: MainModule
@@ -12,25 +12,25 @@ export default class ModuleAdapter implements IModuleAdapter {
     if (sourceCode.length === 0) {
       return true
     }
-    const encoded = new TextEncoder().encode(sourceCode)
+    const encoded: Uint8Array = new TextEncoder().encode(sourceCode)
     if (encoded.length === 0 || encoded.every((value: number) => value === 0)) {
       console.error("encoded source can't be empty")
       return false
     }
-    const ptr = this._module._get_source_code_pointer()
+    const ptr: number = this._module._get_source_code_pointer()
     if (ptr <= 0) {
       console.error(`mmix module returned inalid pointer for source code (value: ${String(ptr)})`)
       return false
     }
     try {
-      this._module.HEAPU8.set(encoded, ptr)
+      (this._module.HEAPU8 as Uint8Array).set(encoded, ptr)
     } catch (error: unknown) {
       console.error("range error writing source code to buffer")
       console.error(error?.toString())
     }
     const len = encoded.length
-    if (ptr + len < this._module.HEAPU8.length) {
-      this._module.HEAPU8[ptr + len] = 0
+    if (ptr + len < (this._module.HEAPU8 as Uint8Array).length) {
+      (this._module.HEAPU8 as Uint8Array)[ptr + len] = 0
     }
     const result = this._module._assemble_mmixal(len)
     return result === 0
@@ -78,11 +78,11 @@ export default class ModuleAdapter implements IModuleAdapter {
     if (len === 0) {
       return
     }
-    if (ptr + len >= this._module.HEAPU8.length) {
+    if (ptr + len >= (this._module.HEAPU8 as Uint8Array).length) {
       console.error("overflow: binary executable too large or not terminated")
       return;
     }
-    const bin = this._module.HEAPU8.slice(ptr, ptr + len)
+    const bin = (this._module.HEAPU8 as Uint8Array).slice(ptr, ptr + len)
     if (bin.every((value: number) => value === 0)) {
       console.log("can't simulate an empty executable")
     }
@@ -98,15 +98,15 @@ export default class ModuleAdapter implements IModuleAdapter {
       console.error("pointer may not be null or negative")
       return "simulator error - see logs"
     }
-    if (ptr >= this._module.HEAPU8.length) {
+    if (ptr >= (this._module.HEAPU8 as Uint8Array).length) {
       console.error("pointer out of range")
       return "simulator error - check logs"
     }
     const end = ptr + len
-    if (end >= this._module.HEAPU8.length) {
-      return new TextDecoder().decode(this._module.HEAPU8.slice(ptr)) + "--truncated"
+    if (end >= (this._module.HEAPU8 as Uint8Array).length) {
+      return new TextDecoder().decode((this._module.HEAPU8 as Uint8Array).slice(ptr)) + "--truncated"
     } else {
-      return new TextDecoder().decode(this._module.HEAPU8.slice(ptr, end))
+      return new TextDecoder().decode((this._module.HEAPU8 as Uint8Array).slice(ptr, end))
     }
   }
 }
