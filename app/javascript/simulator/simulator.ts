@@ -12,7 +12,7 @@ export default class Simulator implements ISimulator {
     this._moduleAdapter = moduleAdapter
   }
 
-  public runUserProgram(): Promise<void> {
+  public runUserProgram(): void {
     const successfullyAssembled = this._moduleAdapter.assembleMMIXAL(this._inText.value)
     if (successfullyAssembled) {
       this._moduleAdapter.simulateMMIX()
@@ -20,6 +20,5 @@ export default class Simulator implements ISimulator {
     const stdout = this._moduleAdapter.getStdOut()
     const stderr = this._moduleAdapter.getStdErr()
     this._outText.value = `${stdout}\n\n${stderr}`
-    return Promise.resolve()
   }
 }

@@ -1,3 +1,3 @@
 export interface ISimulator {
-  runUserProgram(): Promise<void>
+  runUserProgram(): void
 }

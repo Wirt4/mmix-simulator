@@ -23,7 +23,7 @@ export default class ModuleAdapter implements IModuleAdapter {
       return false
     }
     try {
-      (this._module.HEAPU8 as Uint8Array).set(encoded, ptr)
+      this._module.HEAPU8.set(encoded, ptr)
     } catch (error: unknown) {
       console.error("range error writing source code to buffer")
       console.error(error?.toString())
@@ -111,14 +111,14 @@ export default class ModuleAdapter implements IModuleAdapter {
   }
 
   private _heap_size(): number {
-    return (this._module.HEAPU8 as Uint8Array).length
+    return this._module.HEAPU8.length
   }
 
   private _slice_heap(start: number, end: number = this._heap_size()): Uint8Array {
-    return (this._module.HEAPU8 as Uint8Array).slice(start, end)
+    return this._module.HEAPU8.slice(start, end)
   }
 
   private _set_heap(index: number, value: number): void {
-    (this._module.HEAPU8 as Uint8Array)[index] = value
+    this._module.HEAPU8[index] = value
   }
 }
