@@ -2,8 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import type { IIDEFacadeController } from "./ide_facade_controller.interface"
 import Formatter from "../formatter/formatter"
 import Simulator from "../simulator/simulator"
-import ModuleAdapter from '../moduleAdapter/module_adapter'
-import createModule from "../../../wasm/build/wasm/mmix.js"
+import moduleAdapterFactory from "../moduleAdapter/factory"
 export default class IDEFacadeController extends Controller implements IIDEFacadeController {
   static targets = ["textarea", "lineNumbers", "output", "runButton"]
 
@@ -19,9 +18,8 @@ export default class IDEFacadeController extends Controller implements IIDEFacad
     this.formatter = new Formatter(this.textareaTarget, this.lineNumbersTarget)
     this.formatter.updateLineNumbers()
     this.runButtonTarget.hidden = true
-
-    createModule({ locateFile: (path: string) => path.endsWith('.wasm') ? '/mmix.wasm' : path }).then((wasmModule) => {
-      this.simulator = new Simulator(this.textareaTarget, this.outputTarget, new ModuleAdapter(wasmModule))
+    moduleAdapterFactory().then((adapter) => {
+      this.simulator = new Simulator(this.textareaTarget, this.outputTarget, adapter)
       this.runButtonTarget.hidden = false
     }).catch((err: unknown) => {
       console.error("could not initialize simulator", err)

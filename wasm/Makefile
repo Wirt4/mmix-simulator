@@ -166,7 +166,7 @@ wasm: src/glue.c $(WASM_LIBMMIX)
 		-sEXPORTED_FUNCTIONS='["_assemble_mmixal","_mmix_simulate","_get_stdout_pointer","_get_source_code_pointer","_get_binary_pointer","_get_stderr_pointer","_get_stdout_size","_get_binary_size","_get_stderr_size"]' \
 		-sEXPORTED_RUNTIME_METHODS='["ccall","cwrap","HEAPU8"]' \
 		-sMODULARIZE=1 \
-		-sEXPORT_NAME='createMmixModule' --emit-tsd mmix.d.ts
+		-sEXPORT_NAME='createMmixModule' --emit-tsd module.d.ts
 	cp $(WASM_BUILD)/mmix.js $(WASM_BUILD)/mmix.wasm ../public/
 
 analyze:

@@ -79,7 +79,7 @@ FROM base AS build
 RUN --mount=type=cache,id=apt-build,target=/var/cache/apt \
     apt-get update -qq && \
     apt-get install --no-install-recommends -y \
-      build-essential git libyaml-dev pkg-config nodejs npm texlive-binaries && \
+      build-essential git libyaml-dev pkg-config nodejs npm && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Gems (max cache reuse)
@@ -97,20 +97,12 @@ RUN bundle exec bootsnap precompile -j $(nproc) --gemfile
 # npm deps for JS bundling
 COPY package.json package-lock.json* ./
 RUN --mount=type=cache,target=/root/.npm npm install
-ENV PATH="/rails/node_modules/.bin:${PATH}"
-
-# Emscripten SDK for WASM build
-COPY --from=emscripten /opt/emsdk /opt/emsdk
-ENV PATH="/opt/emsdk:/opt/emsdk/upstream/emscripten:${PATH}"
 
 # ─────────────────────────────────────────────────────────────
 # Assets precompile
 # ─────────────────────────────────────────────────────────────
 # Only copy files that affect assets
 COPY . .
-
-# Build WASM before assets:precompile (esbuild needs mmix.js)
-RUN cd wasm && make wasm
 
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 

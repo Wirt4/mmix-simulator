@@ -1,9 +1,5 @@
-import type { IFormatter } from "./formatter.interface"
+import type { SelectionRange, IFormatter } from "./formatter.interface"
 
-interface SelectionRange {
-  start: number
-  end: number
-}
 /**
  * A code editor that pairs a textarea with a line number gutter.
  * Supports Tab-key indentation and synchronized scrolling.

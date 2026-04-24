@@ -454,9 +454,7 @@ int mmix_simulate(size_t executable_size){
 	if (!ASSERT(outputs.success)){
 		return -1;
 	}
-//set up above
 	int mmixLoopRun = run_mmix_loop();
-//clean up is below
 	int restoredOutputs = restore_output(outputs);
 	int result = 0;
 	int copiedToHeap = read_outputs_to_heap(outputs);

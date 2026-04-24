@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "build": "esbuild app/javascript/application.ts --bundle --sourcemap --format=iife --outdir=app/assets/builds --public-path=/assets --external:node:fs --external:node:crypto",
+    "build": "esbuild app/javascript/application.ts --bundle --sourcemap --format=iife --outdir=app/assets/builds --public-path=/assets",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ."

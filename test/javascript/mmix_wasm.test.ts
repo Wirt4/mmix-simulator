@@ -1,8 +1,22 @@
-import path from "path"
-import { describe, it, expect, beforeAll } from "vitest"
-import type { MainModule } from "../../app/javascript/types/module"
-import createModule from "../../wasm/build/wasm/mmix.js"
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-require-imports */
 
+import { describe, it, expect, beforeAll, vi } from "vitest"
+import type { MainModule } from "../../app/javascript/types/module"
+import moduleFactory from "../../app/javascript/wasm/factory"
+
+vi.mock('../../app/javascript/wasm/factory', () => {
+  const { createRequire } = require("module")
+  const path = require("path")
+  const require_ = createRequire(import.meta.url)
+  const createMmixModule = require_(
+    path.resolve(process.cwd(), "wasm/build/wasm/mmix.js")
+  ) as () => Promise<MainModule>
+  return { default: () => createMmixModule() }
+})
 const helloWorldSource =
   "\tLOC\tData_Segment\n" +
   "\tGREG\t@\n" +
@@ -27,7 +41,7 @@ describe("MMIX WASM Module", () => {
   let Module: MainModule
 
   beforeAll(async () => {
-    Module = await createModule({ locateFile: (f: string) => f.endsWith('.wasm') ? path.resolve(__dirname, '../../wasm/build/wasm/mmix.wasm') : f })
+    Module = await moduleFactory()
   })
 
   it("a successfull assemble_mmixal produces a listing output", () => {

@@ -23,14 +23,14 @@ export default class ModuleAdapter implements IModuleAdapter {
       return false
     }
     try {
-      this._module.HEAPU8.set(encoded, ptr)
+      (this._module.HEAPU8 as Uint8Array).set(encoded, ptr)
     } catch (error: unknown) {
       console.error("range error writing source code to buffer")
       console.error(error?.toString())
     }
     const len = encoded.length
-    if (ptr + len < this._heap_size()) {
-      this._set_heap(ptr + len, 0)
+    if (ptr + len < (this._module.HEAPU8 as Uint8Array).length) {
+      (this._module.HEAPU8 as Uint8Array)[ptr + len] = 0
     }
     const result = this._module._assemble_mmixal(len)
     return result === 0
@@ -78,13 +78,13 @@ export default class ModuleAdapter implements IModuleAdapter {
     if (len === 0) {
       return
     }
-    if (ptr + len >= this._heap_size()) {
+    if (ptr + len >= (this._module.HEAPU8 as Uint8Array).length) {
       console.error("overflow: binary executable too large or not terminated")
       return;
     }
-    const bin = this._slice_heap(ptr, ptr + len)
+    const bin = (this._module.HEAPU8 as Uint8Array).slice(ptr, ptr + len)
     if (bin.every((value: number) => value === 0)) {
-      console.error("can't simulate an empty executable")
+      console.log("can't simulate an empty executable")
     }
     // return value of simulate method denotes user errors, not simulator errors
     this._module._mmix_simulate(len)
@@ -98,27 +98,15 @@ export default class ModuleAdapter implements IModuleAdapter {
       console.error("pointer may not be null or negative")
       return "simulator error - see logs"
     }
-    if (ptr >= this._heap_size()) {
+    if (ptr >= (this._module.HEAPU8 as Uint8Array).length) {
       console.error("pointer out of range")
       return "simulator error - check logs"
     }
     const end = ptr + len
-    if (end >= this._heap_size()) {
-      return new TextDecoder().decode(this._slice_heap(ptr)) + "--truncated"
+    if (end >= (this._module.HEAPU8 as Uint8Array).length) {
+      return new TextDecoder().decode((this._module.HEAPU8 as Uint8Array).slice(ptr)) + "--truncated"
     } else {
-      return new TextDecoder().decode(this._slice_heap(ptr, end))
+      return new TextDecoder().decode((this._module.HEAPU8 as Uint8Array).slice(ptr, end))
     }
-  }
-
-  private _heap_size(): number {
-    return this._module.HEAPU8.length
-  }
-
-  private _slice_heap(start: number, end: number = this._heap_size()): Uint8Array {
-    return this._module.HEAPU8.slice(start, end)
-  }
-
-  private _set_heap(index: number, value: number): void {
-    this._module.HEAPU8[index] = value
   }
 }
