@@ -79,7 +79,7 @@ FROM base AS build
 RUN --mount=type=cache,id=apt-build,target=/var/cache/apt \
     apt-get update -qq && \
     apt-get install --no-install-recommends -y \
-      build-essential git libyaml-dev pkg-config nodejs npm && \
+      build-essential git libyaml-dev pkg-config nodejs npm texlive-binaries && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Gems (max cache reuse)
