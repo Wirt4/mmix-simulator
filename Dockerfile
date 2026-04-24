@@ -97,6 +97,7 @@ RUN bundle exec bootsnap precompile -j $(nproc) --gemfile
 # npm deps for JS bundling
 COPY package.json package-lock.json* ./
 RUN --mount=type=cache,target=/root/.npm npm install
+ENV PATH="/rails/node_modules/.bin:${PATH}"
 
 # Emscripten SDK for WASM build
 COPY --from=emscripten /opt/emsdk /opt/emsdk
