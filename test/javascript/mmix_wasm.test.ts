@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-unsafe-argument*/
 
 import { describe, it, expect, beforeAll, vi } from "vitest"
 import type { MainModule } from "../../app/javascript/types/module"
