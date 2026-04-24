@@ -98,11 +98,18 @@ RUN bundle exec bootsnap precompile -j $(nproc) --gemfile
 COPY package.json package-lock.json* ./
 RUN --mount=type=cache,target=/root/.npm npm install
 
+# Emscripten SDK for WASM build
+COPY --from=emscripten /opt/emsdk /opt/emsdk
+ENV PATH="/opt/emsdk:/opt/emsdk/upstream/emscripten:${PATH}"
+
 # ─────────────────────────────────────────────────────────────
 # Assets precompile
 # ─────────────────────────────────────────────────────────────
 # Only copy files that affect assets
 COPY . .
+
+# Build WASM before assets:precompile (esbuild needs mmix.js)
+RUN cd wasm && make wasm
 
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
