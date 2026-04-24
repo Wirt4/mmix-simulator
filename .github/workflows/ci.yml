@@ -42,15 +42,17 @@ jobs:
       - name: Install ctangle
         run: sudo apt-get update && sudo apt-get install -y texlive-binaries
 
+      - name: Install JS dependencies
+        run: npm ci
+
       - name: Set up Emscripten
         uses: mymindstorm/setup-emsdk@v14
 
       - name: Build WASM
         run: make wasm
         working-directory: wasm
-
-      - name: Install JS dependencies
-        run: npm ci
+        env:
+          PATH: ${{ github.workspace }}/node_modules/.bin:${{ env.PATH }}
 
       - name: Audit JS dependencies
         run: npm audit --omit=dev
