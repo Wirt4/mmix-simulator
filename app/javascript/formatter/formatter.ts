@@ -1,4 +1,10 @@
-import type { SelectionRange, IFormatter } from "./formatter.interface"
+import type { IFormatter } from "./formatter.interface"
+
+export interface SelectionRange {
+  start: number
+  end: number
+}
+
 
 /**
  * A code editor that pairs a textarea with a line number gutter.
