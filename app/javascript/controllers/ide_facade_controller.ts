@@ -17,10 +17,17 @@ export default class IDEFacadeController extends Controller implements IIDEFacad
   connect(): void {
     this.formatter = new Formatter(this.textareaTarget, this.lineNumbersTarget)
     this.formatter.updateLineNumbers()
-    this.runButtonTarget.hidden = true
+    // initialize the simulator
+    this.runButtonTarget.disabled = true
+    this.textareaTarget.disabled = true
     moduleAdapterFactory().then((adapter) => {
+      if (adapter === null) {
+        console.error("moduleAdapter is null")
+        return
+      }
       this.simulator = new Simulator(this.textareaTarget, this.outputTarget, adapter)
-      this.runButtonTarget.hidden = false
+      this.runButtonTarget.disabled = false
+      this.textareaTarget.disabled = false
     }).catch((err: unknown) => {
       console.error("could not initialize simulator", err)
     })

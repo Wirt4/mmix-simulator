@@ -3,38 +3,81 @@ import type MainModuleFactory from '../types/module'
 
 declare const createMmixModule: typeof MainModuleFactory
 
-// function loadScript(src: string): Promise<void> {
-// 	return new Promise((resolve, reject) => {
-// 		const script = document.createElement('script')
-// 		script.src = src
-// 		script.onload = () => { resolve() }
-// 		script.onerror = () => { reject(new Error(`Failed to load script: ${src}`)) }
-// 		document.head.appendChild(script)
-// 	})
-// }
+function isValidDirectory(src: string): boolean {
+	const dirRegex = new RegExp("^((/[a-zA-Z0-9._-]+)+|/)$")
+	return dirRegex.test(src)
+}
 
-async function loadScript(src: string): Promise<void> {
+function createScriptElement(src: string): HTMLScriptElement | null {
+	if (!isValidDirectory(src)) {
+		return null
+	}
+
 	const script = document.createElement('script')
+	if (!(script instanceof HTMLScriptElement)) {
+		console.error("did not create script object")
+		return null
+	}
+
 	script.src = src
+	return script
+}
+
+async function loadScript(src: string): Promise<boolean> {
+	if (!isValidDirectory(src)) {
+		console.error(`invalid directory: ${src}`)
+		return false
+	}
+
+	const script = createScriptElement(src)
+	if (script === null) {
+		console.error("did not create script object")
+		return false
+	}
+
 	const loaded = new Promise<void>((resolve, reject) => {
 		script.onload = () => { resolve() }
-		script.onerror = () => { reject(new Error(`failed to load script: ${src}`)) }
+		script.onerror = () => { reject(new Error("did not load script")) }
 	})
-	document.head.appendChild(script)
-	await loaded
-}
 
-export default async function moduleFactory(): Promise<MainModule> {
-	if (typeof createMmixModule === 'undefined') {
-		await loadScript('/mmix.js')
+	try {
+		document.head.appendChild(script)
+	} catch (error) {
+		console.error("could not append script to document head")
+		console.error({ error })
+		return false
 	}
-	return createMmixModule({
-		locateFile(path: string) {
-			if (path.endsWith('.wasm')) {
-				return '/mmix.wasm'
-			}
-			return path
-		}
-	})
+
+	try {
+		await loaded
+		return true
+	} catch (error) {
+		console.error(`could not load script from source: ${src}`)
+		console.error({ error })
+		return false
+	}
 }
 
+function resolveFilepath(path: string): string {
+	return path.endsWith('.wasm') || path.length === 0 ? '/mmix.wasm' : path
+}
+
+export default async function moduleFactory(): Promise<MainModule | null> {
+	if (typeof createMmixModule === 'undefined') {
+		const scriptLoaded = await loadScript('/mmix.js')
+		if (!scriptLoaded) {
+			console.error('error loading script')
+			return null
+		}
+	}
+
+	try {
+		interface moduleConfig { locateFile: (path: string) => string; }
+		const config: moduleConfig = { locateFile: resolveFilepath }
+		return await createMmixModule(config)
+	} catch (error) {
+		console.error("error creating mmixModule")
+		console.error({ error })
+		return null
+	}
+}
