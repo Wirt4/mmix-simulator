@@ -1,10 +1,7 @@
-export interface SelectionRange {
-  start: number
-  end: number
-}
-
-export interface IEditor {
+export interface IIDEFacadeController {
+  connect(): void
   updateLineNumbers(): void
   syncScroll(): void
   handleKeydown(event: KeyboardEvent): void
+  runUserProgram(): void
 }

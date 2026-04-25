@@ -1,5 +1,4 @@
-export interface IEditorController {
-  connect(): void
+export interface IFormatter {
   updateLineNumbers(): void
   syncScroll(): void
   handleKeydown(event: KeyboardEvent): void

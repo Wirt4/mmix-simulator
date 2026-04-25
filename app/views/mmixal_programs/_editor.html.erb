@@ -1,19 +1,19 @@
 <%= form_with model: mmixal_program do |form|%>
-<div class="editor-container" data-controller="editor">
+<div class="editor-container" data-controller="ide-facade">
   <div class="editor-header">
     <span class="editor-title editor-form"><%= form.text_field :title %></span>
   </div>
   <div class="editor-body">
     <!-- note the data-editor target: line numbers is manipulated by the js editor-->
-    <div class="line-numbers" data-editor-target="lineNumbers">
+    <div class="line-numbers" data-ide-facade-target="lineNumbers">
       <span>1</span>
     </div>
        <!-- the editor also adjusts the text area: currently for tab logic -->
     <%= form.text_area :source,
       class: "editor-textarea",
       data: {
-        editor_target: "textarea",
-        action: "input->editor#updateLineNumbers scroll->editor#syncScroll keydown->editor#handleKeydown"
+        ide_facade_target: "textarea",
+        action: "input->ide-facade#updateLineNumbers scroll->ide-facade#syncScroll keydown->ide-facade#handleKeydown"
       },
       spellcheck: false,
       autocomplete: "off",
@@ -21,6 +21,8 @@
       autocapitalize: "off"
     %>
   </div>
+  <textarea data-ide-facade-target="output"></textarea>
+  <%= button_tag "Run", type: "button", data: {ide_facade_target:"runButton", action: "click->ide-facade#runUserProgram"}%>
 </div>
 <%= form.submit "Save" %>
 <% end %>

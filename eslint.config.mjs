@@ -13,6 +13,7 @@ export default defineConfig(
 			'wasm/build/**',
 			'app/views/pwa/**',
 			'app/javascript/types/**',
+			'public/*.js',
 		]
 	},
 	eslint.configs.recommended,
@@ -22,8 +23,8 @@ export default defineConfig(
 		languageOptions: {
 			parserOptions: {
 				projectService: {
-				allowDefaultProject: ['eslint.config.mjs', 'vitest.config.ts'],
-			},
+					allowDefaultProject: ['eslint.config.mjs', 'vitest.config.ts'],
+				},
 				tsconfigRootDir: import.meta.dirname,
 			},
 		},
