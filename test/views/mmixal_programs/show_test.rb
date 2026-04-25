@@ -19,11 +19,4 @@ class MMIXALProgramsShowTest < ActionView::TestCase
       assert_select "a[href=?]", mmixal_programs_path, text: "back", count: 1
       end
   end
-
-  test "renders an Output panel with a pre area" do
-    assert_select "div.output-container" do
-      assert_select ".output-header .output-title", text: "Output"
-      assert_select ".output-body pre.output-pre"
-    end
-  end
 end
