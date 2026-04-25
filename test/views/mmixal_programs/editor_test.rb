@@ -19,6 +19,13 @@ class MMIXALProgramsEditor < ActionView::TestCase
     end
   end
 
+ test "renders an Output panel with a pre area" do
+    assert_select "div.output-container" do
+      assert_select ".output-header .output-title", text: "Output"
+      assert_select ".output-body textarea.output-textarea"
+    end
+  end
+
   test "Save button submits a PATCH to the program's update path" do
     assert_select "form[action=?][method=?]", mmixal_program_path(@mmixal_program), "post" do
       assert_select "input[name=?][value=?]", "_method", "patch"
