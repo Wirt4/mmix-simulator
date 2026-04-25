@@ -22,7 +22,7 @@ class MMIXALProgramsEditor < ActionView::TestCase
  test "renders an Output panel with a pre area" do
     assert_select "div.output-container" do
       assert_select ".output-header .output-title", text: "Output"
-      assert_select ".output-body textarea.output-pre"
+      assert_select ".output-body textarea.output-textarea"
     end
   end
 
