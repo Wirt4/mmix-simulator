@@ -41,7 +41,8 @@ describe("MMIX WASM Module", () => {
   let Module: MainModule
 
   beforeAll(async () => {
-    Module = await moduleFactory()
+    const m = await moduleFactory()
+    if (m !== null) Module = m
   })
 
   it("a successfull assemble_mmixal produces a listing output", () => {
