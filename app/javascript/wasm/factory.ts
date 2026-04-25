@@ -12,7 +12,7 @@ function createScriptElement(src: string): HTMLScriptElement | null {
 	if (!isValidDirectory(src)) {
 		return null
 	}
-
+	// creating an HTML element here is a little weird, but other strategies have broken the build
 	const script = document.createElement('script')
 	if (!(script instanceof HTMLScriptElement)) {
 		console.error("did not create script object")
