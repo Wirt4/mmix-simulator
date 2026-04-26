@@ -8,7 +8,6 @@
 
 #define ASSERT(e) \
     ((e) ? 1 : (log_error(#e, __FILE__, __LINE__), 0))
-#define HEAP_START 0
 #define HEAP_SIZE (1 << 24) //16 MiB
 
 static unsigned char g_bin_pointer[HEAP_SIZE];

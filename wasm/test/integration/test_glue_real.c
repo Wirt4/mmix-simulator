@@ -6,11 +6,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-// cppcheck-suppress unusedFunction
 void setUp(void) {
 }
 
-// cppcheck-suppress unusedFunction
 void tearDown(void) {
 }
 

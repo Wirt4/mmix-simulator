@@ -25,9 +25,14 @@ MMIXLIB_BUILD = build/mmixlib
 
 # Test framework paths
 UNITY_DIR = vendor/unity/src
+CMOCK_DIR = vendor/cmock/src
+MOCK_DIR  = test/unit/mocks
 
 UNITY_SRC = $(UNITY_DIR)/unity.c
 UNITY_INC = -I$(UNITY_DIR)
+CMOCK_SRC = $(CMOCK_DIR)/cmock.c
+CMOCK_INC = -I$(CMOCK_DIR)
+MOCK_SRC  = $(MOCK_DIR)/mock_mmixlib_wrapper.c $(MOCK_DIR)/mock_io_utils.c
 
 # Glue code object
 SRC_OBJS = src/glue.o 
@@ -60,7 +65,7 @@ MMIXLIB_HDRS = $(MMIXLIB_BUILD)/abstime.h $(MMIXLIB_BUILD)/mmixlib.h \
                $(MMIXLIB_BUILD)/libname.h $(MMIXLIB_BUILD)/libbase.h \
                $(LIBH_FILES) $(MMIXLIB_BUILD)/libconfig.h
 
-.PHONY: all test wasm analyze clean
+.PHONY: all test unit_test wasm analyze clean
 
 all: test
 
@@ -131,7 +136,30 @@ $(LIBMMIX): $(LIBSIM_OBJ) $(LIBAL_OBJ) $(LIBEXTRA_OBJ)
 src/glue.o: src/glue.c src/glue.h $(MMIXLIB_HDRS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# --- Assembler stub ---
+
+src/assembler.o: src/assembler.c src/assembler.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
 # --- Mocks & tests ---
+
+$(MOCK_DIR)/mock_mmixlib_wrapper.c $(MOCK_DIR)/mock_mmixlib_wrapper.h: src/mmixlib_wrapper.h
+	mkdir -p $(MOCK_DIR)
+	ruby -Ivendor/cmock/lib -e "require 'cmock'; CMock.new({:mock_path => '$(MOCK_DIR)', :plugins => [:ignore, :callback], :mock_prefix => 'mock_'}).setup_mocks(['$<'])"
+
+$(MOCK_DIR)/mock_io_utils.c $(MOCK_DIR)/mock_io_utils.h: src/io_utils.h
+	mkdir -p $(MOCK_DIR)
+	ruby -Ivendor/cmock/lib -e "require 'cmock'; CMock.new({:mock_path => '$(MOCK_DIR)', :plugins => [:ignore, :callback], :mock_prefix => 'mock_'}).setup_mocks(['$<'])"
+
+unit_test: src/assembler.o $(MOCK_SRC)
+	$(CC) $(CFLAGS) $(UNITY_INC) $(CMOCK_INC) -I$(MOCK_DIR) -Isrc/ \
+		test/unit/test_assembler.c \
+		$(UNITY_SRC) \
+		$(CMOCK_SRC) \
+		$(MOCK_SRC) \
+		src/assembler.o \
+		-o test_unit
+	./test_unit
 
 test: $(SRC_OBJS) $(LIBMMIX)
 	$(CC) $(CFLAGS) $(UNITY_INC) -Isrc/ \
@@ -170,9 +198,9 @@ wasm: src/glue.c $(WASM_LIBMMIX)
 	cp $(WASM_BUILD)/mmix.js $(WASM_BUILD)/mmix.wasm ../public/
 
 analyze:
-	cppcheck --enable=all --inline-suppr --check-level=exhaustive --suppress=missingIncludeSystem -Ibuild/mmixlib src/ test/
+	cppcheck --enable=all --inline-suppr --check-level=exhaustive --suppress=missingIncludeSystem --suppress=*:test/unit/mocks/* --suppressions-list=cppcheck-suppressions.txt -Ibuild/mmixlib src/ test/
 	clang --analyze $(CFLAGS) $(UNITY_INC) src/*.c test/integration/*.c
 
 clean:
 	rm -rf $(MMIXLIB_BUILD) $(WASM_BUILD)
-	rm -f $(SRC_OBJS) test_integration
+	rm -f $(SRC_OBJS) test_integration test_unit

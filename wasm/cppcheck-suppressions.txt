@@ -1,0 +1,19 @@
+# Unity test lifecycle functions (called by framework, not directly)
+unusedFunction:test/unit/*.c
+unusedFunction:test/integration/*.c
+
+# Test functions called by Unity runner, not by other translation units
+staticFunction:test/unit/*.c
+staticFunction:test/integration/*.c
+
+# Unmatched inline suppressions (cppcheck version differences)
+unmatchedSuppression:test/unit/*.c
+unmatchedSuppression:test/integration/*.c
+
+# Missing includes in test files (test framework headers resolved at build time)
+missingInclude:test/unit/*.c
+missingInclude:test/integration/*.c
+
+# Callback function parameters suggested as const (would require casting function pointers)
+constParameterCallback:test/unit/*.c
+constParameterCallback:test/integration/*.c
