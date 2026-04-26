@@ -65,7 +65,7 @@ MMIXLIB_HDRS = $(MMIXLIB_BUILD)/abstime.h $(MMIXLIB_BUILD)/mmixlib.h \
                $(MMIXLIB_BUILD)/libname.h $(MMIXLIB_BUILD)/libbase.h \
                $(LIBH_FILES) $(MMIXLIB_BUILD)/libconfig.h
 
-.PHONY: all test unit_test wasm analyze clean
+.PHONY: all test unit_test unit_test_assembler unit_test_simulator wasm analyze clean
 
 all: test
 
@@ -141,6 +141,12 @@ src/glue.o: src/glue.c src/glue.h $(MMIXLIB_HDRS)
 src/assembler.o: src/assembler.c src/assembler.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
+src/simulator.o: src/simulator.c src/simulator.h $(MMIXLIB_BUILD)/mmixlib.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+src/assert.o: src/assert.c src/assert.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
 # --- Mocks & tests ---
 
 $(MOCK_DIR)/mock_mmixlib_wrapper.c $(MOCK_DIR)/mock_mmixlib_wrapper.h: src/mmixlib_wrapper.h
@@ -151,15 +157,27 @@ $(MOCK_DIR)/mock_io_utils.c $(MOCK_DIR)/mock_io_utils.h: src/io_utils.h
 	mkdir -p $(MOCK_DIR)
 	ruby -Ivendor/cmock/lib -e "require 'cmock'; CMock.new({:mock_path => '$(MOCK_DIR)', :plugins => [:ignore, :callback], :mock_prefix => 'mock_'}).setup_mocks(['$<'])"
 
-unit_test: src/assembler.o $(MOCK_SRC)
+unit_test: unit_test_assembler unit_test_simulator
+
+unit_test_assembler: src/assembler.o $(MOCK_SRC)
 	$(CC) $(CFLAGS) $(UNITY_INC) $(CMOCK_INC) -I$(MOCK_DIR) -Isrc/ \
 		test/unit/test_assembler.c \
 		$(UNITY_SRC) \
 		$(CMOCK_SRC) \
 		$(MOCK_SRC) \
 		src/assembler.o \
-		-o test_unit
-	./test_unit
+		-o test_unit_assembler
+	./test_unit_assembler
+
+unit_test_simulator: src/simulator.o src/assert.o $(MOCK_SRC)
+	$(CC) $(CFLAGS) $(UNITY_INC) $(CMOCK_INC) -I$(MOCK_DIR) -Isrc/ \
+		test/unit/test_simulator.c \
+		$(UNITY_SRC) \
+		$(CMOCK_SRC) \
+		$(MOCK_SRC) \
+		src/simulator.o src/assert.o \
+		-o test_unit_simulator
+	./test_unit_simulator
 
 test: $(SRC_OBJS) $(LIBMMIX)
 	$(CC) $(CFLAGS) $(UNITY_INC) -Isrc/ \
@@ -203,4 +221,4 @@ analyze:
 
 clean:
 	rm -rf $(MMIXLIB_BUILD) $(WASM_BUILD)
-	rm -f $(SRC_OBJS) test_integration test_unit
+	rm -f $(SRC_OBJS) src/assembler.o src/simulator.o src/assert.o test_integration test_unit_assembler test_unit_simulator

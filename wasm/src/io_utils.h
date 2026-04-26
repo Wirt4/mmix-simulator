@@ -2,6 +2,18 @@
 #define IO_UTILS_H
 
 #include <stdio.h>
+
+struct Redirect{
+	int exit_code;
+	FILE* log_pointer;
+	char* filename;
+	int backup_fileno;
+};
+struct HeapRef{
+	int exit_code;
+	unsigned char * heap_pointer;
+	size_t size;
+};
 /**
  * creates a new file and copies information from the heap to the file
  * inputs: src: pointer to heap source, len: size of data to write, filename: name of file
@@ -13,40 +25,26 @@
  * 	len <= MAX_SRC_SIZE
  * postcondition(s): a new file of name <filename> is created and filled with the information from heap
 */
-int write_from_heap(unsigned char* pointer, size_t len, char* filename);
+int write_from_heap(const unsigned char* pointer, size_t len, const char* filename);
 
 /**
  * Switches std err from printing to console to logging internally
- * output: 0 on success, -1 on failure
+ * output: fileno of redirected stderr on success, -1 on failure
  * preconditions: stderr prints to console as usual
  * postconditions:
  * 	messages that would be printed to error are added to the buffer
 */
-int redirect_stderr(void);
+struct Redirect redirect_stderr(void);
 
 /**
  * Restores stderr to a console logging and flushes the buffer
- * output: 0 on success, -1 on failure
+ * input: the fileno of the backedup stderr
+ * output: struct referencing data written to heap, has exit_code 0 on success, -1 on failure
  * preconditions: redirect_std_err has been successfully called
  * postconditions: stderr logs to console normally
 */
-int restore_stderr(void);
+struct HeapRef restore_stderr(struct Redirect redirect);
 
-/*
-* Returns pointer to the stderr buffer
-* outputs: pointer (null if stderr not redirected)
-* preconditions: stderr has been successfully redirected
-* postconditions: none
-* */
-unsigned char * get_stderr_pointer(void);
-
-/**
- * Returns size of content written to stderr buffer
- * ouptuts: length of content written
- * preconditions: stderr has been successfully redirected
- * postconditions: none
-*/
-size_t get_stderr_size(void);
 
 /**
  * wraps file utils or unstd for consistent level of abstraction
@@ -55,7 +53,7 @@ size_t get_stderr_size(void);
  * preconditions: filename is non-null and has length less than FILENAME_SIZE (constants.h)
  * postconditions: none
  */
-int file_exists(char *filename);
+int file_exists(const char *filename);
 
 /**
  * wraps file utils for consistend level of abstraction
@@ -64,6 +62,7 @@ int file_exists(char *filename);
  * preconditions: filename is non-null and has length less than FILENAME_SIZE (constants.h)
  * postconditions: none
 */
-int remove_file(char *filename);
+int remove_file(const char *filename);
 
+//possible TODO: a clear_all_files method to use as a garbage collection thing
 #endif

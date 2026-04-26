@@ -5,6 +5,7 @@
 #include <time.h>
 #include "glue.h"
 #include "mmixlib.h"
+#include "assembler.h"
 
 #define ASSERT(e) \
     ((e) ? 1 : (log_error(#e, __FILE__, __LINE__), 0))
@@ -13,11 +14,12 @@
 static unsigned char g_bin_pointer[HEAP_SIZE];
 static unsigned char g_stdout_pointer[HEAP_SIZE];
 static unsigned char g_source_code_pointer[HEAP_SIZE];
-static unsigned char g_stderr_pointer[HEAP_SIZE];
+//static unsigned char g_stderr_pointer[HEAP_SIZE];
 
 static size_t g_bin_len;
 static size_t g_stdout_len;
-static size_t g_stderr_len;
+
+//static size_t g_stderr_len;
 
 static void log_error(const char *expr, const char *file, int line) {
     fprintf(stderr, "Assertion failed: %s (%s:%d)\n", expr, file, line);
@@ -29,16 +31,6 @@ static int is_valid_string(const char*string){
 	}
 	return 1;
 }
-
-// static FILE* open_file(const char*filename, int isWriteMode){
-// 	if (!is_valid_string(filename)){
-// 		return NULL;
-// 	}
-// 	const char* modeArg = isWriteMode ? "w" : "rb";
-// 	FILE* pointer = fopen(filename, modeArg);
-// 	ASSERT(pointer != NULL);
-// 	return pointer;
-// }
 
 static int create_file(const char*filename){
 	if (!is_valid_string(filename)) {
@@ -471,7 +463,8 @@ int mmix_simulate(size_t executable_size){
 
 /** See glue.h */
 size_t get_stderr_size(void){
-	return g_stderr_len;
+	return (size_t)-1;
+//	return g_stderr_len;
 }
 
 /** See glue.h */
@@ -482,46 +475,43 @@ unsigned char* get_stdout_pointer(void){
 
 /** See glue.h */
 unsigned char* get_stderr_pointer(void){
-	(void)ASSERT(g_stderr_pointer != NULL);
-	return g_stderr_pointer;
-}
-
-/** See glue.h */
-unsigned char* get_source_code_pointer(void){
-	(void)ASSERT(g_source_code_pointer != NULL);
-	return g_source_code_pointer;
+	return NULL;
+//	(void)ASSERT(g_stderr_pointer != NULL);
+//	return g_stderr_pointer;
 }
 
 /** See glue.h */
 int assemble_mmixal(size_t len){
-	if (len == 0){
-		return 0;
-	}
-	if (!ASSERT(len < HEAP_SIZE)){
-		return -1;
-	}
-	struct AssemblyFileNames files = init_assembly_file_names();
-	int writeResult = copy_heap_to_file(files.mms, len);
-	if (!ASSERT(writeResult == 0)){
-		return -1;
-	}
-	int filesCreated = create_assembly_output_files(files);
-	if (!ASSERT(filesCreated == 0)){
-		return -1;
-	}
-	struct Outputs outputs = redirect_outputs();
-	if (!ASSERT(outputs.success)){
-		return -1;
-	}
-	int mmixResult = mmixal(files.mms, files.mmo, files.listing);
-	int heapResult = mmixResult == 0 ? read_assembly_files_to_heap(files): read_outputs_to_heap(outputs);
-	int restoredOutputsResult = restore_output(outputs);
-	int outputRemoveResult = remove_output_files(outputs);
-	int deleteResult = delete_output_files(files);
-	if (!(ASSERT(restoredOutputsResult == 0) && ASSERT(outputRemoveResult == 0) && ASSERT(heapResult == 0) && ASSERT(deleteResult == 0))){
-		return -1;
-	}
-	return mmixResult;
+	char* mmo =assemble(len);
+	return mmo != NULL ? 0: -1;
+	// if (len == 0){
+	// 	return 0;
+	// }
+	// if (!ASSERT(len < HEAP_SIZE)){
+	// 	return -1;
+	// }
+	// struct AssemblyFileNames files = init_assembly_file_names();
+	// int writeResult = copy_heap_to_file(files.mms, len);
+	// if (!ASSERT(writeResult == 0)){
+	// 	return -1;
+	// }
+	// int filesCreated = create_assembly_output_files(files);
+	// if (!ASSERT(filesCreated == 0)){
+	// 	return -1;
+	// }
+	// struct Outputs outputs = redirect_outputs();
+	// if (!ASSERT(outputs.success)){
+	// 	return -1;
+	// }
+	// int mmixResult = mmixal(files.mms, files.mmo, files.listing);
+	// int heapResult = mmixResult == 0 ? read_assembly_files_to_heap(files): read_outputs_to_heap(outputs);
+	// int restoredOutputsResult = restore_output(outputs);
+	// int outputRemoveResult = remove_output_files(outputs);
+	// int deleteResult = delete_output_files(files);
+	// if (!(ASSERT(restoredOutputsResult == 0) && ASSERT(outputRemoveResult == 0) && ASSERT(heapResult == 0) && ASSERT(deleteResult == 0))){
+	// 	return -1;
+	// }
+	// return mmixResult;
 }
 
 /** See glue.h */
