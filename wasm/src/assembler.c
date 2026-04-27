@@ -34,6 +34,7 @@ struct Filenames{
 	char* mmo;
 	char* mms;
 	int exit_code;
+	struct Redirect redirect;
 };
 
 static struct Filenames setup_assembly(size_t src_len){
@@ -59,18 +60,19 @@ static struct Filenames setup_assembly(size_t src_len){
 		return filenames;
 	}
 	// redirect stderr so user error messages are logged to buffer
-	int redirect = redirect_stderr();
-	if (redirect != 0){
+	struct Redirect redirect = redirect_stderr();
+	if (redirect.exit_code != 0){
 		perror("did not redirect stderr");
 		return filenames;
 	}
+	filenames.redirect = redirect;
 	filenames.exit_code = 0;
 	return filenames;
 }
 
-static int teardown_assembly(char* mms){
-	int restore = restore_stderr();
-	if (restore !=0){
+static int teardown_assembly(char* mms, struct Redirect redirect){
+	struct HeapRef restore = restore_stderr(redirect);
+	if (restore.exit_code !=0){
 		printf("ERROR: could not restore stderr from buffer to console");
 		return -1;
 	}
@@ -100,7 +102,7 @@ unsigned char * get_source_code_pointer(void){
  * is assembly is unsuccessful, 
  * - the sterr printed by the mmixal function has been redirected to the stderr heap (see io_utils.h)
 */
-char* assemble(size_t length){
+char* assemble_source(size_t length){
 	struct Filenames filenames = setup_assembly(length);
 	if (filenames.exit_code != 0){
 		perror("could not set up file redirects before assembly");
@@ -108,7 +110,7 @@ char* assemble(size_t length){
 	}
 	// call the library function to assemble mmixal
 	int result = mmixal_w(filenames.mms, filenames.mmo, NULL);
-	int teardown = teardown_assembly(filenames.mms);
+	int teardown = teardown_assembly(filenames.mms, filenames.redirect);
 	if (teardown !=0){
 		perror("could not restore state after assembly");
 		return NULL;

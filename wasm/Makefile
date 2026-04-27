@@ -35,7 +35,7 @@ CMOCK_INC = -I$(CMOCK_DIR)
 MOCK_SRC  = $(MOCK_DIR)/mock_mmixlib_wrapper.c $(MOCK_DIR)/mock_io_utils.c
 
 # Glue code object
-SRC_OBJS = src/glue.o 
+SRC_OBJS = src/glue.o src/assembler.o src/simulator.o src/assert.o src/io_utils.o src/mmixlib_wrapper.o
 
 # mmixlib generated sources (from ctangle mmix-sim.w + mmixlib.ch)
 LIBSIM = libboot.c     libfinal.c     libload.c     libprint.c       libstats.c \
@@ -147,6 +147,12 @@ src/simulator.o: src/simulator.c src/simulator.h $(MMIXLIB_BUILD)/mmixlib.h
 src/assert.o: src/assert.c src/assert.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
+src/io_utils.o: src/io_utils.c src/io_utils.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+src/mmixlib_wrapper.o: src/mmixlib_wrapper.c src/mmixlib_wrapper.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
 # --- Mocks & tests ---
 
 $(MOCK_DIR)/mock_mmixlib_wrapper.c $(MOCK_DIR)/mock_mmixlib_wrapper.h: src/mmixlib_wrapper.h
@@ -221,4 +227,4 @@ analyze:
 
 clean:
 	rm -rf $(MMIXLIB_BUILD) $(WASM_BUILD)
-	rm -f $(SRC_OBJS) src/assembler.o src/simulator.o src/assert.o test_integration test_unit_assembler test_unit_simulator
+	rm -f $(SRC_OBJS) test_integration test_unit_assembler test_unit_simulator

@@ -1,6 +1,9 @@
 #include "mmixlib_wrapper.h"
 #include "mmixlib.h"
-#include "libglobals.h"
+
+extern mmix_opcode op;
+extern bool halted;
+extern bool resuming;
 
 int mmixal_w(char *mms_name, char *mmo_name, char *mml_name){
 	return mmixal(mms_name, mmo_name, mml_name);
@@ -46,4 +49,16 @@ void set_resuming(int value){
 
 void mmix_fetch_instruction_w(void){
 	mmix_fetch_instruction();
+}
+
+void mmix_perform_instruction_w(void){
+	mmix_perform_instruction();
+}
+
+void mmix_lib_finalize_w(void){
+	mmix_lib_finalize();
+}
+
+void mmix_finalize_w(void){
+	mmix_finalize();
 }

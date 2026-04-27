@@ -19,5 +19,5 @@ unsigned char * get_source_code_pointer(void);
  * is assembly is unsuccessful, 
  * - the sterr printed by the mmixal function has been redirected to the stderr heap (see io_redirect.h)
 */
-char* assemble(size_t length);
+char* assemble_source(size_t length);
 #endif

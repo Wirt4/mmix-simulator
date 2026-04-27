@@ -70,7 +70,7 @@ void test_get_source_code_pointer_is_non_null(void) {
 	unsigned char *result = get_source_code_pointer();
 	TEST_ASSERT_NOT_NULL(result);
 }
-// function assemble()
+// function assemble_source()
 void test_assemble_returns_non_null_on_success(void) {
 	file_exists_IgnoreAndReturn(1);
 	remove_file_IgnoreAndReturn(0);
@@ -78,7 +78,7 @@ void test_assemble_returns_non_null_on_success(void) {
 	mmixal_w_IgnoreAndReturn(0);
 	redirect_stderr_IgnoreAndReturn(0);
 	write_from_heap_IgnoreAndReturn(0);
-	char *result = assemble(10);
+	char *result = assemble_source(10);
 	TEST_ASSERT_NOT_NULL(result);
 }
 
@@ -89,7 +89,7 @@ void test_assemble_returns_correctly_formatted_filename_on_success(void) {
 	mmixal_w_IgnoreAndReturn(0);
 	write_from_heap_IgnoreAndReturn(0);
 	redirect_stderr_IgnoreAndReturn(0);
-	char *result = assemble(10);
+	char *result = assemble_source(10);
 	size_t len = strlen(result);
 
 	TEST_ASSERT_GREATER_THAN(11, len); // "program" (7) + at least 1 digit + ".mmo" (4)
@@ -110,7 +110,7 @@ void test_assemble_calls_mmixal_w_with_matching_mms_and_mmo(void) {
 	capture_call_count = 0;
 	mmixal_w_StubWithCallback(capture_mmixal_w_args);
 	write_from_heap_IgnoreAndReturn(0);
-	assemble(10);
+	assemble_source(10);
 
 	TEST_ASSERT_EQUAL_INT(1, capture_call_count);
 
@@ -150,7 +150,7 @@ void test_assemble_calls_write_from_heap_with_correct_args(void) {
 	write_from_heap_StubWithCallback(capture_write_from_heap_args);
 	mmixal_w_IgnoreAndReturn(0);
 
-	assemble(src_len);
+	assemble_source(src_len);
 
 	TEST_ASSERT_EQUAL_INT(1, captured_wfh_call_count);
 	TEST_ASSERT_EQUAL_PTR(src, captured_wfh_pointer);
@@ -168,13 +168,13 @@ void test_assemble_returns_null_on_failure(void){
 		redirect_stderr_IgnoreAndReturn(0);
 		mmixal_w_IgnoreAndReturn(5);
 		write_from_heap_IgnoreAndReturn(0);
-		char *result = assemble(10);
+		char *result = assemble_source(10);
 		TEST_ASSERT_EQUAL(NULL, result);
 }
 
 void test_assemble_returns_null_if_size_too_large(void){
 	const size_t oversized = MAX_SRC_SIZE + 1;
-	TEST_ASSERT_EQUAL(NULL, assemble(oversized));
+	TEST_ASSERT_EQUAL(NULL, assemble_source(oversized));
 }
 
 void test_assemble_redirects_std_err(void){
@@ -186,7 +186,7 @@ void test_assemble_redirects_std_err(void){
 	redirect_stderr_StubWithCallback(capture_void);
 	file_exists_IgnoreAndReturn(1);
 
-	assemble(100);
+	assemble_source(100);
 	
 	TEST_ASSERT_EQUAL_INT(1, captured_void_fn_call_count);
 }
@@ -200,7 +200,7 @@ void test_assemble_restores_std_err(void){
 	redirect_stderr_IgnoreAndReturn(0);
 	restore_stderr_StubWithCallback(capture_void);
 	
-	assemble(100);
+	assemble_source(100);
 	
 	TEST_ASSERT_EQUAL_INT(1, captured_void_fn_call_count);
 }
@@ -214,7 +214,7 @@ void test_successful_mms_removal(void){
 	capture_call_count = 0;
 	file_exists_IgnoreAndReturn(1);
 	remove_file_StubWithCallback(capture_file_util);
-	assemble(100);
+	assemble_source(100);
 
 	TEST_ASSERT_EQUAL_INT(1, capture_call_count);
 //assert the file removed was the mms
@@ -231,7 +231,7 @@ void test_two_calls_to_exists(void){
 
 	capture_call_count = 0;
 	file_exists_StubWithCallback(capture_file_util);
-	assemble(100);
+	assemble_source(100);
 
 	TEST_ASSERT_EQUAL_INT(2, capture_call_count);
 }
