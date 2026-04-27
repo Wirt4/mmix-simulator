@@ -79,10 +79,6 @@ void execute_instructions(unsigned int n){
 	}
 }
 
-int is_halted(void){
-	return 0;
-}
-
 int finalize_simulator(void){
 	/*
 	note: had thoughts about cleaning up user-generated files or directories, but I'm trading that off here. 

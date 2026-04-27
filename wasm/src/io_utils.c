@@ -13,7 +13,7 @@ static unsigned char g_stderr_pointer[STD_ERR_SIZE];
 * preconditions: filename is non null and the file exits, heap_pointer is non-null, the contents of the file are within heap allocation
 * postconditions: the information is written to the heap, the file is deleted
 */
-static size_t read_to_heap(char* filename, unsigned char* heap_pointer){
+static size_t read_to_heap(const char* filename, unsigned char* heap_pointer){
 	// if filename or heap_pointer are null, return bad
 	if (filename == NULL || heap_pointer == NULL){ 
 		perror("filename and heap_pointer may not be null");
@@ -151,7 +151,7 @@ struct Redirect redirect_stderr(void){
 	redirect.backup_fileno = dup(STDERR_FILENO);
 	if (!ASSERT(redirect.backup_fileno >= 0)){ return redirect;}
 	redirect.log_pointer = fopen(redirect.filename, "w");
-	if (! ASSERT (redirect.log_pointer == NULL)){
+	if (! ASSERT (redirect.log_pointer != NULL)){
 		g_stderr_redirected = 0;
 		return redirect;
 	}
@@ -177,6 +177,8 @@ struct Redirect redirect_stderr(void){
 */
 struct HeapRef restore_stderr(struct Redirect redirect){
 	struct HeapRef ref;
+	ref.heap_pointer = NULL;
+	ref.size = (size_t)-1;
 	ref.exit_code = -1;
 	if (!g_stderr_redirected){return ref;}
 	// assert fileno is non-negative

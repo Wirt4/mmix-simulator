@@ -38,11 +38,17 @@ struct Filenames{
 };
 
 static struct Filenames setup_assembly(size_t src_len){
+	struct Redirect redirect;
+	redirect.exit_code = -1;
+	redirect.log_pointer = NULL;
+	redirect.filename = NULL;
+	redirect.backup_fileno = -1;
 	struct Filenames filenames;
 	filenames.mmo = NULL;
 	filenames.mms = NULL;
 	filenames.exit_code = -1;
-	if (src_len > MAX_SRC_SIZE){
+	filenames.redirect =redirect;
+	if (src_len > (size_t)(MAX_SRC_SIZE)){
 		return filenames;
 	}
 	// create "program{timestamp}.mms" and "program.{timestamp}.mmo"
@@ -60,17 +66,16 @@ static struct Filenames setup_assembly(size_t src_len){
 		return filenames;
 	}
 	// redirect stderr so user error messages are logged to buffer
-	struct Redirect redirect = redirect_stderr();
-	if (redirect.exit_code != 0){
+	filenames.redirect = redirect_stderr();
+	if (filenames.redirect.exit_code != 0){
 		perror("did not redirect stderr");
 		return filenames;
 	}
-	filenames.redirect = redirect;
 	filenames.exit_code = 0;
 	return filenames;
 }
 
-static int teardown_assembly(char* mms, struct Redirect redirect){
+static int teardown_assembly(const char* mms, struct Redirect redirect){
 	struct HeapRef restore = restore_stderr(redirect);
 	if (restore.exit_code !=0){
 		printf("ERROR: could not restore stderr from buffer to console");

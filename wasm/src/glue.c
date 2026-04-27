@@ -42,3 +42,8 @@ unsigned char* get_binary_pointer(void){
 size_t get_binary_size(void){
 	return (size_t)-1;
 }
+
+/** See glue.h */
+unsigned char* get_source_code_pointer(void){
+	return NULL;
+}
