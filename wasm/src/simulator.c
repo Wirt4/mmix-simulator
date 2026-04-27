@@ -84,9 +84,17 @@ int is_halted(void){
 }
 
 int finalize_simulator(void){
-	//call remove_except(current_mmo)
-	//call mmix finalize
-	//call mmixlib finalize
-	//mark initialized as false
-	return -1;
+	/*
+	note: had thoughts about cleaning up user-generated files or directories, but I'm trading that off here. 
+	The environment is already sandboxed in a WASM, so if it breaks, then it's a browser restart.
+	Also, resource management is the job of the programmer, and I'm managing the resources of this program, not the user's.
+	So collect your own darn garbage.
+	*/
+	if (!g_simulator_initialized){
+		return -1;
+	}
+	mmix_finalize_w();
+	mmix_lib_finalize_w();
+	g_simulator_initialized = 0;
+	return 0;
 }

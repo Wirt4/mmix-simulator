@@ -23,6 +23,10 @@ void mmix_perform_instruction_w(void);
 
 void mmix_dynamic_trap_w(void);
 
+void mmix_lib_finalize_w(void);
+
+void mmix_finalize_w(void);
+
 mmix_opcode get_op(void);
 // 1 if sim is halted, 0 if not
 int get_halted(void);

@@ -64,5 +64,4 @@ int file_exists(const char *filename);
 */
 int remove_file(const char *filename);
 
-//possible TODO: a clear_all_files method to use as a garbage collection thing
 #endif

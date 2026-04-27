@@ -99,21 +99,30 @@ void test_execute_instructions_sets_resuming(void){
 	execute_instructions(1);
 }
 
-
 // finalize_simulator tests
 
-void test_finalize_returns_negative_one(void) {
+void test_finalize_errs_if_sim_non_initialized(void) {
 	int result = finalize_simulator();
 	TEST_ASSERT_EQUAL_INT(-1, result);
 }
 
+void test_finalize_happy_path(void){
+	// g_simulator_initialized is already set from test_initialize_calls_library_setups
+
+	//library calls finalize simulator should make
+	mmix_finalize_w_Expect();
+	mmix_lib_finalize_w_Expect();
+
+	int result = finalize_simulator();
+	TEST_ASSERT_EQUAL_INT(0, result);
+}
 int main(void) {
 	UNITY_BEGIN();
 	RUN_TEST(test_initialize_returns_negative_on_null_input);
 	RUN_TEST(test_initialize_returns_negative_on_oversized_filename);
 	RUN_TEST(test_initialize_returns_negative_on_non_mmo_extension);
 	RUN_TEST(test_initialize_returns_negative_on_empty_string);
-	RUN_TEST(test_finalize_returns_negative_one);
+	RUN_TEST(test_finalize_errs_if_sim_non_initialized);
 	RUN_TEST(test_initialize_returns_negative_on_nonexistent_file);
 	RUN_TEST(test_initialize_calls_library_setups);
 	RUN_TEST(test_execute_instructions_does_nothing_with_zero);
@@ -121,5 +130,6 @@ int main(void) {
 	RUN_TEST(test_execute_instructions_always_calls_perform_instruction_and_dynamic_trap);
 	RUN_TEST(test_execute_instrctions_calls_fetch_instruction_if_sim_is_not_resuming);
 	RUN_TEST(test_execute_instructions_sets_resuming);
+	RUN_TEST(test_finalize_happy_path);
 	return UNITY_END();
 }
