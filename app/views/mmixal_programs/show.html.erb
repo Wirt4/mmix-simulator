@@ -1,5 +1,5 @@
 <% content_for(:title, "MMIX Simulator") %>
-<nav><%= render "layouts/navbar" %><%= link_to "back", mmixal_programs_path %></nav>
+<nav><%= render "layouts/navbar" %><%= button_to "back", mmixal_programs_path, method: :get %></nav>
 
 <%= render partial: "editor", locals: {mmixal_program: @mmixal_program}%>
 

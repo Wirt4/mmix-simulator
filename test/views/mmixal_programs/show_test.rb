@@ -14,9 +14,9 @@ class MMIXALProgramsShowTest < ActionView::TestCase
     render template: "mmixal_programs/show"
   end
 
-  test "renders a link named 'back'" do
-    assert_select "a" do
-      assert_select "a[href=?]", mmixal_programs_path, text: "back", count: 1
-      end
+  test "renders a button named 'back'" do
+    assert_select "form[action=?][method=get]", mmixal_programs_path do
+      assert_select "button", text: "back", count: 1
+    end
   end
 end
