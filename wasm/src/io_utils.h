@@ -2,18 +2,7 @@
 #define IO_UTILS_H
 
 #include <stdio.h>
-
-struct Redirect{
-	int exit_code;
-	FILE* log_pointer;
-	char* filename;
-	int backup_fileno;
-};
-struct HeapRef{
-	int exit_code;
-	unsigned char * heap_pointer;
-	size_t size;
-};
+#include "types.h"
 /**
  * creates a new file and copies information from the heap to the file
  * inputs: src: pointer to heap source, len: size of data to write, filename: name of file
@@ -27,15 +16,9 @@ struct HeapRef{
 */
 int write_from_heap(const unsigned char* pointer, size_t len, const char* filename);
 
-/**
- * Switches std err from printing to console to logging internally
- * output: fileno of redirected stderr on success, -1 on failure
- * preconditions: stderr prints to console as usual
- * postconditions:
- * 	messages that would be printed to error are added to the buffer
-*/
 struct Redirect redirect_stderr(void);
 
+struct Redirect redirect_stdout(void);
 /**
  * Restores stderr to a console logging and flushes the buffer
  * input: the fileno of the backedup stderr
@@ -45,6 +28,7 @@ struct Redirect redirect_stderr(void);
 */
 struct HeapRef restore_stderr(struct Redirect redirect);
 
+struct HeapRef restore_stdout(struct Redirect redirect);
 
 /**
  * wraps file utils or unstd for consistent level of abstraction
@@ -63,5 +47,22 @@ int file_exists(const char *filename);
  * postconditions: none
 */
 int remove_file(const char *filename);
+
+/**
+ * Returns a pointer to the preallocated stderr buffer
+ */
+unsigned char* get_stderr_heap(void);
+
+/**
+ * Returns a pointer to the preallocated stdout buffer
+ */
+unsigned char* get_stdout_heap(void);
+
+/**
+ * Reads a file into the stdout heap buffer.
+ * Returns a HeapRef with exit_code 0 on success, -1 on failure.
+ * The file is deleted after reading.
+ */
+struct HeapRef read_file_to_stdout_heap(const char *filename);
 
 #endif

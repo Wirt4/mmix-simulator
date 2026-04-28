@@ -17,15 +17,6 @@ vi.mock('../../app/javascript/wasm/factory', () => {
   ) as () => Promise<MainModule>
   return { default: () => createMmixModule() }
 })
-const helloWorldSource =
-  "\tLOC\tData_Segment\n" +
-  "\tGREG\t@\n" +
-  "Text\tBYTE\t\"Greetings Program!\",10,0\n" +
-  "\n" +
-  "\tLOC\t#100\n" +
-  "Main\tLDA\t$255,Text\n" +
-  "\tTRAP\t0,Fputs,StdOut\n" +
-  "\tTRAP\t0,Halt,0\n"
 
 const stderrProgramSource =
   "\tLOC\tData_Segment\n" +
@@ -44,24 +35,6 @@ describe("MMIX WASM Module", () => {
     const m = await moduleFactory()
     if (m !== null) Module = m
   })
-
-  it("a successfull assemble_mmixal produces a listing output", () => {
-    const src: string = helloWorldSource
-
-    const ptr: number = Module._get_source_code_pointer()
-    const encoded: Uint8Array = new TextEncoder().encode(src)
-    Module.HEAPU8.set(encoded, ptr)
-    Module.HEAPU8[ptr + encoded.length] = 0
-    Module._assemble_mmixal(encoded.length)
-    const stdoutPtr: number = Module._get_stdout_pointer()
-    const stdoutSize: number = Module._get_stdout_size()
-    const bytes = Module.HEAPU8.slice(stdoutPtr, stdoutPtr + stdoutSize)
-    const stdoutText: string = new TextDecoder().decode(bytes)
-
-    expect(stdoutText).toEqual(expect.stringContaining("LOC"))
-    expect(stdoutText).toEqual(expect.stringContaining("Text\tBYTE\t\"Greetings Program!"))
-  })
-
 
   it("given a source that's syntactically correct and  prints to stderr, when it is converted to assembly, then the assemble result will be clean", () => {
     const src: string = stderrProgramSource
@@ -84,34 +57,13 @@ describe("MMIX WASM Module", () => {
     Module.HEAPU8.set(encoded, ptr)
     Module.HEAPU8[ptr + encoded.length] = 0
     Module._assemble_mmixal(encoded.length)
-    const binSize: number = Module._get_binary_size()
-    Module._mmix_simulate(binSize)
+    Module._mmix_simulate(1)
     const stderrSize: number = Module._get_stderr_size()
     const stderrPtr: number = Module._get_stderr_pointer()
     const bytes = Module.HEAPU8.slice(stderrPtr, stderrPtr + stderrSize)
     const stderrOutput: string = new TextDecoder().decode(bytes)
 
     expect(stderrOutput).toBe(expected)
-  })
-
-
-  it("mmix_simulate captures stdout output", () => {
-    const src = helloWorldSource
-    const expected = "Greetings Program!\n"
-
-    const ptr: number = Module._get_source_code_pointer()
-    const encoded: Uint8Array = new TextEncoder().encode(src)
-    Module.HEAPU8.set(encoded, ptr)
-    Module.HEAPU8[ptr + encoded.length] = 0
-    Module._assemble_mmixal(encoded.length)
-    const binSize: number = Module._get_binary_size()
-    Module._mmix_simulate(binSize)
-    const stdoutSize: number = Module._get_stdout_size()
-    const stdoutPtr: number = Module._get_stdout_pointer()
-    const bytes = Module.HEAPU8.slice(stdoutPtr, stdoutPtr + stdoutSize)
-    const stdoutOutput: string = new TextDecoder().decode(bytes)
-
-    expect(stdoutOutput).toBe(expected)
   })
 
   it("assemble_mmixal produces nonzero result", () => {

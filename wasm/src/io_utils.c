@@ -5,7 +5,9 @@
 #include "assert.h"
 //PRIVATE
 static int g_stderr_redirected = 0;
+static int g_stdout_redirected = 0;
 static unsigned char g_stderr_pointer[STD_ERR_SIZE];
+static unsigned char g_stdout_pointer[STD_OUT_SIZE];
 /**
 * reads information stored in (filename) to (heap_pointer)
 * inputs: filename, heap_pointer
@@ -52,37 +54,64 @@ static size_t read_to_heap(const char* filename, unsigned char* heap_pointer){
 * returns 0 on success, 1 on faliure
 */
 static int restore_stream(int redirected_fileno, int original_fileno, FILE* stream){
-	//assert filenos are non-negative
 	if (redirected_fileno <0 || original_fileno <0){
 		perror("filenos may not be negative");
 		return -1;
 	}
-	// assert filenos are not equivalent
 	if (redirected_fileno == original_fileno){
 		perror("filenos may not be the same");
 		return -1;
 	}
-	// assert stream is non-null
 	if (stream == NULL){
 		perror("output stream may not be null");
 		return -1;
 	}
-	// flush stream
 	int flushed = fflush(stream);
 	if (flushed !=0){
 		perror("issue with file flushing stream");
 	}
-	// restore the original fileno with dup2
 	int restored = dup2(redirected_fileno, original_fileno);
 	if (restored < 0){
 		perror("did not restore file directory");
 	}	
-	// close the redirected fileno, it's no longer needed
-	int closed = (redirected_fileno);
+	int closed = close(redirected_fileno);
 	if (closed !=0){
 		perror("issue closing redirected fileno");
 	}
 	return 0;
+}
+
+static struct Redirect redirect_stream(struct Redirect redirect, FILE* stream, int target_fileno, int* redirected_flag){
+	if (!ASSERT(!*redirected_flag)){return redirect;}
+	int streamFlush = fflush(stream);
+	if (!ASSERT(streamFlush == 0)){return redirect;}
+	redirect.backup_fileno = dup(target_fileno);
+	if (!ASSERT(redirect.backup_fileno >= 0)){ return redirect;}
+	redirect.log_pointer = fopen(redirect.filename, "w");
+	if (!ASSERT(redirect.log_pointer != NULL)){
+		return redirect;
+	}
+	// as far as dup2 goes, the file descriptor _is_ an integer
+	int duped = dup2(fileno(redirect.log_pointer), target_fileno);
+	if (!ASSERT(duped == target_fileno)){
+		fclose(redirect.log_pointer);
+		return redirect;
+	}
+	int closed = fclose(redirect.log_pointer);
+	if (!ASSERT(closed == 0)){return redirect;}
+	*redirected_flag = 1;
+	redirect.exit_code = 0;
+	return redirect;
+}
+static struct Redirect init_redirect(char*logname){
+	ASSERT(logname != NULL);
+	ASSERT(strlen(logname) < FILE_NAME_SIZE);
+	struct Redirect redirect;
+	redirect.exit_code = -1;
+	redirect.backup_fileno = -1;
+	redirect.filename = logname;
+	redirect.log_pointer = NULL;
+        return redirect;
 }
 //PUBLIC
 /**
@@ -97,7 +126,6 @@ static int restore_stream(int redirected_fileno, int original_fileno, FILE* stre
  * postcondition(s): a new file of name <filename> is created and filled with the information from heap
 */
 int write_from_heap(const unsigned char* pointer, size_t len, const char* filename){
-	// pointer must be non-null
 	if (pointer == NULL || filename == NULL ){
 		perror("pointer and filename may not be null");
 		return -1;
@@ -106,15 +134,12 @@ int write_from_heap(const unsigned char* pointer, size_t len, const char* filena
 		perror("size greater than available heap memory");
 		return -1;
 	}
-	// open a file with filename
 	FILE* fileP = fopen(filename, "wb");
 	if (fileP == NULL){
 		perror("could not open file");
 		return -1;
 	}
-	// copy the buffer to the file
 	int success = 0;
-	//if there's nothing to write, just create the file
 	if (len > 0){
 		size_t bytesWritten = fwrite(pointer, 1, len, fileP);
 		if (bytesWritten != len){
@@ -123,7 +148,6 @@ int write_from_heap(const unsigned char* pointer, size_t len, const char* filena
 			if (feof(fileP)){perror("Error: EOF file write error");}
 		}
 	}
-	// close the file
 	int closed = fclose(fileP);
 	if (closed !=0){
 		perror("error closing file");
@@ -132,74 +156,39 @@ int write_from_heap(const unsigned char* pointer, size_t len, const char* filena
 	return success;
 }
 
-/**
- * Switches std err from printing to console to logging internally
- * output: fileno for redirected stderr, -1 on failure
- * preconditions: stderr prints to console as usual
- * postconditions:
- * 	messages that would be printed to error are added to the buffer
-*/
-struct Redirect redirect_stderr(void){
-	struct Redirect redirect;
-	redirect.exit_code = -1;
-	redirect.backup_fileno = -1;
-	redirect.filename = "stderr_log.txt";
-	redirect.log_pointer = NULL;
-	if (!ASSERT(!g_stderr_redirected)){return redirect;}
-	int streamFlush = fflush(stderr);
-	if (!ASSERT(streamFlush == 0)){return redirect;}
-	redirect.backup_fileno = dup(STDERR_FILENO);
-	if (!ASSERT(redirect.backup_fileno >= 0)){ return redirect;}
-	redirect.log_pointer = fopen(redirect.filename, "w");
-	if (! ASSERT (redirect.log_pointer != NULL)){
-		g_stderr_redirected = 0;
-		return redirect;
-	}
-	int duped = dup2(fileno(redirect.log_pointer), STDERR_FILENO);
-	if (!ASSERT(duped == 0)){
-		perror("did not redirect stderr");
-		fclose(redirect.log_pointer);
-		return redirect;
-	}
-	int closed =fclose(redirect.log_pointer);
-	if (!ASSERT(closed == 0)){return redirect;}
-	g_stderr_redirected = 1;
-	redirect.exit_code = 0;
-	return redirect;
+struct Redirect redirect_stdout(void){
+	return redirect_stream(init_redirect("stdout_log.txt"), stdout, STDOUT_FILENO, &g_stdout_redirected);
 }
 
-/**
- * Restores stderr to a console logging and flushes the buffer
- * input: the fileno of the backedup stderr
- * output: heapref struct, exit_code: 0 on success, -1 on failure
- * preconditions: redirect_std_err has been successfully called
- * postconditions: stderr logs to console normally
-*/
-struct HeapRef restore_stderr(struct Redirect redirect){
+struct Redirect redirect_stderr(void){
+	return redirect_stream(init_redirect("stderr_log.txt"), stderr, STDERR_FILENO, &g_stderr_redirected);
+}
+
+static struct HeapRef restore_and_read(struct Redirect redirect, int target_fileno, FILE* stream, int* redirected_flag, unsigned char* heap_buf){
 	struct HeapRef ref;
 	ref.heap_pointer = NULL;
 	ref.size = (size_t)-1;
 	ref.exit_code = -1;
-	if (!g_stderr_redirected){return ref;}
-	// assert fileno is non-negative
-	if (redirect.backup_fileno < 0){return ref;	}
-	//  restore stream with redirect.backup_fileno, STDERR_NO and stderr
-	const int restored = restore_stream(redirect.backup_fileno, STDERR_FILENO, stderr);
-	// if could not restore, return bad
+	if (!*redirected_flag){return ref;}
+	if (redirect.backup_fileno < 0){return ref;}
+	const int restored = restore_stream(redirect.backup_fileno, target_fileno, stream);
 	if (restored !=0){return ref;}
-	// assert filename non null, 
-	if (redirect.filename == NULL){ return ref;} 
-	// assign the global stderr pointer to ref pointer
-	ref.heap_pointer = g_stderr_pointer;
-	// call read_to_heap with ref.pointer and redirect.filename
+	*redirected_flag = 0;
+	if (redirect.filename == NULL){ return ref;}
+	ref.heap_pointer = heap_buf;
 	size_t size = read_to_heap(redirect.filename, ref.heap_pointer);
-	// if size invalid, return bad
 	if (size == (size_t)-1){return ref;}
-	 // assign the returned size to redirect.filename
 	ref.size = size;
-	// mark success
 	ref.exit_code = 0;
 	return ref;
+}
+
+struct HeapRef restore_stderr(struct Redirect redirect){
+	return restore_and_read(redirect, STDERR_FILENO, stderr, &g_stderr_redirected, g_stderr_pointer);
+}
+
+struct HeapRef restore_stdout(struct Redirect redirect){
+	return restore_and_read(redirect, STDOUT_FILENO, stdout, &g_stdout_redirected, g_stdout_pointer);
 }
 
 /**
@@ -224,6 +213,31 @@ int file_exists(const char *filename){
  * postconditions: none
 */
 int remove_file(const char *filename){
-	if (!ASSERT(filename == NULL)){return -1;}
+	if (!ASSERT(filename != NULL)){return -1;}
 	return remove(filename);
+}
+
+unsigned char* get_stderr_heap(void){
+	return g_stderr_pointer;
+}
+
+unsigned char* get_stdout_heap(void){
+	return g_stdout_pointer;
+}
+
+struct HeapRef read_file_to_stdout_heap(const char *filename){
+	struct HeapRef ref;
+	ref.heap_pointer = g_stdout_pointer;
+	ref.size = (size_t)-1;
+	ref.exit_code = -1;
+	if (filename == NULL) return ref;
+	FILE *f = fopen(filename, "rb");
+	if (!f) return ref;
+	ref.size = fread(g_stdout_pointer, 1, (size_t)STD_OUT_SIZE, f);
+	int err = ferror(f);
+	fclose(f);
+	if (err) return ref;
+	if (ref.size < (size_t)STD_OUT_SIZE) g_stdout_pointer[ref.size] = '\0';
+	ref.exit_code = 0;
+	return ref;
 }

@@ -38,6 +38,7 @@
 /node_modules
 /package-lock.json
 
+**/*.mmo
 # WASM build artifacts
 /wasm/build/
 /wasm/test_unit

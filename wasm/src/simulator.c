@@ -48,7 +48,8 @@ int initialize_simulator(char* mmo){
 		return -1;
 	}
 	// set g_current_mmo to mmo
-	strncpy(g_current_mmo, mmo, strlen(mmo));
+	strncpy(g_current_mmo, mmo, FILE_NAME_SIZE - 1);
+	g_current_mmo[FILE_NAME_SIZE - 1] = '\0';
 	// start mmixlib
 	mmix_lib_initialize_w();
 	// start mmix
@@ -79,6 +80,10 @@ void execute_instructions(unsigned int n){
 	}
 }
 
+int is_halted(void){
+	return get_halted();
+}
+
 int finalize_simulator(void){
 	/*
 	note: had thoughts about cleaning up user-generated files or directories, but I'm trading that off here. 
@@ -86,11 +91,11 @@ int finalize_simulator(void){
 	Also, resource management is the job of the programmer, and I'm managing the resources of this program, not the user's.
 	So collect your own darn garbage.
 	*/
-	if (!g_simulator_initialized){
+	if (!ASSERT(g_simulator_initialized)){
 		return -1;
 	}
 	mmix_finalize_w();
 	mmix_lib_finalize_w();
 	g_simulator_initialized = 0;
-	return 0;
+	return remove(g_current_mmo);
 }

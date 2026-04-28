@@ -20,11 +20,9 @@ interface WasmModule {
   _get_stderr_size(): number;
   _get_stdout_pointer(): number;
   _get_stderr_pointer(): number;
-  _get_source_code_pointer(): number;
   _assemble_mmixal(_0: number): number;
   _get_stdout_size(): number;
-  _get_binary_pointer(): number;
-  _get_binary_size(): number;
+  _get_source_code_pointer(): number;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports;

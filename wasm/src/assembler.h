@@ -9,15 +9,15 @@
 unsigned char * get_source_code_pointer(void);
 
 /**
- * Calls the mmixal assemble function and returns the name of the created .mmo file if successful, null if error
- * preconditions: source has been written to heap, length is less than HEAP_SIZE
- * postconditions:
- * if assembly is successful:
- * - the listing
- * - an .mmo file has been created 
- * - the function returns the filename
- * is assembly is unsuccessful, 
- * - the sterr printed by the mmixal function has been redirected to the stderr heap (see io_redirect.h)
-*/
-char* assemble_source(size_t length);
+ * Assembles MMIXAL source code.
+ * Returns: 0 on success, positive = error count, negative = fatal error.
+ * On success, the .mmo file path is available via get_mmo_path().
+ * listing_name: if non-NULL, mmixal writes listing to this file.
+ */
+int assemble_source(size_t length);
+
+/**
+ * Returns the path of the last assembled .mmo file.
+ */
+const char* get_mmo_path(void);
 #endif

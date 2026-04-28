@@ -106,18 +106,6 @@ describe("Module Adapter", () => {
     expect(result).toEqual(expect.stringContaining(expected))
   })
 
-  it('simulateMMIXAL passes the binary size to the module simulate method', () => {
-    const mockBinSize = 42
-    vi.spyOn(mockModule, '_get_binary_size').mockReturnValue(mockBinSize)
-    const simSpy = vi.spyOn(mockModule, '_mmix_simulate')
-
-    const adapter = new ModuleAdapter(mockModule)
-    adapter.simulateMMIX()
-
-    expect(simSpy.mock.calls.length).toBe(1)
-    expect(simSpy.mock.calls).toEqual(expect.arrayContaining([[mockBinSize]]))
-  })
-
   it('if _assemble_mmixal returns non zero, then mmixSimulate returns false', () => {
     vi.spyOn(mockModule, '_assemble_mmixal').mockReturnValue(5)
 

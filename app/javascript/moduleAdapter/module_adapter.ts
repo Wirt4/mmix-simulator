@@ -73,29 +73,7 @@ export default class ModuleAdapter implements IModuleAdapter {
   }
 
   public simulateMMIX(): void {
-    const ptr = this._module._get_binary_pointer()
-    if (ptr <= 0) {
-      console.error("binary pointer error")
-      return;
-    }
-    const len = this._module._get_binary_size()
-    if (len < 0) {
-      console.error("binary may not have negative length")
-      return
-    }
-    if (len === 0) {
-      return
-    }
-    if (ptr + len >= this._module.HEAPU8.length) {
-      console.error("overflow: binary executable too large or not terminated")
-      return;
-    }
-    const bin = this._module.HEAPU8.slice(ptr, ptr + len)
-    if (bin.every((value: number) => value === 0)) {
-      console.log("can't simulate an empty executable")
-    }
-    // return value of simulate method denotes user errors, not simulator errors
-    this._module._mmix_simulate(len)
+    this._module._mmix_simulate(1)
   }
 
   private _decode_and_return(ptr: number, len: number): string {

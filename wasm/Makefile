@@ -1,8 +1,10 @@
-CC = gcc
+CC = clang
 EMCC = emcc
-CFLAGS_COMMON = -Isrc/ -Ibuild/mmixlib
+#CFLAGS_COMMON = -Isrc/ -Ibuild/mmixlib
+CFLAGS_COMMON = -Isrc/ -isystem build/mmixlib
+
 CFLAGS = -Wall -Wextra -Wpedantic -Werror $(CFLAGS_COMMON)
-CFLAGS_VENDOR = -w $(CFLAGS_COMMON)
+CFLAGS_VENDOR = -w -fsigned-char $(CFLAGS_COMMON)
 AR = ar
 ARFLAGS = cru
 RANLIB = ranlib
@@ -199,6 +201,7 @@ test: $(SRC_OBJS) $(LIBMMIX)
 WASM_BUILD = build/wasm
 WASM_OBJ = $(patsubst $(MMIXLIB_BUILD)/%,$(WASM_BUILD)/%,$(LIBSIM_OBJ) $(LIBAL_OBJ) $(LIBEXTRA_OBJ))
 WASM_LIBMMIX = $(WASM_BUILD)/libmmix.a
+WASM_SRC_OBJ = $(patsubst src/%.o,$(WASM_BUILD)/src_%.o,$(SRC_OBJS))
 
 $(WASM_BUILD):
 	mkdir -p $(WASM_BUILD)
@@ -206,16 +209,19 @@ $(WASM_BUILD):
 $(WASM_BUILD)/%.o: $(MMIXLIB_BUILD)/%.c $(MMIXLIB_HDRS) | $(WASM_BUILD)
 	$(EMCC) $(CFLAGS_VENDOR) -c $< -o $@
 
+$(WASM_BUILD)/src_%.o: src/%.c $(MMIXLIB_HDRS) | $(WASM_BUILD)
+	$(EMCC) $(CFLAGS) -c $< -o $@
+
 $(WASM_LIBMMIX): $(WASM_OBJ)
 	rm -f $@
 	$(EMCC_AR) $(ARFLAGS) $@ $^
 	$(EMCC_RANLIB) $@
 
-wasm: src/glue.c $(WASM_LIBMMIX)
-	$(EMCC) $(CFLAGS) src/glue.c \
+wasm: $(WASM_SRC_OBJ) $(WASM_LIBMMIX)
+	$(EMCC) $(CFLAGS) $(WASM_SRC_OBJ) \
 		-L$(WASM_BUILD) -lmmix \
 		-o $(WASM_BUILD)/mmix.js \
-		-sEXPORTED_FUNCTIONS='["_assemble_mmixal","_mmix_simulate","_get_stdout_pointer","_get_source_code_pointer","_get_binary_pointer","_get_stderr_pointer","_get_stdout_size","_get_binary_size","_get_stderr_size"]' \
+		-sEXPORTED_FUNCTIONS='["_assemble_mmixal","_mmix_simulate","_get_stdout_pointer","_get_source_code_pointer","_get_stderr_pointer","_get_stdout_size","_get_stderr_size"]' \
 		-sEXPORTED_RUNTIME_METHODS='["ccall","cwrap","HEAPU8"]' \
 		-sMODULARIZE=1 \
 		-sEXPORT_NAME='createMmixModule' --emit-tsd module.d.ts
@@ -228,3 +234,4 @@ analyze:
 clean:
 	rm -rf $(MMIXLIB_BUILD) $(WASM_BUILD)
 	rm -f $(SRC_OBJS) test_integration test_unit_assembler test_unit_simulator
+	rm -f program.mmo
