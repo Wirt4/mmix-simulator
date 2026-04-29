@@ -1,13 +1,7 @@
-/*
- * MMIX Simulator — Retro-terminal aesthetic
- * Warm amber CRT tones, dark panels, monospace authority.
- */
-
-/* ── Design tokens ─────────────────────────────────────── */
 :root {
   --bg-deep:       #1a1510;
   --bg-panel:      #231e17;
-  --bg-surface:    #e1d1a9;
+  --bg-surface:    #d7d7d7;
   --bg-input:      #1e1a14;
   --border:        #5c4a2e;
   --border-light:  #7a6340;
@@ -31,7 +25,6 @@
   --radius:        3px;
 }
 
-/* ── Reset & base ──────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -55,7 +48,6 @@ a:hover {
   text-decoration: underline;
 }
 
-/* ── Typography ────────────────────────────────────────── */
 h1, h2, h3 {
   font-family: var(--font-display);
   color: var(--text-bright);
@@ -67,7 +59,6 @@ h1, h2, h3 {
 h1 { font-size: 1.4em; }
 h2 { font-size: 1.15em; }
 
-/* ── Navigation ────────────────────────────────────────── */
 nav {
   display: flex;
   align-items: center;
@@ -79,7 +70,6 @@ nav {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
-/* ── Buttons ───────────────────────────────────────────── */
 button,
 input[type="submit"],
 .btn {
@@ -99,6 +89,7 @@ input[type="submit"],
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   transition: background 0.1s, border-color 0.1s, box-shadow 0.1s, transform 0.1s;
 }
+/*General purpose buttons*/
 button:hover,
 input[type="submit"]:hover,
 .btn:hover {
@@ -141,8 +132,7 @@ button[data-ide-facade-target="runButton"]:active {
     0 0 1px rgba(0, 0, 0, 0.4),
     inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
-
-/* ── Form inputs ───────────────────────────────────────── */
+/* sign in and stuff*/
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -152,7 +142,6 @@ textarea {
   line-height: 1.5;
   background: var(--bg-input);
   color: var(--text-console);
-  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 6px 10px;
   outline: none;
@@ -166,7 +155,6 @@ textarea:focus {
   box-shadow: 0 0 0 1px var(--accent-glow);
 }
 
-/* ── Flash messages ────────────────────────────────────── */
 .flash-alert,
 [style*="color:red"] {
   color: var(--error) !important;
@@ -180,7 +168,6 @@ textarea:focus {
   padding: 0.4em 0;
 }
 
-/* ── Error list ────────────────────────────────────────── */
 #error_explanation {
   border: 1px solid var(--error);
   border-radius: var(--radius);
@@ -194,7 +181,6 @@ textarea:focus {
   color: var(--error);
 }
 
-/* ── Tables (program list, user list) ──────────────────── */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -215,7 +201,6 @@ tr:hover td {
   background: var(--accent-glow);
 }
 
-/* ── Editor & output panels ────────────────────────────── */
 .editor-container,
 .output-container {
   display: flex;
@@ -244,7 +229,6 @@ tr:hover td {
   border: none;
 }
 
-/* CRT screen recess */
 .editor-body,
 .output-body {
   display: flex;
@@ -274,7 +258,6 @@ tr:hover td {
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-/* ── Line numbers & gutters ────────────────────────────── */
 .line-numbers,
 .output-gutter {
   font-family: var(--font-mono);
@@ -293,7 +276,6 @@ tr:hover td {
   display: block;
 }
 
-/* ── Textarea areas ────────────────────────────────────── */
 .editor-textarea,
 .output-textarea {
   font-family: var(--font-mono);
@@ -328,15 +310,6 @@ tr:hover td {
   line-height: 1.5;
 }
 
-/* ── Nav inline forms (button_to wrappers) ─────────────── */
-nav form {
-  margin: 0;
-  padding: 0;
-  display: flex;
-  align-items: center;
-}
-
-/* ── Editor footer buttons ────────────────────────────── */
 .editor-actions {
   display: flex;
   gap: 8px;
@@ -347,6 +320,15 @@ nav form {
 .editor-actions input[type="submit"] {
   min-width: 6em;
 }
+/* ── Nav inline forms (button_to wrappers) ─────────────── */
+nav form {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+
 
 /* ── Auth pages (login, sign up, password reset) ───────── */
 form > div {
@@ -370,7 +352,6 @@ form > div > input[type="password"] {
   max-width: 24em;
 }
 
-/* ── Scrollbar styling (webkit) ────────────────────────── */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -386,7 +367,6 @@ form > div > input[type="password"] {
   background: var(--border-light);
 }
 
-/* ── Selection ─────────────────────────────────────────── */
 ::selection {
   background: rgba(212, 146, 42, 0.35);
   color: var(--text-bright);
