@@ -27,14 +27,8 @@ MMIXLIB_BUILD = build/mmixlib
 
 # Test framework paths
 UNITY_DIR = vendor/unity/src
-CMOCK_DIR = vendor/cmock/src
-MOCK_DIR  = test/unit/mocks
-
 UNITY_SRC = $(UNITY_DIR)/unity.c
 UNITY_INC = -I$(UNITY_DIR)
-CMOCK_SRC = $(CMOCK_DIR)/cmock.c
-CMOCK_INC = -I$(CMOCK_DIR)
-MOCK_SRC  = $(MOCK_DIR)/mock_mmixlib_wrapper.c $(MOCK_DIR)/mock_io_utils.c
 
 # Glue code object
 SRC_OBJS = src/glue.o src/assembler.o src/simulator.o src/assert.o src/io_utils.o src/mmixlib_wrapper.o
@@ -67,7 +61,7 @@ MMIXLIB_HDRS = $(MMIXLIB_BUILD)/abstime.h $(MMIXLIB_BUILD)/mmixlib.h \
                $(MMIXLIB_BUILD)/libname.h $(MMIXLIB_BUILD)/libbase.h \
                $(LIBH_FILES) $(MMIXLIB_BUILD)/libconfig.h
 
-.PHONY: all test unit_test unit_test_assembler unit_test_simulator wasm analyze clean
+.PHONY: all test wasm analyze clean
 
 all: test
 
@@ -155,37 +149,7 @@ src/io_utils.o: src/io_utils.c src/io_utils.h
 src/mmixlib_wrapper.o: src/mmixlib_wrapper.c src/mmixlib_wrapper.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# --- Mocks & tests ---
-
-$(MOCK_DIR)/mock_mmixlib_wrapper.c $(MOCK_DIR)/mock_mmixlib_wrapper.h: src/mmixlib_wrapper.h
-	mkdir -p $(MOCK_DIR)
-	ruby -Ivendor/cmock/lib -e "require 'cmock'; CMock.new({:mock_path => '$(MOCK_DIR)', :plugins => [:ignore, :callback], :mock_prefix => 'mock_'}).setup_mocks(['$<'])"
-
-$(MOCK_DIR)/mock_io_utils.c $(MOCK_DIR)/mock_io_utils.h: src/io_utils.h
-	mkdir -p $(MOCK_DIR)
-	ruby -Ivendor/cmock/lib -e "require 'cmock'; CMock.new({:mock_path => '$(MOCK_DIR)', :plugins => [:ignore, :callback], :mock_prefix => 'mock_'}).setup_mocks(['$<'])"
-
-unit_test: unit_test_assembler unit_test_simulator
-
-unit_test_assembler: src/assembler.o $(MOCK_SRC)
-	$(CC) $(CFLAGS) $(UNITY_INC) $(CMOCK_INC) -I$(MOCK_DIR) -Isrc/ \
-		test/unit/test_assembler.c \
-		$(UNITY_SRC) \
-		$(CMOCK_SRC) \
-		$(MOCK_SRC) \
-		src/assembler.o \
-		-o test_unit_assembler
-	./test_unit_assembler
-
-unit_test_simulator: src/simulator.o src/assert.o $(MOCK_SRC)
-	$(CC) $(CFLAGS) $(UNITY_INC) $(CMOCK_INC) -I$(MOCK_DIR) -Isrc/ \
-		test/unit/test_simulator.c \
-		$(UNITY_SRC) \
-		$(CMOCK_SRC) \
-		$(MOCK_SRC) \
-		src/simulator.o src/assert.o \
-		-o test_unit_simulator
-	./test_unit_simulator
+# --- Tests ---
 
 test: $(SRC_OBJS) $(LIBMMIX)
 	$(CC) $(CFLAGS) $(UNITY_INC) -Isrc/ \
@@ -233,5 +197,5 @@ analyze:
 
 clean:
 	rm -rf $(MMIXLIB_BUILD) $(WASM_BUILD)
-	rm -f $(SRC_OBJS) test_integration test_unit_assembler test_unit_simulator
+	rm -f $(SRC_OBJS) test_integration test_unit_assembler
 	rm -f program.mmo

@@ -16,8 +16,22 @@
 */
 int write_from_heap(const unsigned char* pointer, size_t len, const char* filename);
 
+/**
+ * Redirects stderr output to a file ("stderr_log.txt").
+ * Returns a Redirect struct with exit_code 0 on success, -1 on failure.
+ * preconditions: stderr has not already been redirected
+ * postconditions: stderr writes to "stderr_log.txt";
+ *   original stderr file descriptor is backed up in Redirect.backup_fileno
+ */
 struct Redirect redirect_stderr(void);
 
+/**
+ * Redirects stdout output to a file ("stdout_log.txt").
+ * Returns a Redirect struct with exit_code 0 on success, -1 on failure.
+ * preconditions: stdout has not already been redirected
+ * postconditions: stdout writes to "stdout_log.txt";
+ *   original stdout file descriptor is backed up in Redirect.backup_fileno
+ */
 struct Redirect redirect_stdout(void);
 /**
  * Restores stderr to a console logging and flushes the buffer
@@ -28,6 +42,13 @@ struct Redirect redirect_stdout(void);
 */
 struct HeapRef restore_stderr(struct Redirect redirect);
 
+/**
+ * Restores stdout to normal console output and flushes the buffer.
+ * input: the Redirect struct returned by redirect_stdout()
+ * output: struct HeapRef referencing data written to heap, with exit_code 0 on success, -1 on failure
+ * preconditions: redirect_stdout has been successfully called
+ * postconditions: stdout logs to console normally; "stdout_log.txt" is deleted
+ */
 struct HeapRef restore_stdout(struct Redirect redirect);
 
 /**
@@ -65,4 +86,9 @@ unsigned char* get_stdout_heap(void);
  */
 struct HeapRef read_file_to_stdout_heap(const char *filename);
 
+/**
+ * void
+ * copies src to dest and adds null char at len
+ */
+void strcopy_and_trim(char* dest, const char*src, int len);
 #endif

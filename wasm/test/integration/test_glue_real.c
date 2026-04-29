@@ -10,8 +10,6 @@ void setUp(void) {
 }
 
 void tearDown(void) {
-    // remove("program.mmo");
-    // remove("program.mms");
 }
 
 static const char *stderr_program_source =
@@ -98,7 +96,6 @@ static void test_mmix_simulate_stderr(void) {
     mmix_simulate(1);
     size_t stderr_size = get_stderr_size();
     unsigned char *stderr_out = get_stderr_pointer();
-
     TEST_ASSERT_EQUAL(strlen(expected_stderr), stderr_size);
     TEST_ASSERT_EQUAL_STRING(expected_stderr, stderr_out);
 }
@@ -109,10 +106,12 @@ static void test_mmix_simulate_hello_world_std_out(void) {
     memcpy(buf, hello_world_source, len + 1);
     int assembled = assemble_mmixal(len);
     TEST_ASSERT_EQUAL_INT(0, assembled);
+
     mmix_simulate(1);
-    unsigned char *stdout_out = get_stdout_pointer();
+    const unsigned char *stdout_out = get_stdout_pointer();
     char output[get_stdout_size()];
     strcpy(output, (char*)stdout_out);
+
     TEST_ASSERT_EQUAL_STRING(expected_output, output);
 }
 
@@ -134,6 +133,7 @@ static void test_assemble_mmixal_error_output(void) {
     assemble_mmixal(len);
     char errMsg[get_stderr_size()];
     strcpy(errMsg, (char*)get_stderr_pointer());
+
     TEST_ASSERT_EQUAL_STRING(expected_assembly_stderr, errMsg);
 }
 

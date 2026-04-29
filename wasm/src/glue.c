@@ -1,28 +1,24 @@
 #include <string.h>
-#include <setjmp.h>
 #include "glue.h"
 #include "simulator.h"
 #include "constants.h"
 #include "io_utils.h"
 #include "assembler.h"
-
-extern jmp_buf mmix_exit;
+#include "assert.h"
 
 static struct HeapRef stderr_ref;
 static struct HeapRef stdout_ref;
 static char mmo[FILE_NAME_SIZE];
 
+//TODO: remove argument from mmix_simulate
 int mmix_simulate(size_t executable_size){
 	if (executable_size == 0) {return -1;}
 	(void)executable_size;
 
-	int exit_code = setjmp(mmix_exit);
-	if (exit_code != 0) {
+	int init = initialize_simulator(mmo);
+	if (!ASSERT(init == 0)) {
 		return -1;
 	}
-
-	int init = initialize_simulator(mmo);
-	if (init != 0) {return -1;}
 
 	struct Redirect err_redirect = redirect_stderr();
 	struct Redirect std_redirect = redirect_stdout();
@@ -40,15 +36,19 @@ size_t get_stderr_size(void){
 }
 
 unsigned char* get_stdout_pointer(void){
+	ASSERT(get_stdout_heap() != NULL);
 	return get_stdout_heap();
 }
 
 unsigned char* get_stderr_pointer(void){
+	ASSERT(get_stdout_heap() != NULL);
 	return get_stderr_heap();
 }
 
 int assemble_mmixal(size_t len){
-	if (len == 0 || len >= (size_t)MAX_SRC_SIZE) {return -1;};
+	if (!ASSERT(len != 0 && len < (size_t)MAX_SRC_SIZE)) {
+		return -1;
+	};
 
 	struct Redirect err_redirect = redirect_stderr();
 	int result = assemble_source(len);
@@ -57,8 +57,10 @@ int assemble_mmixal(size_t len){
 	if (result == 0){
 		const char *mmo_path = get_mmo_path();
 		if (file_exists(mmo_path)){
-			strncpy(mmo, mmo_path, FILE_NAME_SIZE - 1);
-			mmo[FILE_NAME_SIZE - 1] = '\0';
+			//THAT's the util point
+			// strncpy(mmo, mmo_path, FILE_NAME_SIZE - 1);
+			// mmo[FILE_NAME_SIZE - 1] = '\0';
+			strcopy_and_trim(mmo, mmo_path, FILE_NAME_SIZE - 1);
 		}
 	}
 

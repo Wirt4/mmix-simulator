@@ -39,7 +39,18 @@
 #undef MMIX_BOOT
 
 #ifdef MMIX_PRINT
+/**
+ * Custom printf replacement used when MMIX_PRINT is defined.
+ * inputs: format: printf-style format string, followed by variadic arguments
+ * outputs: number of characters printed
+ */
 extern int mmix_printf(char *format,...);
+
+/**
+ * Custom fputc replacement used when MMIX_PRINT is defined.
+ * inputs: c: character to write, f: output file stream
+ * outputs: the character written, or EOF on error
+ */
 extern int mmix_fputc(int c, FILE *f);
 #define printf(...) mmix_printf(__VA_ARGS__)
 #define fprintf(file,...) mmix_printf(__VA_ARGS__)
