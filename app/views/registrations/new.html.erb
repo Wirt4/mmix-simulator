@@ -9,13 +9,21 @@
   </div>
 <% end %>
 <%= form_with url: registration_path, model: user do |f| %>
-  <div>username</div>
-  <%= f.text_field :user_name %>
-  <div>email</div>
-  <div><%= f.text_field :email_address %></div>
-  <div>password</div>
-  <div><%= f.password_field :password %></div>
-  <div>confirm password</div>
-  <div><%= f.password_field :password_confirmation %></div>
+  <div>
+    <%= f.label :user_name, "username" %>
+    <%= f.text_field :user_name %>
+  </div>
+  <div>
+    <%= f.label :email_address, "email" %>
+    <%= f.text_field :email_address %>
+  </div>
+  <div>
+    <%= f.label :password, "password" %>
+    <%= f.password_field :password %>
+  </div>
+  <div>
+    <%= f.label :password_confirmation, "confirm password" %>
+    <%= f.password_field :password_confirmation %>
+  </div>
   <%= f.submit 'Submit'%>
 <% end %>
