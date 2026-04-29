@@ -29,8 +29,10 @@
       <textarea class="output-textarea" data-ide-facade-target="output"></textarea>
     </div>
   </div>
-  <%= button_tag "Run", type: "button", data: {ide_facade_target:"runButton", action: "click->ide-facade#runUserProgram"}%>
+  <div class="editor-actions">
+    <%= button_tag "Run", type: "button", data: {ide_facade_target:"runButton", action: "click->ide-facade#runUserProgram"}%>
+    <%= form.submit "Save" %>
+  </div>
 </div>
-<%= form.submit "Save" %>
 <% end %>
 

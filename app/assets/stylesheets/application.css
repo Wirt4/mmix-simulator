@@ -1,61 +1,286 @@
-/*
- * Application styles. Kept intentionally minimal — the goal is a blank slate
- * with just enough structure to be readable.
- */
-
-body {
-  margin: 1em;
-  font-family: sans-serif;
+:root {
+  --bg-deep:       #1a1510;
+  --bg-panel:      #231e17;
+  --bg-surface:    #d7d7d7;
+  --bg-input:      #1e1a14;
+  --border:        #5c4a2e;
+  --border-light:  #7a6340;
+  --text-primary:  #1e1a14;
+  --text-secondary:#b89a4a;
+  --text-on-surface:#5a4520;
+  --text-dim:      #a08848;
+  --text-dim-surface:#6b5530;
+  --text-bright:   #3d2e10;
+  --text-console:  #b1ff7d;
+  --console-shadow:#171717;
+  --accent:        #d4922a;
+  --accent-glow:   #e8a83020;
+  --error:         #8b2a10;
+  --success:       #2d5a18;
+  --link:          #6d4810;
+  --link-hover:    #5a3800;
+  --gutter-bg:     #211c15;
+  --font-mono:     "IBM Plex Mono", "SF Mono", "Cascadia Mono", "Fira Mono", Menlo, Consolas, monospace;
+  --font-display:  "IBM Plex Mono", monospace;
+  --radius:        3px;
 }
 
-/* Code editor: needs monospace + aligned line numbers to be usable. */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 1.5em;
+  font-family: var(--font-mono);
+  font-size: 20px;
+  line-height: 1.6;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  color: var(--text-bright);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+h1 { font-size: 1.4em; }
+h2 { font-size: 1.15em; }
+
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5em 1em;
+  margin: -1.5em -1.5em 1.5em -1.5em;
+  background: var(--bg-panel);
+  border-bottom: 2px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+button,
+input[type="submit"],
+.btn {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 6px 16px;
+  background: #c4b48a;
+  color: var(--text-primary);
+  border: 1px solid #a89868;
+  border-bottom: 3px solid #8a7a50;
+  border-radius: var(--radius);
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: background 0.1s, border-color 0.1s, box-shadow 0.1s, transform 0.1s;
+}
+/*General purpose buttons*/
+button:hover,
+input[type="submit"]:hover,
+.btn:hover {
+  background: #b8a87a;
+  border-color: #9a8a58;
+  border-bottom-color: #7a6a42;
+  color: var(--text-primary);
+}
+button:active,
+input[type="submit"]:active {
+  background: #b0a070;
+  border-bottom-width: 1px;
+  transform: translateY(2px);
+  box-shadow:
+    0 0 1px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Run button (red) ─────────────────────────────────── */
+button[data-ide-facade-target="runButton"] {
+  background: #8b3a2a;
+  color: #f0d8d0;
+  border: 1px solid #6e2e20;
+  border-bottom: 3px solid #4e1e14;
+  box-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+button[data-ide-facade-target="runButton"]:hover {
+  background: #7a3020;
+  border-color: #5e2418;
+  border-bottom-color: #3e1410;
+  color: #f0d8d0;
+}
+button[data-ide-facade-target="runButton"]:active {
+  background: #6a2818;
+  border-bottom-width: 1px;
+  transform: translateY(2px);
+  box-shadow:
+    0 0 1px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+/* sign in and stuff*/
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--bg-input);
+  color: var(--text-console);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-glow);
+}
+
+.flash-alert,
+[style*="color:red"] {
+  color: var(--error) !important;
+  font-weight: 600;
+  padding: 0.4em 0;
+}
+.flash-notice,
+[style*="color:green"] {
+  color: var(--success) !important;
+  font-weight: 600;
+  padding: 0.4em 0;
+}
+
+#error_explanation {
+  border: 1px solid var(--error);
+  border-radius: var(--radius);
+  background: rgba(196, 74, 42, 0.1);
+  padding: 0.6em 1em;
+  margin-bottom: 1em;
+}
+#error_explanation ul {
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--error);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+th, td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  color: var(--text-dim-surface);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+tr:hover td {
+  background: var(--accent-glow);
+}
+
 .editor-container,
 .output-container {
-  border: 1px solid #000;
   display: flex;
   flex-direction: column;
   margin-top: 1em;
-}
-.editor-form input,
-.editor-form textarea {
-  border-width: 0;
+  background: var(--bg-surface);
 }
 
+/* Embossed machine labels */
 .editor-header,
 .output-header {
-  border-bottom: 1px solid #000;
-  padding: 4px 8px;
+  padding: 8px 12px;
+  background: var(--bg-surface);
+  color: var(--text-on-surface);
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: none;
+}
+
+.login-label {
+  background: var(--bg-surface);
+  color: var(--text-on-surface);
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: none;
 }
 
 .editor-footer {
-  border-top: 1px solid #000;
-  padding: 4px 8px;
+  padding: 6px 12px;
+  background: var(--bg-surface);
+  border: none;
 }
 
 .editor-body,
 .output-body {
   display: flex;
+  background: var(--bg-panel);
+  border-radius: 4px;
+  margin: 0 8px 8px;
+  border: 2px solid #3a3020;
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.6),
+    inset 0 0 20px rgba(0, 0, 0, 0.3),
+    0 1px 0 rgba(255, 255, 255, 0.15);
+  overflow: hidden;
 }
-nav {
-  display: flex;
-  align-items: center;
+
+.editor-form input,
+.editor-form textarea {
+  border-width: 0;
+  background: transparent;
 }
-.line-numbers,
-.editor-textarea,
-.output-gutter,
-.output-textarea {
-  font-family: monospace;
-  font-size: 14px;
-  line-height: 1.5;
+
+.editor-title input {
+  color: var(--text-on-surface);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .line-numbers,
 .output-gutter {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
   text-align: right;
-  padding: 8px 4px;
-  border-right: 1px solid #000;
+  padding: 8px 8px 8px 4px;
+  border-right: none;
   user-select: none;
-  min-width: 2em;
+  min-width: 3em;
+  background: transparent;
+  color: var(--text-console);
 }
 
 .line-numbers span {
@@ -64,6 +289,9 @@ nav {
 
 .editor-textarea,
 .output-textarea {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
   flex: 1;
   padding: 8px;
   border: none;
@@ -72,6 +300,13 @@ nav {
   tab-size: 2;
   white-space: pre;
   min-height: 20em;
+  background: var(--bg-panel);
+  color: var(--text-console);
+  caret-color: var(--accent);
+}
+
+.output-textarea {
+  color: var(--text-console);
 }
 
 .output-pre {
@@ -80,4 +315,70 @@ nav {
   margin: 0;
   white-space: pre;
   min-height: 20em;
+  color: var(--text-console);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 8px;
+  margin: 8px 8px 0;
+}
+
+.editor-actions button,
+.editor-actions input[type="submit"] {
+  min-width: 6em;
+}
+/* ── Nav inline forms (button_to wrappers) ─────────────── */
+nav form {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+
+
+/* ── Auth pages (login, sign up, password reset) ───────── */
+form > div {
+  margin-bottom: 0.6em;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.2em;
+  color: var(--text-dim-surface);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+form > div > input[type="text"],
+form > div > input[type="email"],
+form > div > input[type="password"] {
+  display: block;
+  width: 100%;
+  max-width: 24em;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-deep);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-light);
+}
+
+::selection {
+  background: rgba(212, 146, 42, 0.35);
+  color: var(--text-bright);
 }

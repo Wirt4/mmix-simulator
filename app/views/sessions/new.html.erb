@@ -5,24 +5,20 @@
   <div>
 <%= form_with url: session_path do |form| %>
   <div>
-  email
-  </div>
-  <div>
-    <%= form.email_field :email_address, 
-    required: true, 
-    autofocus: true, 
-    autocomplete: "username", 
-    placeholder: "Enter your email address", 
+    <%= form.label :email_address, "email", class: "login-label" %>
+    <%= form.email_field :email_address,
+    required: true,
+    autofocus: true,
+    autocomplete: "username",
+    placeholder: "Enter your email address",
     value: params[:email_address] %>
   </div>
   <div>
-    password
-  </div>
-  <div>
+    <%= form.label :password, "password", class: "login-label" %>
     <%= form.password_field :password,
-    required: true, 
-    autocomplete: "current-password", 
-    placeholder: "Enter your password", 
+    required: true,
+    autocomplete: "current-password",
+    placeholder: "Enter your password",
     maxlength: 72 %>
   </div>
   <div>
@@ -32,7 +28,7 @@
 </div>
 <div>
   <div>
-    <%= link_to "Forgot password?", new_password_path %>
+    <%= link_to "forgot password?", new_password_path %>
   </div>
   <div>
     <%= link_to "sign up", new_registration_path %>
