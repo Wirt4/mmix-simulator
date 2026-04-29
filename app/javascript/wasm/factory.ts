@@ -1,5 +1,5 @@
-import type { MainModule } from '../types/module'
-import type MainModuleFactory from '../types/module'
+import type { MainModule } from '../../../wasm/build/wasm/module'
+import type MainModuleFactory from '../../../wasm/build/wasm/module'
 
 declare const createMmixModule: typeof MainModuleFactory
 

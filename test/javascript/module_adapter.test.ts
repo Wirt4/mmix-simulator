@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import ModuleAdapter from "../../app/javascript/moduleAdapter/module_adapter"
-import type { MainModule } from "../../app/javascript/types/module"
+import type { MainModule } from "../../wasm/build/wasm/module"
 
 describe("Module Adapter", () => {
   let heap: Uint8Array
@@ -30,8 +30,6 @@ describe("Module Adapter", () => {
       _get_source_code_pointer: vi.fn(),
       _assemble_mmixal: vi.fn(),
       _get_stdout_size: vi.fn(),
-      _get_binary_pointer: vi.fn(),
-      _get_binary_size: vi.fn(),
     }
   })
 

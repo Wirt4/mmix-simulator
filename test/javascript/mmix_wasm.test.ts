@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument*/
 
 import { describe, it, expect, beforeAll, vi } from "vitest"
-import type { MainModule } from "../../app/javascript/types/module"
+import type { MainModule } from "../../wasm/build/wasm/module"
 import moduleFactory from "../../app/javascript/wasm/factory"
 
 vi.mock('../../app/javascript/wasm/factory', () => {

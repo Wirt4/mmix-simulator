@@ -7,7 +7,7 @@
 // Since this is the wrapper for a foreign asset, we'll swallow the TSlint style warning here and remember to check the adapter if anything breaks
 
 import type { IModuleAdapter } from './module_adapter.interface'
-import type { MainModule } from "../types/module"
+import type { MainModule } from "../../../wasm/build/wasm/module"
 
 export default class ModuleAdapter implements IModuleAdapter {
   private _module: MainModule
