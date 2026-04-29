@@ -5,7 +5,7 @@
   <div>
 <%= form_with url: session_path do |form| %>
   <div>
-    <%= form.label :email_address, "email" %>
+    <%= form.label :email_address, "email", class: "login-label" %>
     <%= form.email_field :email_address,
     required: true,
     autofocus: true,
@@ -14,7 +14,7 @@
     value: params[:email_address] %>
   </div>
   <div>
-    <%= form.label :password, "password" %>
+    <%= form.label :password, "password", class: "login-label" %>
     <%= form.password_field :password,
     required: true,
     autocomplete: "current-password",
@@ -28,7 +28,7 @@
 </div>
 <div>
   <div>
-    <%= link_to "Forgot password?", new_password_path %>
+    <%= link_to "forgot password?", new_password_path %>
   </div>
   <div>
     <%= link_to "sign up", new_registration_path %>

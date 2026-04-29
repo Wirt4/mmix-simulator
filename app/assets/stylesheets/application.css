@@ -223,6 +223,17 @@ tr:hover td {
   border: none;
 }
 
+.login-label {
+  background: var(--bg-surface);
+  color: var(--text-on-surface);
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: none;
+}
+
 .editor-footer {
   padding: 6px 12px;
   background: var(--bg-surface);
