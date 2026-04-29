@@ -3653,35 +3653,6 @@ async function createWasm() {
   }
   }
 
-  function ___syscall_faccessat(dirfd, path, amode, flags) {
-  try {
-  
-      path = SYSCALLS.getStr(path);
-      assert(flags === 0 || flags == 512);
-      path = SYSCALLS.calculateAt(dirfd, path);
-      if (amode & ~7) {
-        // need a valid mode
-        return -28;
-      }
-      var lookup = FS.lookupPath(path, { follow: true });
-      var node = lookup.node;
-      if (!node) {
-        return -44;
-      }
-      var perms = '';
-      if (amode & 4) perms += 'r';
-      if (amode & 2) perms += 'w';
-      if (amode & 1) perms += 'x';
-      if (perms /* otherwise, they've just passed F_OK */ && FS.nodePermissions(node, perms)) {
-        return -2;
-      }
-      return 0;
-    } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
-    return -e.errno;
-  }
-  }
-
   /** @suppress {duplicate } */
   var syscallGetVarargI = () => {
       assert(SYSCALLS.varargs != undefined);
@@ -4607,8 +4578,6 @@ var wasmImports = {
   /** @export */
   __syscall_dup3: ___syscall_dup3,
   /** @export */
-  __syscall_faccessat: ___syscall_faccessat,
-  /** @export */
   __syscall_fcntl64: ___syscall_fcntl64,
   /** @export */
   __syscall_ioctl: ___syscall_ioctl,
@@ -4663,9 +4632,11 @@ var _mmix_simulate = Module['_mmix_simulate'] = createExportWrapper('mmix_simula
 var _get_stderr_size = Module['_get_stderr_size'] = createExportWrapper('get_stderr_size', 0);
 var _get_stdout_pointer = Module['_get_stdout_pointer'] = createExportWrapper('get_stdout_pointer', 0);
 var _get_stderr_pointer = Module['_get_stderr_pointer'] = createExportWrapper('get_stderr_pointer', 0);
+var _get_source_code_pointer = Module['_get_source_code_pointer'] = createExportWrapper('get_source_code_pointer', 0);
 var _assemble_mmixal = Module['_assemble_mmixal'] = createExportWrapper('assemble_mmixal', 1);
 var _get_stdout_size = Module['_get_stdout_size'] = createExportWrapper('get_stdout_size', 0);
-var _get_source_code_pointer = Module['_get_source_code_pointer'] = createExportWrapper('get_source_code_pointer', 0);
+var _get_binary_pointer = Module['_get_binary_pointer'] = createExportWrapper('get_binary_pointer', 0);
+var _get_binary_size = Module['_get_binary_size'] = createExportWrapper('get_binary_size', 0);
 var _fflush = createExportWrapper('fflush', 1);
 var _strerror = createExportWrapper('strerror', 1);
 var _emscripten_stack_get_end = wasmExports['emscripten_stack_get_end']
@@ -4681,39 +4652,6 @@ function invoke_ii(index,a1) {
   var sp = stackSave();
   try {
     return getWasmTableEntry(index)(a1);
-  } catch(e) {
-    stackRestore(sp);
-    if (e !== e+0) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_vi(index,a1) {
-  var sp = stackSave();
-  try {
-    getWasmTableEntry(index)(a1);
-  } catch(e) {
-    stackRestore(sp);
-    if (e !== e+0) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_i(index) {
-  var sp = stackSave();
-  try {
-    return getWasmTableEntry(index)();
-  } catch(e) {
-    stackRestore(sp);
-    if (e !== e+0) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_vii(index,a1,a2) {
-  var sp = stackSave();
-  try {
-    getWasmTableEntry(index)(a1,a2);
   } catch(e) {
     stackRestore(sp);
     if (e !== e+0) throw e;
@@ -4754,6 +4692,17 @@ function invoke_viii(index,a1,a2,a3) {
   }
 }
 
+function invoke_i(index) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)();
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
 function invoke_ji(index,a1) {
   var sp = stackSave();
   try {
@@ -4763,6 +4712,28 @@ function invoke_ji(index,a1) {
     if (e !== e+0) throw e;
     _setThrew(1, 0);
     return 0n;
+  }
+}
+
+function invoke_vi(index,a1) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_vii(index,a1,a2) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1,a2);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
   }
 }
 
