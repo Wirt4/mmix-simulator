@@ -72,13 +72,13 @@ static void test_mmix_simulate_hello_world_clean_return(void){
     int assembled = assemble_mmixal(len);
     TEST_ASSERT_EQUAL_INT(0, assembled);
 
-    int result = mmix_simulate(1);
+    int result = mmix_simulate();
 
     TEST_ASSERT_EQUAL_INT(0, result);
 }
 
 static void test_mmix_simulate_hello_world_bad_input(void){
-     int result = mmix_simulate(0);
+     int result = mmix_simulate();
      TEST_ASSERT_NOT_EQUAL_INT(0, result);
 }
 
@@ -93,7 +93,7 @@ static void test_mmix_simulate_stderr(void) {
     int assembled = assemble_mmixal(len);
     TEST_ASSERT_EQUAL_INT(0, assembled);
 
-    mmix_simulate(1);
+    mmix_simulate();
     size_t stderr_size = get_stderr_size();
     unsigned char *stderr_out = get_stderr_pointer();
     TEST_ASSERT_EQUAL(strlen(expected_stderr), stderr_size);
@@ -107,7 +107,7 @@ static void test_mmix_simulate_hello_world_std_out(void) {
     int assembled = assemble_mmixal(len);
     TEST_ASSERT_EQUAL_INT(0, assembled);
 
-    mmix_simulate(1);
+    mmix_simulate();
     const unsigned char *stdout_out = get_stdout_pointer();
     char output[get_stdout_size()];
     strcpy(output, (char*)stdout_out);
