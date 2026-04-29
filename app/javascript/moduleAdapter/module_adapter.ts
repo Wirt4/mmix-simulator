@@ -73,7 +73,7 @@ export default class ModuleAdapter implements IModuleAdapter {
   }
 
   public simulateMMIX(): void {
-    this._module._mmix_simulate(1)
+    this._module._mmix_simulate()
   }
 
   private _decode_and_return(ptr: number, len: number): string {

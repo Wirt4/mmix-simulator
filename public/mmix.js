@@ -4659,7 +4659,7 @@ var wasmImports = {
 };
 var wasmExports = await createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors', 0);
-var _mmix_simulate = Module['_mmix_simulate'] = createExportWrapper('mmix_simulate', 1);
+var _mmix_simulate = Module['_mmix_simulate'] = createExportWrapper('mmix_simulate', 0);
 var _get_stderr_size = Module['_get_stderr_size'] = createExportWrapper('get_stderr_size', 0);
 var _get_stdout_pointer = Module['_get_stdout_pointer'] = createExportWrapper('get_stdout_pointer', 0);
 var _get_stderr_pointer = Module['_get_stderr_pointer'] = createExportWrapper('get_stderr_pointer', 0);
@@ -4681,39 +4681,6 @@ function invoke_ii(index,a1) {
   var sp = stackSave();
   try {
     return getWasmTableEntry(index)(a1);
-  } catch(e) {
-    stackRestore(sp);
-    if (e !== e+0) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_vi(index,a1) {
-  var sp = stackSave();
-  try {
-    getWasmTableEntry(index)(a1);
-  } catch(e) {
-    stackRestore(sp);
-    if (e !== e+0) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_i(index) {
-  var sp = stackSave();
-  try {
-    return getWasmTableEntry(index)();
-  } catch(e) {
-    stackRestore(sp);
-    if (e !== e+0) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_vii(index,a1,a2) {
-  var sp = stackSave();
-  try {
-    getWasmTableEntry(index)(a1,a2);
   } catch(e) {
     stackRestore(sp);
     if (e !== e+0) throw e;
@@ -4754,6 +4721,17 @@ function invoke_viii(index,a1,a2,a3) {
   }
 }
 
+function invoke_i(index) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)();
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
 function invoke_ji(index,a1) {
   var sp = stackSave();
   try {
@@ -4763,6 +4741,28 @@ function invoke_ji(index,a1) {
     if (e !== e+0) throw e;
     _setThrew(1, 0);
     return 0n;
+  }
+}
+
+function invoke_vi(index,a1) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_vii(index,a1,a2) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1,a2);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
   }
 }
 

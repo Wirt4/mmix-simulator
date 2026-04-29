@@ -11,10 +11,7 @@ static struct HeapRef stdout_ref;
 static char mmo[FILE_NAME_SIZE];
 
 //TODO: remove argument from mmix_simulate
-int mmix_simulate(size_t executable_size){
-	if (executable_size == 0) {return -1;}
-	(void)executable_size;
-
+int mmix_simulate(void){
 	int init = initialize_simulator(mmo);
 	if (!ASSERT(init == 0)) {
 		return -1;

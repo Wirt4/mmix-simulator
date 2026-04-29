@@ -57,7 +57,7 @@ describe("MMIX WASM Module", () => {
     Module.HEAPU8.set(encoded, ptr)
     Module.HEAPU8[ptr + encoded.length] = 0
     Module._assemble_mmixal(encoded.length)
-    Module._mmix_simulate(1)
+    Module._mmix_simulate()
     const stderrSize: number = Module._get_stderr_size()
     const stderrPtr: number = Module._get_stderr_pointer()
     const bytes = Module.HEAPU8.slice(stderrPtr, stderrPtr + stderrSize)

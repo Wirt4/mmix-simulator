@@ -57,6 +57,6 @@ unsigned char* get_stderr_pointer(void);
  *       get_stderr_pointer()/get_stderr_size() return the program's stderr.
  * @return 0 on success, non-zero on failure.
  */
-int mmix_simulate(size_t executable_size);
+int mmix_simulate(void);
 
 #endif /*GLUE_H */
