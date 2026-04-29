@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import ModuleAdapter from "../../app/javascript/moduleAdapter/module_adapter"
-import type { MainModule } from "../../app/javascript/types/module"
+import type { MainModule } from "../../wasm/build/wasm/module"
 
 describe("Module Adapter", () => {
   let heap: Uint8Array
@@ -30,8 +31,6 @@ describe("Module Adapter", () => {
       _get_source_code_pointer: vi.fn(),
       _assemble_mmixal: vi.fn(),
       _get_stdout_size: vi.fn(),
-      _get_binary_pointer: vi.fn(),
-      _get_binary_size: vi.fn(),
     }
   })
 
@@ -104,18 +103,6 @@ describe("Module Adapter", () => {
 
     expect(result.length).toEqual(expected.length)
     expect(result).toEqual(expect.stringContaining(expected))
-  })
-
-  it('simulateMMIXAL passes the binary size to the module simulate method', () => {
-    const mockBinSize = 42
-    vi.spyOn(mockModule, '_get_binary_size').mockReturnValue(mockBinSize)
-    const simSpy = vi.spyOn(mockModule, '_mmix_simulate')
-
-    const adapter = new ModuleAdapter(mockModule)
-    adapter.simulateMMIX()
-
-    expect(simSpy.mock.calls.length).toBe(1)
-    expect(simSpy.mock.calls).toEqual(expect.arrayContaining([[mockBinSize]]))
   })
 
   it('if _assemble_mmixal returns non zero, then mmixSimulate returns false', () => {

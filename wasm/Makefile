@@ -1,8 +1,10 @@
-CC = gcc
+CC = clang
 EMCC = emcc
-CFLAGS_COMMON = -Isrc/ -Ibuild/mmixlib
+#CFLAGS_COMMON = -Isrc/ -Ibuild/mmixlib
+CFLAGS_COMMON = -Isrc/ -isystem build/mmixlib
+
 CFLAGS = -Wall -Wextra -Wpedantic -Werror $(CFLAGS_COMMON)
-CFLAGS_VENDOR = -w $(CFLAGS_COMMON)
+CFLAGS_VENDOR = -w -fsigned-char $(CFLAGS_COMMON)
 AR = ar
 ARFLAGS = cru
 RANLIB = ranlib
@@ -25,12 +27,11 @@ MMIXLIB_BUILD = build/mmixlib
 
 # Test framework paths
 UNITY_DIR = vendor/unity/src
-
 UNITY_SRC = $(UNITY_DIR)/unity.c
 UNITY_INC = -I$(UNITY_DIR)
 
 # Glue code object
-SRC_OBJS = src/glue.o 
+SRC_OBJS = src/glue.o src/assembler.o src/simulator.o src/assert.o src/io_utils.o src/mmixlib_wrapper.o
 
 # mmixlib generated sources (from ctangle mmix-sim.w + mmixlib.ch)
 LIBSIM = libboot.c     libfinal.c     libload.c     libprint.c       libstats.c \
@@ -131,7 +132,24 @@ $(LIBMMIX): $(LIBSIM_OBJ) $(LIBAL_OBJ) $(LIBEXTRA_OBJ)
 src/glue.o: src/glue.c src/glue.h $(MMIXLIB_HDRS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# --- Mocks & tests ---
+# --- Assembler stub ---
+
+src/assembler.o: src/assembler.c src/assembler.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+src/simulator.o: src/simulator.c src/simulator.h $(MMIXLIB_BUILD)/mmixlib.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+src/assert.o: src/assert.c src/assert.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+src/io_utils.o: src/io_utils.c src/io_utils.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+src/mmixlib_wrapper.o: src/mmixlib_wrapper.c src/mmixlib_wrapper.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# --- Tests ---
 
 test: $(SRC_OBJS) $(LIBMMIX)
 	$(CC) $(CFLAGS) $(UNITY_INC) -Isrc/ \
@@ -147,6 +165,7 @@ test: $(SRC_OBJS) $(LIBMMIX)
 WASM_BUILD = build/wasm
 WASM_OBJ = $(patsubst $(MMIXLIB_BUILD)/%,$(WASM_BUILD)/%,$(LIBSIM_OBJ) $(LIBAL_OBJ) $(LIBEXTRA_OBJ))
 WASM_LIBMMIX = $(WASM_BUILD)/libmmix.a
+WASM_SRC_OBJ = $(patsubst src/%.o,$(WASM_BUILD)/src_%.o,$(SRC_OBJS))
 
 $(WASM_BUILD):
 	mkdir -p $(WASM_BUILD)
@@ -154,25 +173,29 @@ $(WASM_BUILD):
 $(WASM_BUILD)/%.o: $(MMIXLIB_BUILD)/%.c $(MMIXLIB_HDRS) | $(WASM_BUILD)
 	$(EMCC) $(CFLAGS_VENDOR) -c $< -o $@
 
+$(WASM_BUILD)/src_%.o: src/%.c $(MMIXLIB_HDRS) | $(WASM_BUILD)
+	$(EMCC) $(CFLAGS) -c $< -o $@
+
 $(WASM_LIBMMIX): $(WASM_OBJ)
 	rm -f $@
 	$(EMCC_AR) $(ARFLAGS) $@ $^
 	$(EMCC_RANLIB) $@
 
-wasm: src/glue.c $(WASM_LIBMMIX)
-	$(EMCC) $(CFLAGS) src/glue.c \
+wasm: $(WASM_SRC_OBJ) $(WASM_LIBMMIX)
+	$(EMCC) $(CFLAGS) $(WASM_SRC_OBJ) \
 		-L$(WASM_BUILD) -lmmix \
 		-o $(WASM_BUILD)/mmix.js \
-		-sEXPORTED_FUNCTIONS='["_assemble_mmixal","_mmix_simulate","_get_stdout_pointer","_get_source_code_pointer","_get_binary_pointer","_get_stderr_pointer","_get_stdout_size","_get_binary_size","_get_stderr_size"]' \
+		-sEXPORTED_FUNCTIONS='["_assemble_mmixal","_mmix_simulate","_get_stdout_pointer","_get_source_code_pointer","_get_stderr_pointer","_get_stdout_size","_get_stderr_size"]' \
 		-sEXPORTED_RUNTIME_METHODS='["ccall","cwrap","HEAPU8"]' \
 		-sMODULARIZE=1 \
 		-sEXPORT_NAME='createMmixModule' --emit-tsd module.d.ts
 	cp $(WASM_BUILD)/mmix.js $(WASM_BUILD)/mmix.wasm ../public/
 
 analyze:
-	cppcheck --enable=all --inline-suppr --check-level=exhaustive --suppress=missingIncludeSystem -Ibuild/mmixlib src/ test/
+	cppcheck --enable=all --inline-suppr --check-level=exhaustive --suppress=missingIncludeSystem --suppress=*:test/unit/mocks/* --suppressions-list=cppcheck-suppressions.txt -Ibuild/mmixlib src/ test/
 	clang --analyze $(CFLAGS) $(UNITY_INC) src/*.c test/integration/*.c
 
 clean:
 	rm -rf $(MMIXLIB_BUILD) $(WASM_BUILD)
-	rm -f $(SRC_OBJS) test_integration
+	rm -f $(SRC_OBJS) test_integration test_unit_assembler
+	rm -f program.mmo

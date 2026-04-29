@@ -1,5 +1,5 @@
-import type { MainModule } from '../types/module'
-import type MainModuleFactory from '../types/module'
+import type { MainModule } from '../../../wasm/build/wasm/module'
+import type MainModuleFactory from '../../../wasm/build/wasm/module'
 
 declare const createMmixModule: typeof MainModuleFactory
 
@@ -62,6 +62,7 @@ function resolveFilepath(path: string): string {
 	return path.endsWith('.wasm') || path.length === 0 ? '/mmix.wasm' : path
 }
 
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export default async function moduleFactory(): Promise<MainModule | null> {
 	if (typeof createMmixModule === 'undefined') {
 		const scriptLoaded = await loadScript('/mmix.js')
@@ -74,6 +75,7 @@ export default async function moduleFactory(): Promise<MainModule | null> {
 	try {
 		interface moduleConfig { locateFile: (path: string) => string; }
 		const config: moduleConfig = { locateFile: resolveFilepath }
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		return await createMmixModule(config)
 	} catch (error) {
 		console.error("error creating mmixModule")

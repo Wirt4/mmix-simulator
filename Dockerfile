@@ -36,19 +36,19 @@ RUN --mount=type=cache,id=apt-mmix,target=/var/cache/apt \
 
 COPY vendor/mmixware /tmp/mmixware
 ENV CWEBINPUTS=/tmp/mmixware
-
+RUN apt-get update && apt-get install -y clang
 RUN cd /tmp/mmixware && \
     ctangle mmix-arith.w && \
     ctangle mmix-io.w && \
     ctangle mmix-sim.w && \
     ctangle mmixal.w && \
     ctangle abstime.w && \
-    gcc -O0 -c mmix-arith.c && \
-    gcc -O0 -c mmix-io.c && \
-    gcc -O0 -o abstime abstime.c && \
+    clang -O0 -c mmix-arith.c && \
+    clang -O0 -c mmix-io.c && \
+    clang -O0 -o abstime abstime.c && \
     ./abstime > abstime.h && \
-    gcc -O0 mmixal.c mmix-arith.o -o mmixal && \
-    gcc -O0 mmix-sim.c mmix-arith.o mmix-io.o -o mmix && \
+    clang -O0 mmixal.c mmix-arith.o -o mmixal && \
+    clang -O0 mmix-sim.c mmix-arith.o mmix-io.o -o mmix && \
     cp mmix mmixal /usr/local/bin/ && \
     rm -rf /tmp/mmixware
 
@@ -125,7 +125,7 @@ RUN --mount=type=cache,id=apt-test,target=/var/cache/apt \
     apt-get install --no-install-recommends -y \
       build-essential git libyaml-dev pkg-config nodejs npm strace texlive-binaries cppcheck && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
-
+RUN apt-get update && apt-get install -y clang
 # Emscripten SDK
 COPY --from=emscripten /opt/emsdk /opt/emsdk
 ENV PATH="/opt/emsdk:/opt/emsdk/upstream/emscripten:${PATH}"
@@ -149,10 +149,9 @@ COPY --from=mmix /usr/local/bin/mmixal /usr/local/bin/mmixal
 COPY . .
 
 RUN cd wasm && make wasm
-RUN cp wasm/build/wasm/module.d.ts app/javascript/types/module.d.ts
 RUN cp wasm/build/wasm/mmix.js wasm/build/wasm/mmix.wasm public/
 RUN mkdir -p /opt/wasm-cache && \
-    cp wasm/build/wasm/mmix.js wasm/build/wasm/mmix.wasm wasm/build/wasm/module.d.ts /opt/wasm-cache/
+    cp wasm/build/wasm/mmix.js wasm/build/wasm/mmix.wasm /opt/wasm-cache/
 CMD ["bin/ci"]
 
 # ─────────────────────────────────────────────────────────────
