@@ -33,7 +33,10 @@ Rails.application.routes.draw do
   # ──  Mmixal program management (all HTML) ─────────────────────────
   resources :mmixal_programs, only: [ :index, :create, :show, :destroy, :update ]
 
+  # ── Static pages ──────────────────────────────────────────────
+  get "about", to: "pages#about"
+
   # ── Root ───────────────────────────────────────────────────────
-  # GET /                   → mmixal_program#index        (main page)
-  root "mmixal_programs#index"
+  # GET /                   → pages#home                  (landing page)
+  root "pages#home"
 end
