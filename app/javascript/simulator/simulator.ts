@@ -14,11 +14,50 @@ export default class Simulator implements ISimulator {
 
   public runUserProgram(): void {
     const successfullyAssembled = this._moduleAdapter.assembleMMIXAL(this._inText.value)
+    let outputs = ""
     if (successfullyAssembled) {
+      outputs = this.simulateWithTimeout(1, 1);
       this._moduleAdapter.simulateMMIX()
+    } else {
+      outputs = this._moduleAdapter.getStdErr()
     }
-    const stdout = this._moduleAdapter.getStdOut()
-    const stderr = this._moduleAdapter.getStdErr()
-    this._outText.value = `${stdout}\n\n${stderr}`
+    this._outText.value = outputs
+  }
+
+  private simulateWithTimeout(timeout: number, instructionsPerInterval: number): string {
+    let programOutputs = "";
+
+    if (!this.areActionableInputs(timeout, instructionsPerInterval)) {
+      if (!this.areValidInputs(timeout, instructionsPerInterval)) {
+        console.error("arguments to simulateWithTimeout must be non-negative integers")
+        console.error(`timeout ${timeout}`)
+        console.error(`instructionts per interval ${instructionsPerInterval}`)
+      }
+      return programOutputs
+    }
+    let cur: number = Date.now()
+    const deadline = cur + timeout
+    this._moduleAdapter.intitializeMMIX()
+    while (cur < deadline && !this._moduleAdapter.isHalted()) {
+      cur = Date.now()
+      this._moduleAdapter.performInstructions(instructionsPerInterval)
+      //    -- collect stderr and stdout for that batch -- assumes peformInstructions takes care of it's own redirects
+      programOutputs += this._moduleAdapter.getStdErr()
+      programOutputs += this._moduleAdapter.getStdOut();
+      if (cur > deadline) {
+        programOutputs += `ERROR: simulator timeout. Programs may not exceed ${timeout} seconds of clocktime`
+      }
+
+    }
+    this._moduleAdapter.finalizeMMIX()
+    return programOutputs;
+  }
+
+  private areActionableInputs(timeout: number, instructionsPerInterval: number): boolean {
+    return (timeout > 0 && instructionsPerInterval > 0 && Number.isInteger(timeout) && Number.isInteger(instructionsPerInterval))
+  }
+
+  private areValidInputs(timeout: number, instructionsPerInterval: number): boolean {
+    return (timeout >= 0 && instructionsPerInterval >= 0 && Number.isInteger(timeout) && Number.isInteger(instructionsPerInterval))
   }
 }
