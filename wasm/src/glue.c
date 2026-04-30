@@ -90,10 +90,7 @@ int mmix_perform_instructions(unsigned int instructions){
 	struct Redirect stdErrRedirect = redirect_stderr();
 	struct Redirect stdOutRedirect = redirect_stdout();
         // call execute_instructions 
-	while (!is_halted()){
-		execute_instructions(instructions);
-	}
-
+	execute_instructions(instructions);
 	// restore stdout and stderr
 	stdout_ref = restore_stdout(stdOutRedirect);
 	stderr_ref = restore_stderr(stdErrRedirect);

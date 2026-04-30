@@ -5,11 +5,27 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <signal.h>
+
+static int g_tty_fd = -1;
+
+static void timeout_handler(int sig) {
+    (void)sig;
+    const char msg[] = "\nFAIL: Test timed out (1 second)\n";
+    if (g_tty_fd >= 0)
+        write(g_tty_fd, msg, sizeof(msg) - 1);
+    _exit(1);
+}
 
 void setUp(void) {
 }
 
 void tearDown(void) {
+    alarm(0);
+    if (g_tty_fd >= 0) {
+        close(g_tty_fd);
+        g_tty_fd = -1;
+    }
 }
 
 static const char *stderr_program_source =
@@ -40,6 +56,14 @@ static const char *bad_mmixal_source =
     "Main\tBADOP\t1,2,3\n"
     "\tALSOBAD\t4,5,6\n"
     "\tTRAP\t0,Halt,0\n";
+
+static const char *infinite_loop_source =
+    "\tLOC\t#100\n"
+    "\tJMP\tMain\n"
+    "Hello\tBYTE\t\"hello\",#a,0\n"
+    "Main\tGETA\t$255,Hello\n"
+    "\tTRAP\t0,Fputs,StdOut\n"
+    "\tJMP\tMain\n";
 
 static const char *expected_assembly_stderr =
     "\"program.mms\", line 2: unknown operation code `BADOP'!\n"
@@ -128,6 +152,26 @@ static void test_mmix_simulate_hello_world_std_out(void) {
     TEST_ASSERT_EQUAL_STRING(expected_output, output);
 }
 
+static void test_perform_instructions_terminates_on_infinite_loop(void) {
+    g_tty_fd = dup(STDERR_FILENO);
+    signal(SIGALRM, timeout_handler);
+    alarm(1);
+
+    int len = (int)strlen(infinite_loop_source);
+    unsigned char *buf = get_source_code_pointer();
+    memcpy(buf, infinite_loop_source, len + 1);
+    int assembled = assemble_mmixal(len);
+    TEST_ASSERT_EQUAL_INT(0, assembled);
+
+    mmix_initialize_simulator();
+    mmix_perform_instructions(100);
+    mmix_finalize_simulator();
+
+    // If we reach here, perform_instructions respected the instruction limit.
+    // If it didn't, the alarm fires and fails with a timeout message.
+    TEST_PASS();
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_source_code_pointer_is_non_null);
@@ -138,5 +182,6 @@ int main(void) {
     RUN_TEST(test_stderr_is_non_null);
     RUN_TEST(test_simulation_error);
     RUN_TEST(test_mmix_simulate_hello_world_std_out);
+    RUN_TEST(test_perform_instructions_terminates_on_infinite_loop);
     return UNITY_END();
 }
