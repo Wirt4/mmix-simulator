@@ -72,8 +72,27 @@ export default class ModuleAdapter implements IModuleAdapter {
     return this._decode_and_return(ptr, len)
   }
 
-  public simulateMMIX(): void {
-    this._module._mmix_simulate()
+  public intitializeMMIX(): void {
+    const initialized = this._module._mmix_initialize_simulator();
+    if (initialized !== 0) {
+      console.error("did not initialize simulator");
+    }
+  }
+
+  public finalizeMMIX(): void {
+    const finalized = this._module._mmix_finalize_simulator();
+    if (finalized !== 0) {
+      console.error("did not finalize simulator")
+    }
+    //todo
+  }
+
+  public isHalted(): boolean {
+    return this._module._is_halted() !== 0;
+  }
+
+  public performInstructions(instructions: number): void {
+    this._module._mmix_perform_instructions(instructions);
   }
 
   private _decode_and_return(ptr: number, len: number): string {
