@@ -8,7 +8,6 @@ function createMockAdapter(): IModuleAdapter {
     assembleMMIXAL: vi.fn(),
     getStdOut: vi.fn(),
     getStdErr: vi.fn(),
-    simulateMMIX: vi.fn(),
     finalizeMMIX: vi.fn(),
     isHalted: vi.fn(),
     intitializeMMIX: vi.fn(),
@@ -80,17 +79,6 @@ describe("Simulator tests", () => {
     simulator.runUserProgram()
 
     expect(outText.value).toEqual(expect.stringContaining(expected))
-  })
-
-  it("if assembleMMIXAL returns true, then runUserProgram also calls mmixSimulate", () => {
-    const outText = createTextarea()
-    const mockAdapter = createMockAdapter()
-    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
-
-    const simulator = new Simulator(createTextarea(), outText, mockAdapter)
-    simulator.runUserProgram()
-
-    expect(mockAdapter.simulateMMIX).toHaveBeenCalledTimes(1)
   })
 
   it('writes std out to outfile', () => {

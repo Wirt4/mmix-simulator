@@ -16,11 +16,18 @@ static size_t read_to_heap(const char* filename, unsigned char* heap_pointer){
 	FILE *fileP = fopen(filename, "rb");
 	size_t size = (size_t)-1;
 	int readError = 0;
+	int closed;
 	if (fileP){
-		size = fread(heap_pointer, 1, (size_t)STD_ERR_SIZE, fileP);
+		int seek = fseek(fileP, 0L, SEEK_END);
+		size_t fileSize = ftell(fileP);
+		ASSERT(fileSize <= (size_t)STD_ERR_SIZE);
+		ASSERT(seek == 0);
+		int rewind = fseek(fileP, 0L, SEEK_SET);
+		ASSERT(rewind == 0);
+		size = fread(heap_pointer, 1, fileSize, fileP);
 		readError = ferror(fileP);
-		int closed = fclose(fileP);
-		if (closed != 0){perror("file not properly closed");}
+		closed = fclose(fileP);
+		ASSERT(closed == 0);
 	}
 	int deleted = remove(filename);
 	ASSERT(deleted == 0);
@@ -28,6 +35,7 @@ static size_t read_to_heap(const char* filename, unsigned char* heap_pointer){
 		return (size_t)-1;
 	}
 	ASSERT(size <= (size_t)(STD_ERR_SIZE));
+	heap_pointer[size] = '\0';
 	return size;
 }
 
