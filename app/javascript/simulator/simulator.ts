@@ -14,14 +14,14 @@ export default class Simulator implements ISimulator {
 
   public runUserProgram(): void {
     const successfullyAssembled = this._moduleAdapter.assembleMMIXAL(this._inText.value)
-    let outputs = ""
-    if (successfullyAssembled) {
-      outputs = this.simulateWithTimeout(1, 1);
-      this._moduleAdapter.simulateMMIX()
-    } else {
-      outputs = this._moduleAdapter.getStdErr()
+    if (!successfullyAssembled) {
+      this._outText.value = this._moduleAdapter.getStdErr()
+      return
     }
-    this._outText.value = outputs
+
+    const timeout = 800;
+    const instructionBatch = 1000;
+    this._outText.value = this.simulateWithTimeout(timeout, instructionBatch)
   }
 
   private simulateWithTimeout(timeout: number, instructionsPerInterval: number): string {
@@ -30,8 +30,8 @@ export default class Simulator implements ISimulator {
     if (!this.areActionableInputs(timeout, instructionsPerInterval)) {
       if (!this.areValidInputs(timeout, instructionsPerInterval)) {
         console.error("arguments to simulateWithTimeout must be non-negative integers")
-        console.error(`timeout ${timeout}`)
-        console.error(`instructionts per interval ${instructionsPerInterval}`)
+        console.error(`timeout ${timeout.toString()}`)
+        console.error(`instructionts per interval ${instructionsPerInterval.toString()}`)
       }
       return programOutputs
     }
@@ -41,11 +41,10 @@ export default class Simulator implements ISimulator {
     while (cur < deadline && !this._moduleAdapter.isHalted()) {
       cur = Date.now()
       this._moduleAdapter.performInstructions(instructionsPerInterval)
-      //    -- collect stderr and stdout for that batch -- assumes peformInstructions takes care of it's own redirects
       programOutputs += this._moduleAdapter.getStdErr()
       programOutputs += this._moduleAdapter.getStdOut();
       if (cur > deadline) {
-        programOutputs += `ERROR: simulator timeout. Programs may not exceed ${timeout} seconds of clocktime`
+        programOutputs = `ERROR: simulator timeout. Programs may not exceed ${timeout.toString()} ms of clock time\n` + programOutputs
       }
 
     }
