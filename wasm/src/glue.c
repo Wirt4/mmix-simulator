@@ -54,9 +54,6 @@ int assemble_mmixal(size_t len){
 	if (result == 0){
 		const char *mmo_path = get_mmo_path();
 		if (file_exists(mmo_path)){
-			//THAT's the util point
-			// strncpy(mmo, mmo_path, FILE_NAME_SIZE - 1);
-			// mmo[FILE_NAME_SIZE - 1] = '\0';
 			strcopy_and_trim(mmo, mmo_path, FILE_NAME_SIZE - 1);
 		}
 	}
