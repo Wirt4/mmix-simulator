@@ -19,7 +19,7 @@ export default class Simulator implements ISimulator {
       return
     }
 
-    const timeout = 800;
+    const timeout = 400;
     const instructionBatch = 1000;
     this._outText.value = this.simulateWithTimeout(timeout, instructionBatch)
   }
@@ -28,27 +28,35 @@ export default class Simulator implements ISimulator {
     let programOutputs = "";
 
     if (!this.areActionableInputs(timeout, instructionsPerInterval)) {
+
       if (!this.areValidInputs(timeout, instructionsPerInterval)) {
         console.error("arguments to simulateWithTimeout must be non-negative integers")
         console.error(`timeout ${timeout.toString()}`)
         console.error(`instructionts per interval ${instructionsPerInterval.toString()}`)
       }
+
       return programOutputs
     }
+
     let cur: number = Date.now()
     const deadline = cur + timeout
     this._moduleAdapter.intitializeMMIX()
+    let hasTimedOut = false
+
     while (cur < deadline && !this._moduleAdapter.isHalted()) {
       cur = Date.now()
       this._moduleAdapter.performInstructions(instructionsPerInterval)
       programOutputs += this._moduleAdapter.getStdErr()
       programOutputs += this._moduleAdapter.getStdOut();
-      if (cur > deadline) {
-        programOutputs = `ERROR: simulator timeout. Programs may not exceed ${timeout.toString()} ms of clock time\n` + programOutputs
-      }
-
+      hasTimedOut = cur >= deadline
     }
+
     this._moduleAdapter.finalizeMMIX()
+
+    if (hasTimedOut) {
+      return `ERROR: simulator timeout. Programs may not exceed ${timeout.toString()} ms of clock time\n`
+    }
+
     return programOutputs;
   }
 
