@@ -19,11 +19,11 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   # Public: Verifies that valid credentials start a session and redirect
-  # to the root path.
+  # to the programs path.
   test "create with valid credentials" do
     post session_path, params: { email_address: @user.email_address, password: "password" }
 
-    assert_redirected_to root_path
+    assert_redirected_to mmixal_programs_path
     assert cookies[:session_id]
   end
 
@@ -52,13 +52,13 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
    end
 
    # # Verifies that destroying a session clears the session cookie
-   # # and redirects to the login form.
+   # and redirects to the landing page.
    test "destroy" do
      sign_in_as(@user)
 
      delete session_path
 
-     assert_redirected_to new_session_path
+     assert_redirected_to root_path
      assert_empty cookies[:session_id]
    end
 end

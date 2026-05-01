@@ -66,7 +66,7 @@ module Authentication
     #
     # Returns a String URL.
     def after_authentication_url
-      session.delete(:return_to_after_authenticating) || root_url
+      session.delete(:return_to_after_authenticating) || mmixal_programs_url
     end
 
     # Private: Creates a new Session for the given user and sets the

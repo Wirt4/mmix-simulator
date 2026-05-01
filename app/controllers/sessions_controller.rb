@@ -24,10 +24,10 @@ class SessionsController < ApplicationController
     end
   end
 
-  # Public: Terminates the current session and redirects to the login page.
+  # Public: Terminates the current session and redirects to the landing page.
   def destroy
     terminate_session
-    redirect_to new_session_path, status: :see_other
+    redirect_to root_path, status: :see_other
   end
 
   # Public: Renders the logout confirmation page.
