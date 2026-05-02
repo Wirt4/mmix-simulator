@@ -9,25 +9,45 @@ static int g_stdout_redirected = 0;
 static unsigned char g_stderr_pointer[STD_ERR_SIZE];
 static unsigned char g_stdout_pointer[STD_OUT_SIZE];
 
-static size_t read_to_heap(const char* filename, unsigned char* heap_pointer){
+static size_t get_file_size(FILE *fileP, size_t bufferSize){
+	ASSERT(fileP !=NULL);
+	ASSERT(bufferSize > 0);
+	int seek = fseek(fileP, 0L, SEEK_END);
+	ASSERT(seek == 0);
+	size_t fileSize = ftell(fileP);
+	ASSERT(fileSize <= bufferSize);
+	int rewind = fseek(fileP, 0L, SEEK_SET);
+	ASSERT(rewind == 0);
+	return fileSize;
+}
+
+static size_t read_to_heap(const char* filename, unsigned char* heap_pointer, size_t bufferSize){
 	if (!(ASSERT(filename != NULL) && ASSERT(heap_pointer != NULL))){ 
 		return (size_t)-1;
 	}
 	FILE *fileP = fopen(filename, "rb");
 	size_t size = (size_t)-1;
 	int readError = 0;
+	int closed;
 	if (fileP){
-		size = fread(heap_pointer, 1, (size_t)STD_ERR_SIZE, fileP);
+		size_t fileSize = get_file_size(fileP, bufferSize);
+		if (fileSize > 0){
+			size = fread(heap_pointer, 1, fileSize, fileP);
+		}else{
+			size = 0;
+		}
 		readError = ferror(fileP);
-		int closed = fclose(fileP);
-		if (closed != 0){perror("file not properly closed");}
+		closed = fclose(fileP);
+		ASSERT(closed == 0);
 	}
 	int deleted = remove(filename);
 	ASSERT(deleted == 0);
 	if (!ASSERT(!readError)){
 		return (size_t)-1;
 	}
-	ASSERT(size <= (size_t)(STD_ERR_SIZE));
+	ASSERT(size <= bufferSize);
+	//add null terminator
+	heap_pointer[size] = '\0';
 	return size;
 }
 
@@ -124,7 +144,9 @@ static struct HeapRef restore_and_read(
 	int target_fileno, 
 	FILE* stream, 
 	int* redirected_flag, 
-	unsigned char* heap_buf)
+	unsigned char* heap_buf,
+	size_t bufferSize
+	)
 {
 	struct HeapRef ref;
 	ref.heap_pointer = NULL;
@@ -146,7 +168,7 @@ static struct HeapRef restore_and_read(
 		return ref;
 	}
 	ref.heap_pointer = heap_buf;
-	size_t size = read_to_heap(redirect.filename, ref.heap_pointer);
+	size_t size = read_to_heap(redirect.filename, ref.heap_pointer, bufferSize);
 	if (!ASSERT(size != (size_t)-1)){
 		return ref;
 	}
@@ -156,11 +178,11 @@ static struct HeapRef restore_and_read(
 }
 
 struct HeapRef restore_stderr(struct Redirect redirect){
-	return restore_and_read(redirect, STDERR_FILENO, stderr, &g_stderr_redirected, g_stderr_pointer);
+	return restore_and_read(redirect, STDERR_FILENO, stderr, &g_stderr_redirected, g_stderr_pointer, (size_t)STD_ERR_SIZE);
 }
 
 struct HeapRef restore_stdout(struct Redirect redirect){
-	return restore_and_read(redirect, STDOUT_FILENO, stdout, &g_stdout_redirected, g_stdout_pointer);
+	return restore_and_read(redirect, STDOUT_FILENO, stdout, &g_stdout_redirected, g_stdout_pointer, (size_t)STD_OUT_SIZE);
 }
 
 int file_exists(const char *filename){

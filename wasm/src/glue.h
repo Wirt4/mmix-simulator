@@ -29,7 +29,7 @@ size_t get_stderr_size(void);
  * Returns a pointer to the buffer containing the simulator's stdout output.
  *
  * After assemble_mmixal(), this holds the assembler listing.
- * After mmix_simulate(), this holds the simulated program's stdout.
+ * After simulation, this holds the simulated program's stdout.
  */
 unsigned char* get_stdout_pointer(void);
 
@@ -51,12 +51,37 @@ unsigned char* get_stderr_pointer(void);
 /**
  * Executes a compiled .mmo binary.
  *
- * @param executable_size  Must be non-zero; the .mmo file is loaded from disk.
  * @pre  assemble_mmixal() has been called successfully.
  * @post get_stdout_pointer()/get_stdout_size() return the program's stdout;
  *       get_stderr_pointer()/get_stderr_size() return the program's stderr.
  * @return 0 on success, non-zero on failure.
  */
-int mmix_simulate(void);
+int mmix_initialize_simulator(void);
+
+/**Performs a specified amount of mmix instructions and redirects the console outputs of those instructions to buffer
+ *
+ * @param instructions the number of mmix instructions to execute
+ * @pre mmix_intialize has been successfully called
+ * @post 
+ *      state of simulator has advanced by specified instruction state (or exited if)
+ *      outputs of performed code are stored in buffers
+ */
+int mmix_perform_instructions(unsigned int instructions);
+
+/**
+ * Cleans up the mmix simulator. Calls teardown methods in mmix and mmixware library. 
+ * Removes files or assets created by the user's mmix program, excluding the initial mmo
+ * preconditions: the simulator is initialized
+ * Returns 0 on success, -1 on failure
+*/
+int mmix_finalize_simulator(void); 
+
+/*
+ * returns 1 if the simulator is halted, 0 if not
+ * preconditions: simulator is in an initialized state
+ * postconditions: simulator is in an intitialized state
+*/
+int is_halted(void);
+
 
 #endif /*GLUE_H */

@@ -8,17 +8,53 @@ function createMockAdapter(): IModuleAdapter {
     assembleMMIXAL: vi.fn(),
     getStdOut: vi.fn(),
     getStdErr: vi.fn(),
-    simulateMMIX: vi.fn()
+    finalizeMMIX: vi.fn(),
+    isHalted: vi.fn(),
+    intitializeMMIX: vi.fn(),
+    performInstructions: vi.fn()
   }
 }
 
 describe("Simulator tests", () => {
-  it("runUserProgram calls assembleMMIXAL", () => {
+  it("on successful assembly, runUserProgram calls initializeMMIX", () => {
     const mockAdapter = createMockAdapter()
+    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
     const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+
     simulator.runUserProgram()
 
-    expect(mockAdapter.assembleMMIXAL).toHaveBeenCalledTimes(1)
+    expect(mockAdapter.intitializeMMIX).toHaveBeenCalledTimes(1)
+  })
+
+  it("on successful assembly, runUserProgram calls finalizeMMIX", () => {
+    const mockAdapter = createMockAdapter()
+    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
+    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+
+    simulator.runUserProgram()
+
+    expect(mockAdapter.finalizeMMIX).toHaveBeenCalledTimes(1)
+  })
+
+  it("on successful assembly, runUserProgram calls isHalted()  at least once", () => {
+    const mockAdapter = createMockAdapter()
+    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
+    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+
+    simulator.runUserProgram()
+
+    expect(mockAdapter.isHalted).toHaveBeenCalled()
+  })
+
+  it("on successful assembly, and isHalted = false runUserProgram calls performInstructions()  at least once", () => {
+    const mockAdapter = createMockAdapter()
+    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
+    vi.spyOn(mockAdapter, 'isHalted').mockReturnValue(false)
+    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+
+    simulator.runUserProgram()
+
+    expect(mockAdapter.performInstructions).toHaveBeenCalled()
   })
 
   it("runUserProgram calls assembleMMIXAL with the code from the inText field", () => {
@@ -45,27 +81,16 @@ describe("Simulator tests", () => {
     expect(outText.value).toEqual(expect.stringContaining(expected))
   })
 
-  it("if assembleMMIXAL returns true, then runUserProgram also calls mmixSimulate", () => {
-    const outText = createTextarea()
-    const mockAdapter = createMockAdapter()
-    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
-
-    const simulator = new Simulator(createTextarea(), outText, mockAdapter)
-    simulator.runUserProgram()
-
-    expect(mockAdapter.simulateMMIX).toHaveBeenCalledTimes(1)
-  })
-
   it('writes std out to outfile', () => {
     const outText = createTextarea()
     const expected = "Hello world!"
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
     vi.spyOn(mockAdapter, 'getStdOut').mockReturnValue(expected)
+    vi.spyOn(mockAdapter, 'isHalted').mockReturnValueOnce(false).mockReturnValueOnce(true)
 
     const simulator = new Simulator(createTextarea(), outText, mockAdapter)
     simulator.runUserProgram()
-
     expect(outText.value).toEqual(expect.stringContaining(expected))
   })
 })

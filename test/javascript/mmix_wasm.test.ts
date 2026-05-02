@@ -36,7 +36,7 @@ describe("MMIX WASM Module", () => {
     if (m !== null) Module = m
   })
 
-  it("given a source that's syntactically correct and  prints to stderr, when it is converted to assembly, then the assemble result will be clean", () => {
+  it("given a source that's syntactically correct and prints to stderr, when it is converted to assembly, then the assemble result will be clean", () => {
     const src: string = stderrProgramSource
 
     const ptr: number = Module._get_source_code_pointer()
@@ -48,7 +48,7 @@ describe("MMIX WASM Module", () => {
     expect(assemblyResult).toBe(0)
   })
 
-  it("mmix_simulate captures stderr output", () => {
+  it("simulating a mmix process captures stderr output", () => {
     const expected = "I can't do that Dave.\n"
     const src = stderrProgramSource
 
@@ -57,9 +57,13 @@ describe("MMIX WASM Module", () => {
     Module.HEAPU8.set(encoded, ptr)
     Module.HEAPU8[ptr + encoded.length] = 0
     Module._assemble_mmixal(encoded.length)
-    Module._mmix_simulate()
+
+    Module._mmix_initialize_simulator()
+    Module._mmix_perform_instructions(10)
     const stderrSize: number = Module._get_stderr_size()
     const stderrPtr: number = Module._get_stderr_pointer()
+    Module._mmix_finalize_simulator()
+
     const bytes = Module.HEAPU8.slice(stderrPtr, stderrPtr + stderrSize)
     const stderrOutput: string = new TextDecoder().decode(bytes)
 
