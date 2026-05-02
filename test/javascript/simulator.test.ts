@@ -87,10 +87,10 @@ describe("Simulator tests", () => {
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
     vi.spyOn(mockAdapter, 'getStdOut').mockReturnValue(expected)
+    vi.spyOn(mockAdapter, 'isHalted').mockReturnValueOnce(false).mockReturnValueOnce(true)
 
     const simulator = new Simulator(createTextarea(), outText, mockAdapter)
     simulator.runUserProgram()
-
     expect(outText.value).toEqual(expect.stringContaining(expected))
   })
 })

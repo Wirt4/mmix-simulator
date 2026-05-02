@@ -29,7 +29,7 @@ size_t get_stderr_size(void);
  * Returns a pointer to the buffer containing the simulator's stdout output.
  *
  * After assemble_mmixal(), this holds the assembler listing.
- * After mmix_simulate(), this holds the simulated program's stdout.
+ * After simulation, this holds the simulated program's stdout.
  */
 unsigned char* get_stdout_pointer(void);
 
@@ -47,17 +47,6 @@ size_t get_stdout_size(void);
  * Returns a pointer to the buffer containing the simulator's stderr output.
  */
 unsigned char* get_stderr_pointer(void);
-
-/**
- * Executes a compiled .mmo binary.
- *
- * @param executable_size  Must be non-zero; the .mmo file is loaded from disk.
- * @pre  assemble_mmixal() has been called successfully.
- * @post get_stdout_pointer()/get_stdout_size() return the program's stdout;
- *       get_stderr_pointer()/get_stderr_size() return the program's stderr.
- * @return 0 on success, non-zero on failure.
- */
-int mmix_simulate(void);
 
 /**
  * Executes a compiled .mmo binary.

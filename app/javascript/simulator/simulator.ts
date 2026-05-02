@@ -19,7 +19,7 @@ export default class Simulator implements ISimulator {
       return
     }
 
-    const timeout = 400;
+    const timeout = 800;
     const instructionBatch = 1000;
     this._outText.value = this.simulateWithTimeout(timeout, instructionBatch)
   }

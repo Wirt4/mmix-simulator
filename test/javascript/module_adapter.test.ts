@@ -24,13 +24,16 @@ describe("Module Adapter", () => {
       ccall: vi.fn(),
       cwrap: vi.fn(),
       HEAPU8: heap,
-      _mmix_simulate: vi.fn(),
       _get_stderr_size: vi.fn(),
       _get_stdout_pointer: vi.fn(),
       _get_stderr_pointer: vi.fn(),
       _get_source_code_pointer: vi.fn(),
       _assemble_mmixal: vi.fn(),
       _get_stdout_size: vi.fn(),
+      _mmix_initialize_simulator: vi.fn(),
+      _mmix_finalize_simulator: vi.fn(),
+      _mmix_perform_instructions: vi.fn(),
+      _is_halted: vi.fn(),
     }
   })
 
@@ -103,6 +106,70 @@ describe("Module Adapter", () => {
 
     expect(result.length).toEqual(expected.length)
     expect(result).toEqual(expect.stringContaining(expected))
+  })
+
+  it("intitializeMMIX calls _mmix_initialize_simulator", () => {
+    const initSpy = vi.spyOn(mockModule, '_mmix_initialize_simulator').mockReturnValue(0)
+
+    const adapter = new ModuleAdapter(mockModule)
+    adapter.intitializeMMIX()
+
+    expect(initSpy).toHaveBeenCalledOnce()
+  })
+
+  it("intitializeMMIX logs error when initialization fails", () => {
+    vi.spyOn(mockModule, '_mmix_initialize_simulator').mockReturnValue(-1)
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const adapter = new ModuleAdapter(mockModule)
+    adapter.intitializeMMIX()
+
+    expect(errorSpy).toHaveBeenCalledWith("did not initialize simulator")
+  })
+
+  it("finalizeMMIX calls _mmix_finalize_simulator", () => {
+    const finSpy = vi.spyOn(mockModule, '_mmix_finalize_simulator').mockReturnValue(0)
+
+    const adapter = new ModuleAdapter(mockModule)
+    adapter.finalizeMMIX()
+
+    expect(finSpy).toHaveBeenCalledOnce()
+  })
+
+  it("finalizeMMIX logs error when finalization fails", () => {
+    vi.spyOn(mockModule, '_mmix_finalize_simulator').mockReturnValue(-1)
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const adapter = new ModuleAdapter(mockModule)
+    adapter.finalizeMMIX()
+
+    expect(errorSpy).toHaveBeenCalledWith("did not finalize simulator")
+  })
+
+  it("isHalted returns true when _is_halted returns non-zero", () => {
+    vi.spyOn(mockModule, '_is_halted').mockReturnValue(1)
+
+    const adapter = new ModuleAdapter(mockModule)
+
+    expect(adapter.isHalted()).toBe(true)
+  })
+
+  it("isHalted returns false when _is_halted returns 0", () => {
+    vi.spyOn(mockModule, '_is_halted').mockReturnValue(0)
+
+    const adapter = new ModuleAdapter(mockModule)
+
+    expect(adapter.isHalted()).toBe(false)
+  })
+
+  it("performInstructions calls _mmix_perform_instructions with the count", () => {
+    const perfSpy = vi.spyOn(mockModule, '_mmix_perform_instructions')
+
+    const adapter = new ModuleAdapter(mockModule)
+    adapter.performInstructions(42)
+
+    expect(perfSpy).toHaveBeenCalledOnce()
+    expect(perfSpy).toHaveBeenCalledWith(42)
   })
 
   it('if _assemble_mmixal returns non zero, then mmixSimulate returns false', () => {

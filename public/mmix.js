@@ -4555,7 +4555,6 @@ function checkIncomingModuleAPI() {
 }
 
 // Imports from the Wasm binary.
-var _is_halted = Module['_is_halted'] = makeInvalidEarlyAccess('_is_halted');
 var _get_stderr_size = Module['_get_stderr_size'] = makeInvalidEarlyAccess('_get_stderr_size');
 var _get_stdout_pointer = Module['_get_stdout_pointer'] = makeInvalidEarlyAccess('_get_stdout_pointer');
 var _get_stderr_pointer = Module['_get_stderr_pointer'] = makeInvalidEarlyAccess('_get_stderr_pointer');
@@ -4565,6 +4564,7 @@ var _mmix_perform_instructions = Module['_mmix_perform_instructions'] = makeInva
 var _mmix_initialize_simulator = Module['_mmix_initialize_simulator'] = makeInvalidEarlyAccess('_mmix_initialize_simulator');
 var _mmix_finalize_simulator = Module['_mmix_finalize_simulator'] = makeInvalidEarlyAccess('_mmix_finalize_simulator');
 var _get_source_code_pointer = Module['_get_source_code_pointer'] = makeInvalidEarlyAccess('_get_source_code_pointer');
+var _is_halted = Module['_is_halted'] = makeInvalidEarlyAccess('_is_halted');
 var _fflush = makeInvalidEarlyAccess('_fflush');
 var _emscripten_stack_get_end = makeInvalidEarlyAccess('_emscripten_stack_get_end');
 var _emscripten_stack_get_base = makeInvalidEarlyAccess('_emscripten_stack_get_base');
@@ -4581,7 +4581,6 @@ var wasmMemory = makeInvalidEarlyAccess('wasmMemory');
 var wasmTable = makeInvalidEarlyAccess('wasmTable');
 
 function assignWasmExports(wasmExports) {
-  assert(typeof wasmExports['is_halted'] != 'undefined', 'missing Wasm export: is_halted');
   assert(typeof wasmExports['get_stderr_size'] != 'undefined', 'missing Wasm export: get_stderr_size');
   assert(typeof wasmExports['get_stdout_pointer'] != 'undefined', 'missing Wasm export: get_stdout_pointer');
   assert(typeof wasmExports['get_stderr_pointer'] != 'undefined', 'missing Wasm export: get_stderr_pointer');
@@ -4591,6 +4590,7 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['mmix_initialize_simulator'] != 'undefined', 'missing Wasm export: mmix_initialize_simulator');
   assert(typeof wasmExports['mmix_finalize_simulator'] != 'undefined', 'missing Wasm export: mmix_finalize_simulator');
   assert(typeof wasmExports['get_source_code_pointer'] != 'undefined', 'missing Wasm export: get_source_code_pointer');
+  assert(typeof wasmExports['is_halted'] != 'undefined', 'missing Wasm export: is_halted');
   assert(typeof wasmExports['fflush'] != 'undefined', 'missing Wasm export: fflush');
   assert(typeof wasmExports['emscripten_stack_get_end'] != 'undefined', 'missing Wasm export: emscripten_stack_get_end');
   assert(typeof wasmExports['emscripten_stack_get_base'] != 'undefined', 'missing Wasm export: emscripten_stack_get_base');
@@ -4603,7 +4603,6 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['emscripten_stack_get_current'] != 'undefined', 'missing Wasm export: emscripten_stack_get_current');
   assert(typeof wasmExports['memory'] != 'undefined', 'missing Wasm export: memory');
   assert(typeof wasmExports['__indirect_function_table'] != 'undefined', 'missing Wasm export: __indirect_function_table');
-  _is_halted = Module['_is_halted'] = createExportWrapper('is_halted', 0);
   _get_stderr_size = Module['_get_stderr_size'] = createExportWrapper('get_stderr_size', 0);
   _get_stdout_pointer = Module['_get_stdout_pointer'] = createExportWrapper('get_stdout_pointer', 0);
   _get_stderr_pointer = Module['_get_stderr_pointer'] = createExportWrapper('get_stderr_pointer', 0);
@@ -4613,6 +4612,7 @@ function assignWasmExports(wasmExports) {
   _mmix_initialize_simulator = Module['_mmix_initialize_simulator'] = createExportWrapper('mmix_initialize_simulator', 0);
   _mmix_finalize_simulator = Module['_mmix_finalize_simulator'] = createExportWrapper('mmix_finalize_simulator', 0);
   _get_source_code_pointer = Module['_get_source_code_pointer'] = createExportWrapper('get_source_code_pointer', 0);
+  _is_halted = Module['_is_halted'] = createExportWrapper('is_halted', 0);
   _fflush = createExportWrapper('fflush', 1);
   _emscripten_stack_get_end = wasmExports['emscripten_stack_get_end'];
   _emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'];

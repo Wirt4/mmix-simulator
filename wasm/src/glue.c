@@ -11,23 +11,6 @@ static struct HeapRef stdout_ref;
 static char mmo[FILE_NAME_SIZE];
 static int initialized = 0;
 
-int mmix_simulate(void){
-	int init = initialize_simulator(mmo);
-	if (!ASSERT(init == 0)) {
-		return -1;
-	}
-
-	struct Redirect err_redirect = redirect_stderr();
-	struct Redirect std_redirect = redirect_stdout();
-	while (!is_halted()){
-		execute_instructions(CYCLES_PER_BATCH);
-	}
-	stdout_ref = restore_stdout(std_redirect);
-	stderr_ref = restore_stderr(err_redirect);
-	finalize_simulator();
-	return 0;
-}
-
 size_t get_stderr_size(void){
 	return stderr_ref.size;
 }
