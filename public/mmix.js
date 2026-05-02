@@ -4659,17 +4659,20 @@ var wasmImports = {
 };
 var wasmExports = await createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors', 0);
-var _mmix_simulate = Module['_mmix_simulate'] = createExportWrapper('mmix_simulate', 0);
+var _is_halted = Module['_is_halted'] = createExportWrapper('is_halted', 0);
 var _get_stderr_size = Module['_get_stderr_size'] = createExportWrapper('get_stderr_size', 0);
 var _get_stdout_pointer = Module['_get_stdout_pointer'] = createExportWrapper('get_stdout_pointer', 0);
 var _get_stderr_pointer = Module['_get_stderr_pointer'] = createExportWrapper('get_stderr_pointer', 0);
 var _assemble_mmixal = Module['_assemble_mmixal'] = createExportWrapper('assemble_mmixal', 1);
 var _get_stdout_size = Module['_get_stdout_size'] = createExportWrapper('get_stdout_size', 0);
+var _mmix_perform_instructions = Module['_mmix_perform_instructions'] = createExportWrapper('mmix_perform_instructions', 1);
+var _mmix_initialize_simulator = Module['_mmix_initialize_simulator'] = createExportWrapper('mmix_initialize_simulator', 0);
+var _mmix_finalize_simulator = Module['_mmix_finalize_simulator'] = createExportWrapper('mmix_finalize_simulator', 0);
 var _get_source_code_pointer = Module['_get_source_code_pointer'] = createExportWrapper('get_source_code_pointer', 0);
 var _fflush = createExportWrapper('fflush', 1);
-var _strerror = createExportWrapper('strerror', 1);
 var _emscripten_stack_get_end = wasmExports['emscripten_stack_get_end']
 var _emscripten_stack_get_base = wasmExports['emscripten_stack_get_base']
+var _strerror = createExportWrapper('strerror', 1);
 var _setThrew = createExportWrapper('setThrew', 2);
 var _emscripten_stack_init = wasmExports['emscripten_stack_init']
 var _emscripten_stack_get_free = wasmExports['emscripten_stack_get_free']

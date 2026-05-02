@@ -1,7 +1,7 @@
 <nav><%= render "layouts/navbar" %></nav>
 
 <div class="landing">
-  <img src="/icon.svg" alt="mmix simulator" class="landing-logo">
+  <%= image_tag "logo.svg", alt: "mmix simulator", class: "landing-logo" %>
 
   <div class="landing-links">
     <%= link_to "Why MMIX?", about_path %>
