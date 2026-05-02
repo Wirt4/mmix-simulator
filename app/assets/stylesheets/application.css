@@ -402,9 +402,8 @@ form > div > input[type="password"] {
 }
 
 .landing-logo {
-  width: 160px;
-  height: 160px;
-  margin-bottom: 2em;
+  height: 145px;
+  margin-bottom: 1.5em;
 }
 .landing-buttons{
   margin-top: 25px;
