@@ -1,4 +1,64 @@
 <nav><%= render "layouts/navbar" %></nav>
 
-<h1>About MMIX</h1>
-<p>This page is under construction.</p>
+<article class="about">
+  <h1>About MMIX</h1>
+
+  <h2>What Is This?</h2>
+  <p>
+    This app has a specific purpose: to make it easier to get through
+    <em>The Art of Computer Programming</em> (TAOCP) by Donald Knuth. There are two
+    problems with the textbooks: they are very hard to read, and the existing tools for
+    writing the code are GNU utilities and command-line builds that deter newcomers. I
+    can't do jack about problem one (still working on that myself), but I can do
+    something about problem two. The books are hard; the tooling shouldn't be.
+  </p>
+
+  <h2>What Is MMIX?</h2>
+  <p>
+    To demonstrate his algorithms, Knuth invented his own computer. MMIX is a
+    "polyunsaturated" (imaginary) 64-bit RISC architecture that models the features
+    common to real modern processors. (It replaced an older imaginary computer called
+    MIX, which described big iron from the Apollo era.) The assembly language for this
+    imaginary computer is MMIXAL &mdash; and that's what you can write and run here, in
+    your browser. Under the hood, this simulator compiles Knuth's own C implementation
+    to WebAssembly, so there's nothing to install.
+  </p>
+
+  <h2>Try It</h2>
+  <p>Paste this into the editor and hit Run:</p>
+  <pre><code>          LOC   #100
+Main      GETA  $255,String
+          TRAP  0,Fputs,StdOut
+          TRAP  0,Halt,0
+String    BYTE  "Greetings, Programmer!",#a,0</code></pre>
+  <p>
+    That prints "Greetings, Programmer!" to standard output and halts. That's it; you're
+    writing MMIXAL.
+  </p>
+
+  <h2>Why Bother?</h2>
+  <p>
+    In print since 1968, TAOCP keeps finding new readers, decade after decade. It's a
+    math-first, machine-level treatment of algorithms &mdash; the kind of fundamentals
+    that don't expire when the next framework drops. Even the tools we're all talking
+    about now are built on this stuff: in early 2026, Filip Stappers used an LLM to
+    <a href="https://www-cs-faculty.stanford.edu/~knuth/papers/claude-cycles.pdf"
+       target="_blank" rel="noopener">solve an open problem from a forthcoming TAOCP
+    volume</a>, and Knuth wrote it up himself. You always need to know what the hell
+    you're doing, whether you're writing the code or prompting the thing that writes the
+    code. And honestly? It's fun.
+  </p>
+
+  <h2>Go To It</h2>
+  <p>
+    TAOCP is a classic doorstopper that invites the foolhardy programmer to join in the
+    Quixotic pursuit of actually reading it. There's enough friction in the books
+    themselves without throwing additional barriers in the way. If you want to charge at
+    the windmill that is <em>The Art of Computer Programming</em>, this is your lance.
+  </p>
+  <p>
+    If you want to see how this has been put together under the hood, the
+    <a href="https://github.com/Wirt4/mmix-simulator" target="_blank"
+       rel="noopener">source is on GitHub</a>.
+  </p>
+</article>

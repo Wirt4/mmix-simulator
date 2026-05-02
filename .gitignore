@@ -50,3 +50,7 @@
 /wasm/src/*.plist
 /wasm/*.plist
 /wasm/compile_commands.json
+
+#don't want to accidentally commit personal notes
+*.md
+!README.md
