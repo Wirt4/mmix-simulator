@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-empty-function */
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import ModuleAdapter from "../../app/javascript/moduleAdapter/module_adapter"
 import type { MainModule } from "../../wasm/build/wasm/module"
@@ -119,7 +119,7 @@ describe("Module Adapter", () => {
 
   it("intitializeMMIX logs error when initialization fails", () => {
     vi.spyOn(mockModule, '_mmix_initialize_simulator').mockReturnValue(-1)
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
     const adapter = new ModuleAdapter(mockModule)
     adapter.intitializeMMIX()
@@ -138,7 +138,7 @@ describe("Module Adapter", () => {
 
   it("finalizeMMIX logs error when finalization fails", () => {
     vi.spyOn(mockModule, '_mmix_finalize_simulator').mockReturnValue(-1)
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
     const adapter = new ModuleAdapter(mockModule)
     adapter.finalizeMMIX()
