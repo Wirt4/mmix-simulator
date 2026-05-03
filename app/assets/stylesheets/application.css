@@ -282,7 +282,7 @@ tr:hover td {
   user-select: none;
   min-width: 3em;
   background: transparent;
-  color: var(--text-console);
+  color: var(--text-dim);
 }
 
 .line-numbers span {
@@ -434,4 +434,152 @@ form > div > input[type="password"] {
     inset 0 0 20px rgba(0, 0, 0, 0.3),
     0 1px 0 rgba(255, 255, 255, 0.15);
   overflow-x: auto;
+}
+
+/* ── IDE grid layout ───────────────────────────────────── */
+.ide-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  grid-template-rows: auto 1fr auto;
+}
+
+.ide-layout-header {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.ide-layout-register-header {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.ide-content {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  position: relative;
+}
+
+.ide-main {
+  margin-right: 296px;
+}
+
+.register-panel {
+  position: absolute;
+  top: 0;
+  right: 8px;
+  bottom: 8px;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-panel);
+  border-radius: 4px;
+  border: 2px solid #3a3020;
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.6),
+    inset 0 0 20px rgba(0, 0, 0, 0.3),
+    0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.register-panel-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.ide-layout-actions {
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+
+/* ── Register header (matches editor-header / output-header) ── */
+.register-header {
+  padding: 8px 12px;
+  background: var(--bg-surface);
+  color: var(--text-on-surface);
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: none;
+}
+
+/* ── Register sections & rows ─────────────────────────── */
+.register-section {
+  border-bottom: 1px solid #3a3020;
+}
+
+.register-section:last-child {
+  border-bottom: none;
+}
+
+.register-section-header {
+  padding: 6px 12px;
+  color: var(--text-console);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.register-group-controls {
+  padding: 0 12px 6px;
+}
+
+.register-group-select {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--bg-input);
+  color: var(--text-console);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px 6px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.register-group-select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.register-group-container {
+  padding: 0 8px 8px;
+}
+
+.register-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 1px 4px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.register-row:hover {
+  background: rgba(212, 146, 42, 0.1);
+}
+
+.register-name {
+  width: 3em;
+  flex-shrink: 0;
+  color: var(--text-dim);
+  font-weight: 600;
+  text-align: right;
+}
+
+.register-hex {
+  color: var(--accent);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.register-dec {
+  color: var(--text-dim);
+  font-size: 10px;
+  flex-shrink: 0;
 }

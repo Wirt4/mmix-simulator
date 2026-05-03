@@ -1,38 +1,78 @@
 <%= form_with model: mmixal_program do |form|%>
-<div class="editor-container" data-controller="ide-facade">
-  <div class="editor-header">
+<div class="ide-layout" data-controller="ide-facade">
+  <div class="editor-header ide-layout-header">
     <span class="editor-title editor-form"><%= form.text_field :title %></span>
   </div>
-  <div class="editor-body">
-    <!-- note the data-editor target: line numbers is manipulated by the js editor-->
-    <div class="line-numbers" data-ide-facade-target="lineNumbers">
-      <span>1</span>
+  <div class="register-header ide-layout-register-header">Registers</div>
+
+  <div class="ide-content">
+    <div class="ide-main">
+      <div class="editor-body">
+        <div class="line-numbers" data-ide-facade-target="lineNumbers">
+          <span>1</span>
+        </div>
+        <%= form.text_area :source,
+          class: "editor-textarea",
+          data: {
+            ide_facade_target: "textarea",
+            action: "input->ide-facade#updateLineNumbers scroll->ide-facade#syncScroll keydown->ide-facade#handleKeydown"
+          },
+          spellcheck: false,
+          autocomplete: "off",
+          autocorrect: "off",
+          autocapitalize: "off"
+        %>
+      </div>
+      <div class="output-container">
+        <div class="output-body">
+          <textarea class="output-textarea" data-ide-facade-target="output" readonly></textarea>
+        </div>
+      </div>
     </div>
-       <!-- the editor also adjusts the text area: currently for tab logic -->
-    <%= form.text_area :source,
-      class: "editor-textarea",
-      data: {
-        ide_facade_target: "textarea",
-        action: "input->ide-facade#updateLineNumbers scroll->ide-facade#syncScroll keydown->ide-facade#handleKeydown"
-      },
-      spellcheck: false,
-      autocomplete: "off",
-      autocorrect: "off",
-      autocapitalize: "off"
-    %>
+
+    <div class="register-panel">
+      <div class="register-panel-scroll">
+        <div class="register-section">
+        <div class="register-section-header">Special Purpose</div>
+        <div class="register-group-container">
+          <% %w[rA rB rC rD rE rF rG rH rI rJ rK rL rM rN rO rP rQ rR rS rT rTT rU rV rW rX rY rZ rBB rWW rXX rYY rZZ].each do |reg| %>
+            <div class="register-row">
+              <span class="register-name"><%= reg %></span>
+              <span class="register-hex">0x0000000000000000</span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      <div class="register-section">
+        <div class="register-section-header">General Purpose</div>
+        <div class="register-group-controls">
+          <select class="register-group-select" onchange="document.querySelectorAll('.register-group').forEach(g => g.style.display = 'none'); document.getElementById('gp-group-' + this.value).style.display = 'block';">
+            <% (0..7).each do |group| %>
+              <option value="<%= group %>">$<%= group * 32 %>&ndash;$<%= group * 32 + 31 %></option>
+            <% end %>
+          </select>
+        </div>
+        <div class="register-group-container">
+          <% (0..7).each do |group| %>
+            <div id="gp-group-<%= group %>" class="register-group" style="<%= 'display: none;' unless group == 0 %>">
+              <% (0..31).each do |i| %>
+                <div class="register-row">
+                  <span class="register-name">$<%= group * 32 + i %></span>
+                  <span class="register-hex">0x0000000000000000</span>
+                 
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="output-container">
-    <div class="output-header">
-      <span class="output-title">Output</span>
-    </div>
-    <div class="output-body">
-      <textarea class="output-textarea" data-ide-facade-target="output"></textarea>
-    </div>
   </div>
-  <div class="editor-actions">
+
+  <div class="editor-actions ide-layout-actions">
     <%= button_tag "Run", type: "button", data: {ide_facade_target:"runButton", action: "click->ide-facade#runUserProgram"}%>
     <%= form.submit "Save" %>
   </div>
 </div>
 <% end %>
-
