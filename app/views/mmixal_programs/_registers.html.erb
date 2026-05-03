@@ -1,0 +1,43 @@
+<div class="register-panel" data-resizable-panels-target="registerPanel">
+  <div class="resize-handle resize-handle-h" data-resizable-panels-target="registerResize" data-action="mousedown->resizable-panels#startRegisterResize"></div>
+  <div class="register-header">
+    <button type="button" class="panel-toggle" data-resizable-panels-target="registerToggle" data-action="click->resizable-panels#toggleRegister">-</button>
+    Registers
+  </div>
+  <div class="register-panel-scroll" data-resizable-panels-target="registerScroll">
+    <div class="register-section">
+    <div class="register-section-header">Special Purpose</div>
+    <div class="register-group-container">
+      <% %w[rA rB rC rD rE rF rG rH rI rJ rK rL rM rN rO rP rQ rR rS rT rTT rU rV rW rX rY rZ rBB rWW rXX rYY rZZ].each do |reg| %>
+        <div class="register-row">
+          <span class="register-name"><%= reg %></span>
+          <span class="register-hex">0x0000000000000000</span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  <div class="register-section">
+    <div class="register-section-header">General Purpose</div>
+    <div class="register-group-controls">
+      <select class="register-group-select" onchange="document.querySelectorAll('.register-group').forEach(g => g.style.display = 'none'); document.getElementById('gp-group-' + this.value).style.display = 'block';">
+        <% (0..7).each do |group| %>
+          <option value="<%= group %>">$<%= group * 32 %>&ndash;$<%= group * 32 + 31 %></option>
+        <% end %>
+      </select>
+    </div>
+    <div class="register-group-container">
+      <% (0..7).each do |group| %>
+        <div id="gp-group-<%= group %>" class="register-group" style="<%= 'display: none;' unless group == 0 %>">
+          <% (0..31).each do |i| %>
+            <div class="register-row">
+              <span class="register-name">$<%= group * 32 + i %></span>
+              <span class="register-hex">0x0000000000000000</span>
+
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+</div>

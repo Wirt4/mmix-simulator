@@ -23,6 +23,7 @@
   --font-mono:     "IBM Plex Mono", "SF Mono", "Cascadia Mono", "Fira Mono", Menlo, Consolas, monospace;
   --font-display:  "IBM Plex Mono", monospace;
   --radius:        3px;
+  --red: #8b3a2a;
 }
 
 *, *::before, *::after {
@@ -65,11 +66,11 @@ nav {
   justify-content: space-between;
   padding: 0.5em 1em;
   margin: -1.5em -1.5em 1.5em -1.5em;
-  background: var(--bg-panel);
+  background: var(--red);
   border-bottom: 2px solid var(--border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
+/* ── Button base: typography, cursor, transition ──────── */
 button,
 input[type="submit"],
 .btn {
@@ -78,30 +79,33 @@ input[type="submit"],
   font-size: 13px;
   line-height: 1.4;
   padding: 6px 16px;
-  background: #c4b48a;
-  color: var(--text-primary);
-  border: 1px solid #a89868;
-  border-bottom: 3px solid #8a7a50;
+  border: none;
   border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
   cursor: pointer;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  transition: background 0.1s, border-color 0.1s, box-shadow 0.1s, transform 0.1s;
+}
+
+/* ── Tactile: raised 3D pressable appearance ──────────── */
+.btn--tactile {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid #a89868;
+  border-bottom: 3px solid #8a7a50;
   box-shadow:
     0 2px 3px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  transition: background 0.1s, border-color 0.1s, box-shadow 0.1s, transform 0.1s;
 }
-/*General purpose buttons*/
-button:hover,
-input[type="submit"]:hover,
-.btn:hover {
+.btn--tactile:hover {
   background: #b8a87a;
   border-color: #9a8a58;
   border-bottom-color: #7a6a42;
   color: var(--text-primary);
 }
-button:active,
-input[type="submit"]:active {
+.btn--tactile:active {
   background: #b0a070;
   border-bottom-width: 1px;
   transform: translateY(2px);
@@ -110,8 +114,8 @@ input[type="submit"]:active {
     inset 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-/* ── Run button (red) ─────────────────────────────────── */
-button[data-ide-facade-target="runButton"] {
+/* ── Tactile: red variant ──────────────────────── */
+.btn--tactile--alert {
   background: #8b3a2a;
   color: #f0d8d0;
   border: 1px solid #6e2e20;
@@ -120,13 +124,13 @@ button[data-ide-facade-target="runButton"] {
     0 2px 3px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
-button[data-ide-facade-target="runButton"]:hover {
+.btn--tactile--alert:hover {
   background: #7a3020;
   border-color: #5e2418;
   border-bottom-color: #3e1410;
   color: #f0d8d0;
 }
-button[data-ide-facade-target="runButton"]:active {
+.btn--tactile--alert:active {
   background: #6a2818;
   border-bottom-width: 1px;
   transform: translateY(2px);
@@ -253,8 +257,17 @@ tr:hover td {
     inset 0 2px 8px rgba(0, 0, 0, 0.6),
     inset 0 0 20px rgba(0, 0, 0, 0.3),
     0 1px 0 rgba(255, 255, 255, 0.15);
-  overflow-y: auto;
+  overflow: hidden;
+}
+
+.editor-body {
   height: 394px;
+}
+
+.output-body {
+  max-height: 300px;
+  height: 300px;
+  overflow-y: auto;
 }
 
 .editor-form input,
@@ -285,6 +298,7 @@ tr:hover td {
   min-width: 3em;
   background: transparent;
   color: var(--text-dim);
+  overflow: hidden;
 }
 
 .line-numbers span {
@@ -474,7 +488,6 @@ form > div > input[type="password"] {
   overflow: hidden;
   background: var(--bg-panel);
   border-radius: 4px;
-  border: 2px solid #3a3020;
   box-shadow:
     inset 0 2px 8px rgba(0, 0, 0, 0.6),
     inset 0 0 20px rgba(0, 0, 0, 0.3),
@@ -582,4 +595,124 @@ form > div > input[type="password"] {
   color: var(--text-dim);
   font-size: 10px;
   flex-shrink: 0;
+}
+
+/* ── Panel collapse / resize ──────────────────────────── */
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--bg-surface);
+  color: var(--text-on-surface);
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: none;
+}
+
+.panel-header-label {
+  flex: 1;
+}
+
+.panel-toggle {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-bright);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+}
+
+.panel-toggle:hover {
+  opacity: 1;
+  color: var(--text-secondary);
+}
+
+/* Collapsed panels */
+.panel-collapsed {
+  height: 0 !important;
+  min-height: 0 !important;
+  flex: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+/* Register panel collapsed via layout class */
+.ide-layout.register-collapsed .ide-main {
+  margin-right: 0;
+}
+
+.register-panel--collapsed {
+  bottom: auto;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Resize handles */
+.resize-handle {
+  flex-shrink: 0;
+  background: transparent;
+  position: relative;
+}
+
+.resize-handle::after {
+  content: "";
+  position: absolute;
+  background: var(--border);
+  border-radius: 2px;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+}
+
+.resize-handle:hover::after {
+  opacity: 1;
+  background: var(--accent);
+}
+
+/* Vertical resize (between editor/output) */
+.resize-handle-v {
+  height: 6px;
+  cursor: ns-resize;
+}
+
+.resize-handle-v::after {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 2px;
+}
+
+/* Horizontal resize (register panel left edge) */
+.resize-handle-h {
+  width: 6px;
+  cursor: ew-resize;
+  position: absolute;
+  left: -3px;
+  top: 0;
+  bottom: 0;
+  z-index: 10;
+}
+
+.resize-handle-h::after {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 40px;
 }

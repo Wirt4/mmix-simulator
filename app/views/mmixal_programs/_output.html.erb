@@ -1,0 +1,10 @@
+<div class="panel-header">
+  <button type="button" class="panel-toggle" data-resizable-panels-target="outputToggle" data-action="click->resizable-panels#toggleOutput">-</button>
+  <span class="panel-header-label">Output</span>
+</div>
+<div class="output-container" data-resizable-panels-target="outputPanel">
+  <div class="output-body">
+    <textarea class="output-textarea" data-ide-facade-target="output" readonly></textarea>
+  </div>
+</div>
+<div class="resize-handle resize-handle-v" data-resizable-panels-target="outputResize" data-action="mousedown->resizable-panels#startOutputResize"></div>

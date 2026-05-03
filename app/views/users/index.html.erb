@@ -12,8 +12,8 @@
         <td><%= user.user_name %></td>
         <td><%= user.email_address %></td>
         <td><%= user.role %></td>
-        <td><%= button_to "Edit", edit_user_path(user), method: :get %></td>
-        <td><%= button_to "Delete", user_path(user), method: :delete %></td>
+        <td><%= button_to "Edit", edit_user_path(user), method: :get, class: "btn--tactile" %></td>
+        <td><%= button_to "Delete", user_path(user), method: :delete, class: "btn--tactile" %></td>
       </tr>
     <% end %>
   </tbody>

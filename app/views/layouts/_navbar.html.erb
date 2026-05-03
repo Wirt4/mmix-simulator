@@ -1,5 +1,5 @@
 <% if authenticated? %>
-  <%= button_to "Log Out", session_path, method: :delete %>
+  <%= button_to "Log Out", session_path, method: :delete, class: "btn--tactile" %>
 <% else %>
-  <%= link_to "Login", new_session_path, class: "btn" %>
+  <%= link_to "Login", new_session_path, class: "btn btn--tactile" %>
 <% end %>
