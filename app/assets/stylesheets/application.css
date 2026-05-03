@@ -253,7 +253,8 @@ tr:hover td {
     inset 0 2px 8px rgba(0, 0, 0, 0.6),
     inset 0 0 20px rgba(0, 0, 0, 0.3),
     0 1px 0 rgba(255, 255, 255, 0.15);
-  overflow: hidden;
+  overflow-y: auto;
+  height: 394px;
 }
 
 .editor-form input,
@@ -263,6 +264,7 @@ tr:hover td {
 }
 
 .editor-title input {
+  width: 100%;
   color: var(--text-on-surface);
   font-weight: 700;
   font-size: 18px;
@@ -301,7 +303,6 @@ tr:hover td {
   resize: none;
   tab-size: 2;
   white-space: pre;
-  min-height: 20em;
   background: var(--bg-panel);
   color: var(--text-console);
   caret-color: var(--accent);
@@ -316,7 +317,6 @@ tr:hover td {
   padding: 8px;
   margin: 0;
   white-space: pre;
-  min-height: 20em;
   color: var(--text-console);
   font-family: var(--font-mono);
   font-size: 14px;
