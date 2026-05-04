@@ -44,6 +44,7 @@ a {
   color: var(--link);
   text-decoration: none;
 }
+
 a:hover {
   color: var(--link-hover);
   text-decoration: underline;
@@ -211,7 +212,6 @@ tr:hover td {
 .output-container {
   display: flex;
   flex-direction: column;
-  margin-top: 1em;
   background: var(--bg-surface);
 }
 
@@ -343,6 +343,32 @@ tr:hover td {
   margin: 8px 8px 0;
 }
 
+/* Beige tactile buttons on grey surface areas (not alert variants) */
+.btn--tactile:not(.btn--tactile--alert) {
+  background: #c8b88a;
+  border: 1px solid #a89868;
+  border-bottom: 3px solid #8a7a50;
+}
+.btn--tactile:not(.btn--tactile--alert):hover {
+  background: #b8a87a;
+}
+.btn--tactile:not(.btn--tactile--alert):active {
+  background: #b0a070;
+}
+
+/* Keep nav buttons grey (on red background) */
+nav .btn--tactile:not(.btn--tactile--alert) {
+  background: var(--bg-surface);
+  border: 1px solid #a89868;
+  border-bottom: 3px solid #8a7a50;
+}
+nav .btn--tactile:not(.btn--tactile--alert):hover {
+  background: #b8a87a;
+}
+nav .btn--tactile:not(.btn--tactile--alert):active {
+  background: #b0a070;
+}
+
 .editor-actions button,
 .editor-actions input[type="submit"] {
   min-width: 6em;
@@ -471,6 +497,7 @@ form > div > input[type="password"] {
   grid-column: 1 / -1;
   grid-row: 2;
   position: relative;
+  overflow: hidden;
 }
 
 .ide-main {
@@ -481,7 +508,7 @@ form > div > input[type="password"] {
   position: absolute;
   top: 0;
   right: 8px;
-  bottom: 8px;
+  bottom: 14px;
   width: 280px;
   display: flex;
   flex-direction: column;
@@ -658,7 +685,6 @@ form > div > input[type="password"] {
 }
 
 .register-panel--collapsed {
-  bottom: auto;
   background: transparent;
   box-shadow: none;
 }
