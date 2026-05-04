@@ -1,39 +1,13 @@
 import { Controller } from "@hotwired/stimulus"
-
-const STORAGE_KEY = "ide-panel-state"
-
-interface PanelState {
-  editorHeight: number | null
-  outputHeight: number | null
-  registerWidth: number | null
-  editorCollapsed: boolean
-  outputCollapsed: boolean
-  registerCollapsed: boolean
-}
-
-function loadState(): Partial<PanelState> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : {}
-  } catch {
-    return {}
-  }
-}
-
-function saveState(state: Partial<PanelState>): void {
-  try {
-    const current = loadState()
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...current, ...state }))
-  } catch {
-    // localStorage unavailable
-  }
-}
+import { PanelStateStore } from "../panel/panel_state_store"
+import { ResizablePanel } from "../resizablePanel/resizable_panel"
+import { TogglePanel } from "./togglePanels/toggle_panel"
 
 export default class ResizablePanelsController extends Controller {
   static targets = [
     "editorPanel", "outputPanel", "registerPanel", "registerScroll",
     "editorToggle", "outputToggle", "registerToggle",
-    "editorResize", "outputResize", "registerResize",
+    "editorResize", "outputResize", "registerVerticalResize",
     "ideMain", "ideContent"
   ]
 
@@ -46,155 +20,128 @@ export default class ResizablePanelsController extends Controller {
   declare registerToggleTarget: HTMLElement
   declare editorResizeTarget: HTMLElement
   declare outputResizeTarget: HTMLElement
-  declare registerResizeTarget: HTMLElement
+  declare registerVerticalResizeTarget: HTMLElement
   declare ideMainTarget: HTMLElement
   declare ideContentTarget: HTMLElement
 
-  private dragging: string | null = null
-  private startY = 0
-  private startX = 0
-  private startSize = 0
+  private editorState!: PanelStateStore
+  private outputState!: PanelStateStore
+  private registerState!: PanelStateStore
+  private registerHeightState!: PanelStateStore
 
-  private boundMouseMove = this.onMouseMove.bind(this)
-  private boundMouseUp = this.onMouseUp.bind(this)
+  private editorResizer!: ResizablePanel
+  private outputResizer!: ResizablePanel
+  private registerVerticalResizer!: ResizablePanel
+
+  private editorToggler!: TogglePanel
+  private outputToggler!: TogglePanel
+  private registerToggler!: TogglePanel
 
   connect(): void {
-    const state = loadState()
+    this.editorState = new PanelStateStore("editor")
+    this.outputState = new PanelStateStore("output")
+    this.registerState = new PanelStateStore("register")
+    this.registerHeightState = new PanelStateStore("register-height")
 
-    if (state.editorCollapsed) this.setCollapsed("editor", true)
-    if (state.outputCollapsed) this.setCollapsed("output", true)
-    if (state.registerCollapsed) this.setCollapsed("register", true)
+    this.editorResizer = new ResizablePanel({
+      panel: this.editorPanelTarget,
+      direction: "vertical",
+      min: 60,
+      onResizeEnd: (size) => { this.editorState.save({ size }) }
+    })
 
-    if (state.editorHeight && !state.editorCollapsed) {
-      this.editorPanelTarget.style.height = `${state.editorHeight}px`
-    }
-    if (state.outputHeight && !state.outputCollapsed) {
-      this.outputPanelTarget.style.height = `${state.outputHeight}px`
-    }
-    if (state.registerWidth && !state.registerCollapsed) {
-      this.applyRegisterWidth(state.registerWidth)
-    }
-  }
+    this.outputResizer = new ResizablePanel({
+      panel: this.outputPanelTarget,
+      direction: "vertical",
+      min: 60,
+      onResizeEnd: (size) => { this.outputState.save({ size }) }
+    })
 
-  toggleEditor(): void {
-    const collapsed = !this.editorPanelTarget.classList.contains("panel-collapsed")
-    this.setCollapsed("editor", collapsed)
-    saveState({ editorCollapsed: collapsed })
-  }
+    this.registerVerticalResizer = new ResizablePanel({
+      panel: this.registerPanelTarget,
+      direction: "vertical",
+      min: 100,
+      onResizeEnd: (size) => { this.registerHeightState.save({ size }) }
+    })
 
-  toggleOutput(): void {
-    const collapsed = !this.outputPanelTarget.classList.contains("panel-collapsed")
-    this.setCollapsed("output", collapsed)
-    saveState({ outputCollapsed: collapsed })
-  }
+    this.editorToggler = new TogglePanel({
+      toggleButton: this.editorToggleTarget,
+      resizeHandle: this.editorResizeTarget,
+      onCollapse: () => {
+        this.editorPanelTarget.classList.add("panel-collapsed")
+        this.editorState.save({ collapsed: true })
+      },
+      onExpand: () => {
+        this.editorPanelTarget.classList.remove("panel-collapsed")
+        this.editorState.save({ collapsed: false })
+      }
+    })
 
-  toggleRegister(): void {
-    const collapsed = this.registerScrollTarget.style.display !== "none"
-    this.setCollapsed("register", collapsed)
-    saveState({ registerCollapsed: collapsed })
-  }
+    this.outputToggler = new TogglePanel({
+      toggleButton: this.outputToggleTarget,
+      resizeHandle: this.outputResizeTarget,
+      onCollapse: () => {
+        this.outputPanelTarget.classList.add("panel-collapsed")
+        this.outputState.save({ collapsed: true })
+      },
+      onExpand: () => {
+        this.outputPanelTarget.classList.remove("panel-collapsed")
+        this.outputState.save({ collapsed: false })
+      }
+    })
 
-  startEditorResize(event: MouseEvent): void {
-    event.preventDefault()
-    this.dragging = "editor"
-    this.startY = event.clientY
-    this.startSize = this.editorPanelTarget.getBoundingClientRect().height
-    document.addEventListener("mousemove", this.boundMouseMove)
-    document.addEventListener("mouseup", this.boundMouseUp)
-    document.body.style.cursor = "ns-resize"
-    document.body.style.userSelect = "none"
-  }
-
-  startOutputResize(event: MouseEvent): void {
-    event.preventDefault()
-    this.dragging = "output"
-    this.startY = event.clientY
-    this.startSize = this.outputPanelTarget.getBoundingClientRect().height
-    document.addEventListener("mousemove", this.boundMouseMove)
-    document.addEventListener("mouseup", this.boundMouseUp)
-    document.body.style.cursor = "ns-resize"
-    document.body.style.userSelect = "none"
-  }
-
-  startRegisterResize(event: MouseEvent): void {
-    event.preventDefault()
-    this.dragging = "register"
-    this.startX = event.clientX
-    this.startSize = this.registerPanelTarget.getBoundingClientRect().width
-    document.addEventListener("mousemove", this.boundMouseMove)
-    document.addEventListener("mouseup", this.boundMouseUp)
-    document.body.style.cursor = "ew-resize"
-    document.body.style.userSelect = "none"
-  }
-
-  private onMouseMove(event: MouseEvent): void {
-    if (!this.dragging) return
-
-    if (this.dragging === "editor") {
-      const delta = event.clientY - this.startY
-      const newHeight = Math.max(60, this.startSize + delta)
-      this.editorPanelTarget.style.height = `${newHeight}px`
-    } else if (this.dragging === "output") {
-      const delta = event.clientY - this.startY
-      const newHeight = Math.max(60, this.startSize + delta)
-      this.outputPanelTarget.style.height = `${newHeight}px`
-    } else if (this.dragging === "register") {
-      // Dragging left edge of register panel: moving left = wider
-      const delta = this.startX - event.clientX
-      const newWidth = Math.max(150, Math.min(600, this.startSize + delta))
-      this.applyRegisterWidth(newWidth)
-    }
-  }
-
-  private onMouseUp(): void {
-    if (this.dragging === "editor") {
-      saveState({ editorHeight: this.editorPanelTarget.getBoundingClientRect().height })
-    } else if (this.dragging === "output") {
-      saveState({ outputHeight: this.outputPanelTarget.getBoundingClientRect().height })
-    } else if (this.dragging === "register") {
-      saveState({ registerWidth: this.registerPanelTarget.getBoundingClientRect().width })
-    }
-
-    this.dragging = null
-    document.removeEventListener("mousemove", this.boundMouseMove)
-    document.removeEventListener("mouseup", this.boundMouseUp)
-    document.body.style.cursor = ""
-    document.body.style.userSelect = ""
-  }
-
-  private setCollapsed(panel: string, collapsed: boolean): void {
-    if (panel === "editor") {
-      this.editorPanelTarget.classList.toggle("panel-collapsed", collapsed)
-      this.editorToggleTarget.textContent = collapsed ? "+" : "-"
-      this.editorResizeTarget.style.display = collapsed ? "none" : ""
-    } else if (panel === "output") {
-      this.outputPanelTarget.classList.toggle("panel-collapsed", collapsed)
-      this.outputToggleTarget.textContent = collapsed ? "+" : "-"
-      this.outputResizeTarget.style.display = collapsed ? "none" : ""
-    } else if (panel === "register") {
-      this.registerScrollTarget.style.display = collapsed ? "none" : ""
-      this.registerToggleTarget.textContent = collapsed ? "+" : "-"
-      this.registerResizeTarget.style.display = collapsed ? "none" : ""
-      this.registerPanelTarget.classList.toggle("register-panel--collapsed", collapsed)
-      if (collapsed) {
+    this.registerToggler = new TogglePanel({
+      toggleButton: this.registerToggleTarget,
+      resizeHandle: this.registerVerticalResizeTarget,
+      onCollapse: () => {
+        this.registerScrollTarget.style.display = "none"
+        this.registerPanelTarget.classList.add("register-panel--collapsed")
         this.ideMainTarget.style.marginRight = "0"
         this.ideContentTarget.closest(".ide-layout")
           ?.classList.add("register-collapsed")
-      } else {
+        this.registerState.save({ collapsed: true })
+      },
+      onExpand: () => {
+        this.registerScrollTarget.style.display = ""
+        this.registerPanelTarget.classList.remove("register-panel--collapsed")
         this.ideMainTarget.style.marginRight = ""
         this.ideContentTarget.closest(".ide-layout")
           ?.classList.remove("register-collapsed")
+        this.registerState.save({ collapsed: false })
       }
+    })
+
+    this.restoreState()
+  }
+
+  toggleEditor(): void { this.editorToggler.toggle() }
+  toggleOutput(): void { this.outputToggler.toggle() }
+  toggleRegister(): void { this.registerToggler.toggle() }
+
+  startEditorResize(event: MouseEvent): void { this.editorResizer.startResize(event) }
+  startOutputResize(event: MouseEvent): void { this.outputResizer.startResize(event) }
+  startRegisterVerticalResize(event: MouseEvent): void { this.registerVerticalResizer.startResize(event) }
+
+  private restoreState(): void {
+    const editor = this.editorState.load()
+    const output = this.outputState.load()
+    const register = this.registerState.load()
+
+    if (editor.collapsed) this.editorToggler.collapse()
+    if (output.collapsed) this.outputToggler.collapse()
+    if (register.collapsed) this.registerToggler.collapse()
+
+    if (editor.size && !editor.collapsed) {
+      this.editorPanelTarget.style.height = `${String(editor.size)}px`
+    }
+    if (output.size && !output.collapsed) {
+      this.outputPanelTarget.style.height = `${String(output.size)}px`
+    }
+
+    const registerHeight = this.registerHeightState.load()
+    if (registerHeight.size && !register.collapsed) {
+      this.registerPanelTarget.style.height = `${String(registerHeight.size)}px`
     }
   }
 
-  private applyRegisterWidth(width: number): void {
-    this.registerPanelTarget.style.width = `${width}px`
-    this.ideMainTarget.style.marginRight = `${width + 16}px`
-    // Update grid column
-    const layout = this.ideContentTarget.closest(".ide-layout") as HTMLElement
-    if (layout) {
-      layout.style.gridTemplateColumns = `1fr ${width}px`
-    }
-  }
 }
