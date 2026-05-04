@@ -1,0 +1,22 @@
+<div class="register-subpanel">
+  <div class="register-subpanel-header">General Purpose</div>
+  <div class="register-group-controls">
+    <select class="register-group-select" onchange="document.querySelectorAll('.register-group').forEach(g => g.style.display = 'none'); document.getElementById('gp-group-' + this.value).style.display = 'block';">
+      <% (0..7).each do |group| %>
+        <option value="<%= group %>">$<%= group * 32 %>&ndash;$<%= group * 32 + 31 %></option>
+      <% end %>
+    </select>
+  </div>
+  <div class="register-group-container">
+    <% (0..7).each do |group| %>
+      <div id="gp-group-<%= group %>" class="register-group" style="<%= 'display: none;' unless group == 0 %>">
+        <% (0..31).each do |i| %>
+          <div class="register-row">
+            <span class="register-name">$<%= group * 32 + i %></span>
+            <span class="register-hex">0x0000000000000000</span>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

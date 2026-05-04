@@ -518,16 +518,16 @@ form > div > input[type="password"] {
   border: none;
 }
 
-/* ── Register sections & rows ─────────────────────────── */
-.register-section {
+/* ── Register subpanels & rows ────────────────────────── */
+.register-subpanel {
   border-bottom: 1px solid #3a3020;
 }
 
-.register-section:last-child {
+.register-subpanel:last-child {
   border-bottom: none;
 }
 
-.register-section-header {
+.register-subpanel-header {
   padding: 6px 12px;
   color: var(--text-console);
   font-size: 11px;
