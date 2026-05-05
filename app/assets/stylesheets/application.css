@@ -195,13 +195,11 @@ textarea:focus {
   box-shadow: 0 0 0 1px var(--accent-glow);
 }
 
-.flash-alert,
 [style*="color:red"] {
   color: var(--error) !important;
   font-weight: 600;
   padding: 0.4em 0;
 }
-.flash-notice,
 [style*="color:green"] {
   color: var(--success) !important;
   font-weight: 600;
@@ -248,19 +246,6 @@ tr:hover td {
   background: var(--bg-surface);
 }
 
-/* Embossed machine labels */
-.editor-header,
-.output-header {
-  padding: 8px 12px;
-  background: var(--bg-surface);
-  color: var(--text-on-surface);
-  font-size: 18px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
-  border: none;
-}
 
 .login-label {
   background: var(--bg-surface);
@@ -270,12 +255,6 @@ tr:hover td {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
-  border: none;
-}
-
-.editor-footer {
-  padding: 6px 12px;
-  background: var(--bg-surface);
   border: none;
 }
 
@@ -312,24 +291,7 @@ tr:hover td {
   overflow-y: auto;
 }
 
-.editor-form input,
-.editor-form textarea {
-  border-width: 0;
-  background: transparent;
-}
-
-.editor-title input {
-  width: 100%;
-  color: var(--text-on-surface);
-  font-weight: 700;
-  font-size: 18px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-.line-numbers,
-.output-gutter {
+.line-numbers {
   font-family: var(--font-mono);
   font-size: 14px;
   line-height: 1.5;
@@ -366,17 +328,6 @@ tr:hover td {
 
 .output-textarea {
   color: var(--text-console);
-}
-
-.output-pre {
-  flex: 1;
-  padding: 8px;
-  margin: 0;
-  white-space: pre;
-  color: var(--text-console);
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.5;
 }
 
 .editor-actions {
@@ -525,16 +476,6 @@ form > div > input[type="password"] {
   grid-template-rows: auto 1fr auto;
 }
 
-.ide-layout-header {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.ide-layout-register-header {
-  grid-column: 2;
-  grid-row: 1;
-}
-
 .ide-content {
   grid-column: 1 / -1;
   grid-row: 2;
@@ -575,7 +516,7 @@ form > div > input[type="password"] {
   grid-row: 3;
 }
 
-/* ── Register header (matches editor-header / output-header) ── */
+/* ── Register header ──────────────────────────────────── */
 .register-header {
   padding: 8px 12px;
   background: var(--bg-surface);
@@ -661,14 +602,6 @@ form > div > input[type="password"] {
   white-space: nowrap;
 }
 
-.register-dec {
-  color: var(--text-dim);
-  font-size: 10px;
-  flex-shrink: 0;
-}
-
-/* ── Panel collapse / resize ──────────────────────────── */
-
 .panel-header {
   display: flex;
   align-items: center;
@@ -688,82 +621,4 @@ form > div > input[type="password"] {
   flex: 1;
 }
 
-.panel-toggle {
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: none;
-  border-radius: var(--radius);
-  background: transparent;
-  color: var(--text-bright);
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.7;
-}
-
-.panel-toggle:hover {
-  opacity: 1;
-  color: var(--text-secondary);
-}
-
-/* Collapsed panels */
-.panel-collapsed {
-  height: 0 !important;
-  min-height: 0 !important;
-  flex: 0 !important;
-  overflow: hidden !important;
-  padding: 0 !important;
-  border: none !important;
-}
-
-/* Register panel collapsed via layout class */
-.ide-layout.register-collapsed .ide-main {
-  margin-right: 0;
-}
-
-.register-panel--collapsed {
-  background: transparent;
-  box-shadow: none;
-}
-
-/* Resize handles */
-.resize-handle {
-  flex-shrink: 0;
-  background: transparent;
-  position: relative;
-}
-
-.resize-handle::after {
-  content: "";
-  position: absolute;
-  background: var(--border);
-  border-radius: 2px;
-  opacity: 0.7;
-  transition: opacity 0.15s;
-}
-
-.resize-handle:hover::after {
-  opacity: 1;
-  background: var(--accent);
-}
-
-/* Vertical resize (between editor/output) */
-.resize-handle-v {
-  height: 6px;
-  cursor: ns-resize;
-}
-
-.resize-handle-v::after {
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 40px;
-  height: 2px;
-}
 
