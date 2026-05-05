@@ -1,11 +1,5 @@
 <div class="register-subpanel">
   <div class="register-subpanel-header">Special Purpose</div>
-  <div class="register-group-container">
-    <% %w[rA rB rC rD rE rF rG rH rI rJ rK rL rM rN rO rP rQ rR rS rT rTT rU rV rW rX rY rZ rBB rWW rXX rYY rZZ].each do |reg| %>
-      <div class="register-row">
-        <span class="register-name"><%= reg %></span>
-        <span class="register-hex">0x0000000000000000</span>
-      </div>
-    <% end %>
+  <div class="register-group-container" data-registers-target="specialContainer">
   </div>
 </div>
