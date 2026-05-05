@@ -284,7 +284,7 @@ tr:hover td {
   display: flex;
   background: var(--bg-panel);
   border-radius: 4px;
-  margin: 0 8px 8px;
+  margin: 0 8px 0;
   border: 2px solid var(--inset-border);
   box-shadow:
     inset 0 2px 8px rgba(0, 0, 0, 0.6),
@@ -523,7 +523,6 @@ form > div > input[type="password"] {
   display: grid;
   grid-template-columns: 1fr 280px;
   grid-template-rows: auto 1fr auto;
-  height: 100vh;
 }
 
 .ide-layout-header {
@@ -552,8 +551,8 @@ form > div > input[type="password"] {
   top: 0;
   right: 8px;
   width: 280px;
-  height: calc(100% - 14px);
-  max-height: calc(100% - 14px);
+  height: 100%;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
