@@ -5,14 +5,13 @@ import { TogglePanel } from "./togglePanels/toggle_panel"
 
 export default class ResizablePanelsController extends Controller {
   static targets = [
-    "editorPanel", "outputPanel", "registerPanel", "registerScroll",
+    "editorPanel", "registerPanel", "registerScroll",
     "editorToggle", "outputToggle", "registerToggle",
     "editorResize", "outputResize", "registerVerticalResize",
     "ideMain", "ideContent"
   ]
 
   declare editorPanelTarget: HTMLElement
-  declare outputPanelTarget: HTMLElement
   declare registerPanelTarget: HTMLElement
   declare registerScrollTarget: HTMLElement
   declare editorToggleTarget: HTMLElement
@@ -25,21 +24,17 @@ export default class ResizablePanelsController extends Controller {
   declare ideContentTarget: HTMLElement
 
   private editorState!: PanelStateStore
-  private outputState!: PanelStateStore
   private registerState!: PanelStateStore
   private registerHeightState!: PanelStateStore
 
   private editorResizer!: ResizablePanel
-  private outputResizer!: ResizablePanel
   private registerVerticalResizer!: ResizablePanel
 
   private editorToggler!: TogglePanel
-  private outputToggler!: TogglePanel
   private registerToggler!: TogglePanel
 
   connect(): void {
     this.editorState = new PanelStateStore("editor")
-    this.outputState = new PanelStateStore("output")
     this.registerState = new PanelStateStore("register")
     this.registerHeightState = new PanelStateStore("register-height")
 
@@ -48,13 +43,6 @@ export default class ResizablePanelsController extends Controller {
       direction: "vertical",
       min: 60,
       onResizeEnd: (size) => { this.editorState.save({ size }) }
-    })
-
-    this.outputResizer = new ResizablePanel({
-      panel: this.outputPanelTarget,
-      direction: "vertical",
-      min: 60,
-      onResizeEnd: (size) => { this.outputState.save({ size }) }
     })
 
     this.registerVerticalResizer = new ResizablePanel({
@@ -74,19 +62,6 @@ export default class ResizablePanelsController extends Controller {
       onExpand: () => {
         this.editorPanelTarget.classList.remove("panel-collapsed")
         this.editorState.save({ collapsed: false })
-      }
-    })
-
-    this.outputToggler = new TogglePanel({
-      toggleButton: this.outputToggleTarget,
-      resizeHandle: this.outputResizeTarget,
-      onCollapse: () => {
-        this.outputPanelTarget.classList.add("panel-collapsed")
-        this.outputState.save({ collapsed: true })
-      },
-      onExpand: () => {
-        this.outputPanelTarget.classList.remove("panel-collapsed")
-        this.outputState.save({ collapsed: false })
       }
     })
 
@@ -115,29 +90,21 @@ export default class ResizablePanelsController extends Controller {
   }
 
   toggleEditor(): void { this.editorToggler.toggle() }
-  toggleOutput(): void { this.outputToggler.toggle() }
   toggleRegister(): void { this.registerToggler.toggle() }
 
   startEditorResize(event: MouseEvent): void { this.editorResizer.startResize(event) }
-  startOutputResize(event: MouseEvent): void { this.outputResizer.startResize(event) }
   startRegisterVerticalResize(event: MouseEvent): void { this.registerVerticalResizer.startResize(event) }
 
   private restoreState(): void {
     const editor = this.editorState.load()
-    const output = this.outputState.load()
     const register = this.registerState.load()
 
     if (editor.collapsed) this.editorToggler.collapse()
-    if (output.collapsed) this.outputToggler.collapse()
     if (register.collapsed) this.registerToggler.collapse()
 
     if (editor.size && !editor.collapsed) {
       this.editorPanelTarget.style.height = `${String(editor.size)}px`
     }
-    if (output.size && !output.collapsed) {
-      this.outputPanelTarget.style.height = `${String(output.size)}px`
-    }
-
     const registerHeight = this.registerHeightState.load()
     if (registerHeight.size && !register.collapsed) {
       this.registerPanelTarget.style.height = `${String(registerHeight.size)}px`
