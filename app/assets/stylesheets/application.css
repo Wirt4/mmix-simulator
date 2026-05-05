@@ -1,29 +1,62 @@
 :root {
-  --bg-deep:       #1a1510;
-  --bg-panel:      #231e17;
-  --bg-surface:    #d7d7d7;
-  --bg-input:      #1e1a14;
+  /* ── Base palette (11 colors) ──────────────────────────── */
+  --black:         #1a1510;
+  --charcoal:      #231e17;
+  --surface:       #d7d7d7;
   --border:        #5c4a2e;
-  --border-light:  #7a6340;
-  --text-primary:  #1e1a14;
-  --text-secondary:#b89a4a;
-  --text-on-surface:#5a4520;
-  --text-dim:      #a08848;
-  --text-dim-surface:#6b5530;
-  --text-bright:   #3d2e10;
-  --text-console:  #b1ff7d;
-  --console-shadow:#171717;
+  --gold:          #b89a4a;
+  --brown:         #5a4520;
+  --tan:           #c8b88a;
   --accent:        #d4922a;
-  --accent-glow:   #e8a83020;
-  --error:         #8b2a10;
-  --success:       #2d5a18;
-  --link:          #6d4810;
-  --link-hover:    #5a3800;
-  --gutter-bg:     #211c15;
+  --red:           #8b3a2a;
+  --green-bright:  #b1ff7d;
+  --green-dark:    #2d5a18;
+
+  /* ── Semantic aliases (derived from base 11) ───────────── */
+  --bg-deep:       var(--black);
+  --bg-panel:      var(--charcoal);
+  --bg-surface:    var(--surface);
+  --bg-input:      var(--black);
+  --border-light:  color-mix(in srgb, var(--border), var(--surface) 30%);
+  --text-primary:  var(--black);
+  --text-secondary: var(--gold);
+  --text-on-surface: var(--brown);
+  --text-dim:      color-mix(in srgb, var(--gold), var(--brown) 30%);
+  --text-dim-surface: color-mix(in srgb, var(--brown), var(--black) 20%);
+  --text-bright:   color-mix(in srgb, var(--brown), var(--black) 40%);
+  --text-console:  var(--green-bright);
+  --console-shadow: var(--black);
+  --accent-glow:   color-mix(in srgb, var(--accent) 12%, transparent);
+  --error:         var(--red);
+  --success:       var(--green-dark);
+  --link:          color-mix(in srgb, var(--brown), var(--accent) 30%);
+  --link-hover:    color-mix(in srgb, var(--brown), var(--black) 30%);
+  --gutter-bg:     var(--charcoal);
+
+  /* ── Button derived colors ─────────────────────────────── */
+  --btn-border:        color-mix(in srgb, var(--tan), var(--brown) 30%);
+  --btn-border-bottom: color-mix(in srgb, var(--tan), var(--black) 45%);
+  --btn-hover:         color-mix(in srgb, var(--tan), var(--brown) 15%);
+  --btn-active:        color-mix(in srgb, var(--tan), var(--brown) 20%);
+  --btn-hover-border:  color-mix(in srgb, var(--tan), var(--black) 50%);
+  --btn-active-border: color-mix(in srgb, var(--tan), var(--black) 60%);
+
+  /* ── Alert button derived colors ───────────────────────── */
+  --alert-text:          color-mix(in srgb, var(--red), white 75%);
+  --alert-border:        color-mix(in srgb, var(--red), var(--black) 25%);
+  --alert-border-bottom: color-mix(in srgb, var(--red), var(--black) 55%);
+  --alert-hover:         color-mix(in srgb, var(--red), var(--black) 15%);
+  --alert-hover-border:  color-mix(in srgb, var(--red), var(--black) 40%);
+  --alert-hover-bottom:  color-mix(in srgb, var(--red), var(--black) 65%);
+  --alert-active:        color-mix(in srgb, var(--red), var(--black) 30%);
+
+  /* ── Inset/panel border ────────────────────────────────── */
+  --inset-border:  color-mix(in srgb, var(--charcoal), var(--black) 30%);
+
+  /* ── Tokens ────────────────────────────────────────────── */
   --font-mono:     "IBM Plex Mono", "SF Mono", "Cascadia Mono", "Fira Mono", Menlo, Consolas, monospace;
   --font-display:  "IBM Plex Mono", monospace;
   --radius:        3px;
-  --red: #8b3a2a;
 }
 
 *, *::before, *::after {
@@ -94,20 +127,20 @@ input[type="submit"],
 .btn--tactile {
   background: var(--bg-surface);
   color: var(--text-primary);
-  border: 1px solid #a89868;
-  border-bottom: 3px solid #8a7a50;
+  border: 1px solid var(--btn-border);
+  border-bottom: 3px solid var(--btn-border-bottom);
   box-shadow:
     0 2px 3px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 .btn--tactile:hover {
-  background: #b8a87a;
-  border-color: #9a8a58;
-  border-bottom-color: #7a6a42;
+  background: var(--btn-hover);
+  border-color: var(--btn-hover-border);
+  border-bottom-color: var(--btn-active-border);
   color: var(--text-primary);
 }
 .btn--tactile:active {
-  background: #b0a070;
+  background: var(--btn-active);
   border-bottom-width: 1px;
   transform: translateY(2px);
   box-shadow:
@@ -117,22 +150,22 @@ input[type="submit"],
 
 /* ── Tactile: red variant ──────────────────────── */
 .btn--tactile--alert {
-  background: #8b3a2a;
-  color: #f0d8d0;
-  border: 1px solid #6e2e20;
-  border-bottom: 3px solid #4e1e14;
+  background: var(--red);
+  color: var(--alert-text);
+  border: 1px solid var(--alert-border);
+  border-bottom: 3px solid var(--alert-border-bottom);
   box-shadow:
     0 2px 3px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 .btn--tactile--alert:hover {
-  background: #7a3020;
-  border-color: #5e2418;
-  border-bottom-color: #3e1410;
-  color: #f0d8d0;
+  background: var(--alert-hover);
+  border-color: var(--alert-hover-border);
+  border-bottom-color: var(--alert-hover-bottom);
+  color: var(--alert-text);
 }
 .btn--tactile--alert:active {
-  background: #6a2818;
+  background: var(--alert-active);
   border-bottom-width: 1px;
   transform: translateY(2px);
   box-shadow:
@@ -252,7 +285,7 @@ tr:hover td {
   background: var(--bg-panel);
   border-radius: 4px;
   margin: 0 8px 8px;
-  border: 2px solid #3a3020;
+  border: 2px solid var(--inset-border);
   box-shadow:
     inset 0 2px 8px rgba(0, 0, 0, 0.6),
     inset 0 0 20px rgba(0, 0, 0, 0.3),
@@ -354,28 +387,28 @@ tr:hover td {
 
 /* Beige tactile buttons on grey surface areas (not alert variants) */
 .btn--tactile:not(.btn--tactile--alert) {
-  background: #c8b88a;
-  border: 1px solid #a89868;
-  border-bottom: 3px solid #8a7a50;
+  background: var(--tan);
+  border: 1px solid var(--btn-border);
+  border-bottom: 3px solid var(--btn-border-bottom);
 }
 .btn--tactile:not(.btn--tactile--alert):hover {
-  background: #b8a87a;
+  background: var(--btn-hover);
 }
 .btn--tactile:not(.btn--tactile--alert):active {
-  background: #b0a070;
+  background: var(--btn-active);
 }
 
 /* Keep nav buttons grey (on red background) */
 nav .btn--tactile:not(.btn--tactile--alert) {
   background: var(--bg-surface);
-  border: 1px solid #a89868;
-  border-bottom: 3px solid #8a7a50;
+  border: 1px solid var(--btn-border);
+  border-bottom: 3px solid var(--btn-border-bottom);
 }
 nav .btn--tactile:not(.btn--tactile--alert):hover {
-  background: #b8a87a;
+  background: var(--btn-hover);
 }
 nav .btn--tactile:not(.btn--tactile--alert):active {
-  background: #b0a070;
+  background: var(--btn-active);
 }
 
 .editor-actions button,
@@ -476,7 +509,7 @@ form > div > input[type="password"] {
   font-size: 14px;
   line-height: 1.5;
   padding: 12px 16px;
-  border: 2px solid #3a3020;
+  border: 2px solid var(--inset-border);
   border-radius: 4px;
   box-shadow:
     inset 0 2px 8px rgba(0, 0, 0, 0.6),
@@ -558,7 +591,7 @@ form > div > input[type="password"] {
 
 /* ── Register subpanels & rows ────────────────────────── */
 .register-subpanel {
-  border-bottom: 1px solid #3a3020;
+  border-bottom: 1px solid var(--inset-border);
 }
 
 .register-subpanel:last-child {
