@@ -1,16 +1,13 @@
 <%= form_with model: mmixal_program do |form|%>
 <div class="ide-layout" data-controller="ide-facade">
   <%= form.hidden_field :title %>
-
-  <div class="ide-content" data-resizable-panels-target="ideContent">
-    <div class="ide-main" data-resizable-panels-target="ideMain">
+  <div class="ide-content">
+    <div class="ide-main">
       <%= render "input", form: form %>
       <%= render "output" %>
     </div>
-
     <%= render "registers" %>
   </div>
-
   <div class="editor-actions ide-layout-actions">
     <%= button_tag "Run", type: "button", class: "btn--tactile btn--tactile--alert", data: {ide_facade_target:"runButton", action: "click->ide-facade#runUserProgram"}%>
     <%= form.submit "Save", class: "btn--tactile" %>

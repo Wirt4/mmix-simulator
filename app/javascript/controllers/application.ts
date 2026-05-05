@@ -1,5 +1,4 @@
 import { Application } from "@hotwired/stimulus"
-import "./application.interface"
 
 const application = Application.start()
 
