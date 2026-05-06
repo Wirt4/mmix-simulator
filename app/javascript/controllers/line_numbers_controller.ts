@@ -9,15 +9,18 @@ export default class LineNumbersController extends Controller {
 
   private formatter!: Formatter
 
+  /** Creates the formatter and renders initial line numbers on connect. */
   connect() {
     this.formatter = new Formatter(this.textareaTarget, this.lineNumbersTarget)
     this.formatter.updateLineNumbers()
   }
 
+  /** Recalculates and renders line numbers to match the current textarea content. */
   updateLineNumbers(): void {
     this.formatter.updateLineNumbers()
   }
 
+  /** Synchronizes the line number gutter scroll position with the textarea. */
   syncScroll(): void {
     this.formatter.syncScroll()
   }

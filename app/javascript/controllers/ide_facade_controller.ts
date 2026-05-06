@@ -18,6 +18,7 @@ export default class IDEFacadeController extends Controller {
   private simulator!: Simulator
   private generalRegistersRendered = false
 
+  /** Initializes the WASM module adapter, simulator, and register display on connect. */
   connect(): void {
     // initialize the simulator
     this.runButtonTarget.disabled = true
@@ -38,11 +39,7 @@ export default class IDEFacadeController extends Controller {
 
   }
 
-  /**
-    handleKeydown(event: KeyboardEvent): void {
-      this.formatter.handleKeydown(event)
-    }
-  */
+  /** Delegates program execution to the simulator. */
   runUserProgram(): void {
     this.simulator.runUserProgram()
   }

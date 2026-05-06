@@ -16,6 +16,7 @@ export default class ModuleAdapter implements IModuleAdapter {
     this._module = module
   }
 
+  /** Assembles MMIXAL source code by writing it into the WASM heap and invoking the assembler. */
   public assembleMMIXAL(sourceCode: string): boolean {
     if (sourceCode.length === 0) {
       return true
@@ -52,6 +53,7 @@ export default class ModuleAdapter implements IModuleAdapter {
     return result === 0
   }
 
+  /** Reads and decodes the simulator's stdout buffer from the WASM heap. */
   public getStdOut(): string {
     const ptr = this._module._get_stdout_pointer()
 
@@ -70,6 +72,7 @@ export default class ModuleAdapter implements IModuleAdapter {
     return this._decode_and_return(ptr, len)
   }
 
+  /** Reads and decodes the simulator's stderr buffer from the WASM heap. */
   public getStdErr(): string {
     const ptr = this._module._get_stderr_pointer()
 
@@ -88,6 +91,7 @@ export default class ModuleAdapter implements IModuleAdapter {
     return this._decode_and_return(ptr, len)
   }
 
+  /** Initializes the MMIX simulator state via the WASM module. */
   public intitializeMMIX(): void {
     const initialized = this._module._mmix_initialize_simulator();
 
@@ -96,6 +100,7 @@ export default class ModuleAdapter implements IModuleAdapter {
     }
   }
 
+  /** Tears down the MMIX simulator and releases WASM resources. */
   public finalizeMMIX(): void {
     const finalized = this._module._mmix_finalize_simulator();
 
@@ -104,10 +109,12 @@ export default class ModuleAdapter implements IModuleAdapter {
     }
   }
 
+  /** Returns true if the MMIX simulator has halted execution. */
   public isHalted(): boolean {
     return this._module._is_halted() !== 0;
   }
 
+  /** Executes the given number of MMIX instructions. */
   public performInstructions(instructions: number): void {
     this._module._mmix_perform_instructions(instructions);
   }

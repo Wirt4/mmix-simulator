@@ -15,6 +15,7 @@ export default class Simulator implements ISimulator {
     this._moduleAdapter = moduleAdapter
   }
 
+  /** Assembles and executes the user's MMIXAL program, writing output to the output textarea. */
   public runUserProgram(): void {
     const successfullyAssembled = this._moduleAdapter.assembleMMIXAL(this._inText.value)
     if (!successfullyAssembled) {
@@ -27,12 +28,14 @@ export default class Simulator implements ISimulator {
     this._outText.value = this.simulateWithTimeout(timeout, instructionBatch)
   }
 
+  /** Returns the current hex value of the given register. */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public getRegisterValue(register: string): string {
     //stub
     return "0x0000000000000000"
   }
 
+  /** The list of MMIX special register names. */
   get specialRegisters(): string[] {
     return [
       "rA", "rB", "rC", "rD", "rE", "rF", "rG", "rH",
