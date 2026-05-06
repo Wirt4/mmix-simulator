@@ -24,6 +24,24 @@ export default class Simulator implements ISimulator {
     this._outText.value = this.simulateWithTimeout(timeout, instructionBatch)
   }
 
+  public getRegisterValue(register: string): string {
+    //stub
+    return "0x0000000000000000"
+  }
+
+  get specialRegisters(): Array<string> {
+    return [
+      "rA", "rB", "rC", "rD", "rE", "rF", "rG", "rH",
+      "rI", "rJ", "rK", "rL", "rM", "rN", "rO", "rP",
+      "rQ", "rR", "rS", "rT", "rTT", "rU", "rV", "rW",
+      "rX", "rY", "rZ", "rBB", "rWW", "rXX", "rYY", "rZZ"
+    ]
+  }
+
+  get generalRegisterCount(): number {
+    return 256
+  }
+
   private simulateWithTimeout(timeout: number, instructionsPerInterval: number): string {
     let programOutputs = "";
 
