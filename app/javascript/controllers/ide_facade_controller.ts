@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { assert } from '../utils'
 import Simulator from "../simulator/simulator"
 import moduleAdapterFactory from "../moduleAdapter/factory"
 
@@ -15,6 +16,7 @@ export default class IDEFacadeController extends Controller {
   declare groupSelectTarget: HTMLSelectElement
 
   private simulator!: Simulator
+  private generalRegistersRendered = false
 
   connect(): void {
     // initialize the simulator
@@ -46,68 +48,88 @@ export default class IDEFacadeController extends Controller {
   }
 
   /**
-  * information hidden
+  * information hidden : the reorganization of display between groups of general registers
   * inputs: none
   * outputs:none
-  * preconditions
-  * postconditions
+  * preconditions: General registers have been rendered
+* General registers are formatted with ids of the form "gp-group-(index)" and all have the class of "register-group"
+  * postconditions: the selected group is displayed
   **/
-  switchGroup(): void {
+  switchRegisterTab(): void {
+    // check preconditions
+    if (!this.generalRegistersRendered) {
+      throw new Error("general registers not rendered")
+    }
+    // get index of group to display from the dropdown widget
     const selected = this.groupSelectTarget.value
+    // hide all register groups
     this.generalContainerTarget.querySelectorAll<HTMLElement>(".register-group").forEach((g) => {
+      //NOTE: can this be iterated through cleaner??
       g.style.display = "none"
     })
+    //unhide the selected group
     const target = document.getElementById(`gp-group-${selected}`)
     if (target) target.style.display = "block"
   }
 
-  /**
-  * information hidden
-  * inputs: none
-  * outputs: none
-  * preconditions
-  * postconditions
-  */
   private renderSpecialRegisters(): void {
-    this.specialContainerTarget.innerHTML = this.simulator.specialRegisters.map((reg) =>
-      `<div class="register-row">
-        <span class="register-name">${reg}</span>
-        <span class="register-hex">${this.simulator.getRegisterValue(reg)}</span>
-      </div>`
-    ).join("")
+    this.specialContainerTarget.innerHTML = this.simulator.specialRegisters.map((reg) => this.createRegisterDiv(reg)).join("")
   }
 
-  /*
-  *information hidden
-  * inputs: none
-  * outputs: none
-  * preconditions:
-  * postconditions:
-  * */
   private renderGeneralRegisters(): void {
-    const groupCount = this.simulator.generalRegisterCount / GROUP_SIZE
-    const options: string[] = []
-    const groups: string[] = []
+    this.groupSelectTarget.innerHTML = this.renderDropDown(GROUP_SIZE)
+    this.generalContainerTarget.innerHTML = this.renderRegisters(GROUP_SIZE)
+    this.generalRegistersRendered = true
+  }
 
-    for (let group = 0; group < groupCount; group++) {
-      const start = group * GROUP_SIZE
-      const end = start + GROUP_SIZE - 1
-      options.push(`<option value="${group}">$${start}\u2013$${end}</option>`)
+  private renderDropDown(groupSize: number): string {
+    assert(groupSize > 0 && Number.isInteger(groupSize), "groupSize must be a positive integer")
+    if (groupSize <= 0) { return "" }
+    const groupCount = Math.floor(this.simulator.generalRegisterCount / groupSize)
+    const arr = new Array<string>(groupCount)
+    for (let i = 0; i < groupCount; i++) {
+      // -- derive the start and end values for the label
+      const start = i * groupSize
+      const end = start + groupSize - 1
+      arr[i] = `<option value="${i.toString()}">$${start.toString()}\u2013$${end.toString()}</option>`
+    }
+    return arr.join("")
+  }
 
-      const rows: string[] = []
-      for (let i = 0; i < GROUP_SIZE; i++) {
-        rows.push(
-          `<div class="register-row">
-            <span class="register-name">$${start + i}</span>
-            <span class="register-hex">${this.simulator.getRegisterValue(new String(start + i))}</span>
-          </div>`
-        )
-      }
-      const display = group === 0 ? "" : " style=\"display: none;\""
-      groups.push(`<div id="gp-group-${group}" class="register-group"${display}>${rows.join("")}</div>`)
+  private renderRegisters(groupSize: number): string {
+    assert(groupSize > 0 && Number.isInteger(groupSize), "groupSize must be a positive integer")
+    if (groupSize <= 0) {
+      return ""
     }
 
-    this.groupSelectTarget.innerHTML = options.join("")
-    this.generalContainerTarget.innerHTML = groups.join("")
+    //derive the group count
+    const regCount = this.simulator.generalRegisterCount
+    assert(Number.isInteger(regCount), "regCount must be a non-negative integer")
+
+    const groupCount = Math.floor(regCount / groupSize)
+    const arr = new Array<string>(this.simulator.generalRegisterCount + (2 * groupCount))
+    arr[0] = '<div id="gp-group-0" class="register-group">'
+    let p = 1;
+
+    for (let i = 0; i < regCount; i++) {
+      // -- if it's the start of a new group and index isn't zero
+      if (i % groupSize === 0 && i != 0) {
+        arr[p] = `</div><div id="gp-group-${(i / groupSize).toString()}" class="register-group" style="display: none;">`
+        p++;
+      }
+      arr[p] = this.createRegisterDiv("$" + i.toString())
+      p++
+      // if is the last register, append a closing div for a group
+      if (i === regCount - 1) {
+        arr[p] = "</div>"
+      }
+    }
+
+    return arr.join("")
+  }
+
+  private createRegisterDiv(reg: string): string {
+    const val = this.simulator.getRegisterValue(reg)
+    return `<div class="register-row"><span class="register-name">${reg}</span><span class="register-hex">${val}</span></div>`
   }
 }

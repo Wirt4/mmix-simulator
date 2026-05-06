@@ -1,6 +1,6 @@
 export interface ISimulator {
   runUserProgram(): void
-  specialRegisters: Array<string>
+  specialRegisters: string[]
   generalRegisterCount: number
   getRegisterValue(register: string): string
 }
