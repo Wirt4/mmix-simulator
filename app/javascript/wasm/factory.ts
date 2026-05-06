@@ -62,6 +62,7 @@ function resolveFilepath(path: string): string {
 	return path.endsWith('.wasm') || path.length === 0 ? '/mmix.wasm' : path
 }
 
+/** Loads the MMIX WASM script and instantiates the module. Returns null on failure. */
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export default async function moduleFactory(): Promise<MainModule | null> {
 	if (typeof createMmixModule === 'undefined') {

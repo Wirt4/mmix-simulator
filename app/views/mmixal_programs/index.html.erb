@@ -3,12 +3,12 @@
   <% @mmixal_programs.each do |program| %>
     <tr>
       <td><%= program.title %></td>
-      <td><%= link_to mmixal_program_path(program) do %><button>Open</button><% end %></td>
-      <td><%= button_to "Delete", mmixal_program_path(program), method: :delete %></td>
+      <td><%= link_to mmixal_program_path(program) do %><button class="btn--tactile">Open</button><% end %></td>
+      <td><%= button_to "Delete", mmixal_program_path(program), method: :delete, class: "btn--tactile" %></td>
     </tr>
   <% end %>
 </table>
 
 <%= form_with url: mmixal_programs_path do |f| %>
-  <button>Create New</button>
+  <button class="btn--tactile">Create New</button>
 <% end %>

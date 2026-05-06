@@ -25,9 +25,9 @@
     "url": "https://github.com/Wirt4/mmix-simulator/issues"
   },
   "homepage": "https://github.com/Wirt4/mmix-simulator#readme",
-  "engines":  {
+  "engines": {
     "node": ">=20.19.2",
-    "npm": ">=9.2.0" 
+    "npm": ">=9.2.0"
   },
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",
@@ -36,7 +36,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^22.0.0",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.25.12",
     "eslint": "^10.2.0",
     "jsdom": "^28.1.0",
     "typescript": "^5.9.3",

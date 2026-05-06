@@ -40,10 +40,10 @@ export default class Editor implements IFormatter {
    */
   handleKeydown(event: KeyboardEvent): void {
     if (event.key === "Tab") {
-      const numSpaces = 2
+      const numSpaces = 1
       event.preventDefault()
       const selection: SelectionRange = { start: this.textarea.selectionStart, end: this.textarea.selectionEnd }
-      this._insertChars(selection, numSpaces, " ")
+      this._insertChars(selection, numSpaces, "\t")
       this._advanceSelection(selection.start, numSpaces)
       this.updateLineNumbers()
     }

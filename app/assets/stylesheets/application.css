@@ -1,25 +1,59 @@
 :root {
-  --bg-deep:       #1a1510;
-  --bg-panel:      #231e17;
-  --bg-surface:    #d7d7d7;
-  --bg-input:      #1e1a14;
+  /* ── Base palette (11 colors) ──────────────────────────── */
+  --black:         #1a1510;
+  --charcoal:      #231e17;
+  --surface:       #d7d7d7;
   --border:        #5c4a2e;
-  --border-light:  #7a6340;
-  --text-primary:  #1e1a14;
-  --text-secondary:#b89a4a;
-  --text-on-surface:#5a4520;
-  --text-dim:      #a08848;
-  --text-dim-surface:#6b5530;
-  --text-bright:   #3d2e10;
-  --text-console:  #b1ff7d;
-  --console-shadow:#171717;
+  --gold:          #b89a4a;
+  --brown:         #5a4520;
+  --tan:           #c8b88a;
   --accent:        #d4922a;
-  --accent-glow:   #e8a83020;
-  --error:         #8b2a10;
-  --success:       #2d5a18;
-  --link:          #6d4810;
-  --link-hover:    #5a3800;
-  --gutter-bg:     #211c15;
+  --red:           #8b3a2a;
+  --green-bright:  #b1ff7d;
+  --green-dark:    #2d5a18;
+
+  /* ── Semantic aliases (derived from base 11) ───────────── */
+  --bg-deep:       var(--black);
+  --bg-panel:      var(--charcoal);
+  --bg-surface:    var(--surface);
+  --bg-input:      var(--black);
+  --border-light:  color-mix(in srgb, var(--border), var(--surface) 30%);
+  --text-primary:  var(--black);
+  --text-secondary: var(--gold);
+  --text-on-surface: var(--brown);
+  --text-dim:      color-mix(in srgb, var(--gold), var(--brown) 30%);
+  --text-dim-surface: color-mix(in srgb, var(--brown), var(--black) 20%);
+  --text-bright:   color-mix(in srgb, var(--brown), var(--black) 40%);
+  --text-console:  var(--green-bright);
+  --console-shadow: var(--black);
+  --accent-glow:   color-mix(in srgb, var(--accent) 12%, transparent);
+  --error:         var(--red);
+  --success:       var(--green-dark);
+  --link:          color-mix(in srgb, var(--brown), var(--accent) 30%);
+  --link-hover:    color-mix(in srgb, var(--brown), var(--black) 30%);
+  --gutter-bg:     var(--charcoal);
+
+  /* ── Button derived colors ─────────────────────────────── */
+  --btn-border:        color-mix(in srgb, var(--tan), var(--brown) 30%);
+  --btn-border-bottom: color-mix(in srgb, var(--tan), var(--black) 45%);
+  --btn-hover:         color-mix(in srgb, var(--tan), var(--brown) 15%);
+  --btn-active:        color-mix(in srgb, var(--tan), var(--brown) 20%);
+  --btn-hover-border:  color-mix(in srgb, var(--tan), var(--black) 50%);
+  --btn-active-border: color-mix(in srgb, var(--tan), var(--black) 60%);
+
+  /* ── Alert button derived colors ───────────────────────── */
+  --alert-text:          color-mix(in srgb, var(--red), white 75%);
+  --alert-border:        color-mix(in srgb, var(--red), var(--black) 25%);
+  --alert-border-bottom: color-mix(in srgb, var(--red), var(--black) 55%);
+  --alert-hover:         color-mix(in srgb, var(--red), var(--black) 15%);
+  --alert-hover-border:  color-mix(in srgb, var(--red), var(--black) 40%);
+  --alert-hover-bottom:  color-mix(in srgb, var(--red), var(--black) 65%);
+  --alert-active:        color-mix(in srgb, var(--red), var(--black) 30%);
+
+  /* ── Inset/panel border ────────────────────────────────── */
+  --inset-border:  color-mix(in srgb, var(--charcoal), var(--black) 30%);
+
+  /* ── Tokens ────────────────────────────────────────────── */
   --font-mono:     "IBM Plex Mono", "SF Mono", "Cascadia Mono", "Fira Mono", Menlo, Consolas, monospace;
   --font-display:  "IBM Plex Mono", monospace;
   --radius:        3px;
@@ -43,6 +77,7 @@ a {
   color: var(--link);
   text-decoration: none;
 }
+
 a:hover {
   color: var(--link-hover);
   text-decoration: underline;
@@ -65,11 +100,11 @@ nav {
   justify-content: space-between;
   padding: 0.5em 1em;
   margin: -1.5em -1.5em 1.5em -1.5em;
-  background: var(--bg-panel);
+  background: var(--red);
   border-bottom: 2px solid var(--border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
+/* ── Button base: typography, cursor, transition ──────── */
 button,
 input[type="submit"],
 .btn {
@@ -78,31 +113,34 @@ input[type="submit"],
   font-size: 13px;
   line-height: 1.4;
   padding: 6px 16px;
-  background: #c4b48a;
-  color: var(--text-primary);
-  border: 1px solid #a89868;
-  border-bottom: 3px solid #8a7a50;
+  border: none;
   border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
   cursor: pointer;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  transition: background 0.1s, border-color 0.1s, box-shadow 0.1s, transform 0.1s;
+}
+
+/* ── Tactile: raised 3D pressable appearance ──────────── */
+.btn--tactile {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--btn-border);
+  border-bottom: 3px solid var(--btn-border-bottom);
   box-shadow:
     0 2px 3px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  transition: background 0.1s, border-color 0.1s, box-shadow 0.1s, transform 0.1s;
 }
-/*General purpose buttons*/
-button:hover,
-input[type="submit"]:hover,
-.btn:hover {
-  background: #b8a87a;
-  border-color: #9a8a58;
-  border-bottom-color: #7a6a42;
+.btn--tactile:hover {
+  background: var(--btn-hover);
+  border-color: var(--btn-hover-border);
+  border-bottom-color: var(--btn-active-border);
   color: var(--text-primary);
 }
-button:active,
-input[type="submit"]:active {
-  background: #b0a070;
+.btn--tactile:active {
+  background: var(--btn-active);
   border-bottom-width: 1px;
   transform: translateY(2px);
   box-shadow:
@@ -110,24 +148,24 @@ input[type="submit"]:active {
     inset 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-/* ── Run button (red) ─────────────────────────────────── */
-button[data-ide-facade-target="runButton"] {
-  background: #8b3a2a;
-  color: #f0d8d0;
-  border: 1px solid #6e2e20;
-  border-bottom: 3px solid #4e1e14;
+/* ── Tactile: red variant ──────────────────────── */
+.btn--tactile--alert {
+  background: var(--red);
+  color: var(--alert-text);
+  border: 1px solid var(--alert-border);
+  border-bottom: 3px solid var(--alert-border-bottom);
   box-shadow:
     0 2px 3px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
-button[data-ide-facade-target="runButton"]:hover {
-  background: #7a3020;
-  border-color: #5e2418;
-  border-bottom-color: #3e1410;
-  color: #f0d8d0;
+.btn--tactile--alert:hover {
+  background: var(--alert-hover);
+  border-color: var(--alert-hover-border);
+  border-bottom-color: var(--alert-hover-bottom);
+  color: var(--alert-text);
 }
-button[data-ide-facade-target="runButton"]:active {
-  background: #6a2818;
+.btn--tactile--alert:active {
+  background: var(--alert-active);
   border-bottom-width: 1px;
   transform: translateY(2px);
   box-shadow:
@@ -157,13 +195,11 @@ textarea:focus {
   box-shadow: 0 0 0 1px var(--accent-glow);
 }
 
-.flash-alert,
 [style*="color:red"] {
   color: var(--error) !important;
   font-weight: 600;
   padding: 0.4em 0;
 }
-.flash-notice,
 [style*="color:green"] {
   color: var(--success) !important;
   font-weight: 600;
@@ -207,23 +243,9 @@ tr:hover td {
 .output-container {
   display: flex;
   flex-direction: column;
-  margin-top: 1em;
   background: var(--bg-surface);
 }
 
-/* Embossed machine labels */
-.editor-header,
-.output-header {
-  padding: 8px 12px;
-  background: var(--bg-surface);
-  color: var(--text-on-surface);
-  font-size: 18px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
-  border: none;
-}
 
 .login-label {
   background: var(--bg-surface);
@@ -236,19 +258,13 @@ tr:hover td {
   border: none;
 }
 
-.editor-footer {
-  padding: 6px 12px;
-  background: var(--bg-surface);
-  border: none;
-}
-
 .editor-body,
 .output-body {
   display: flex;
   background: var(--bg-panel);
   border-radius: 4px;
-  margin: 0 8px 8px;
-  border: 2px solid #3a3020;
+  margin: 0 8px 0;
+  border: 2px solid var(--inset-border);
   box-shadow:
     inset 0 2px 8px rgba(0, 0, 0, 0.6),
     inset 0 0 20px rgba(0, 0, 0, 0.3),
@@ -256,23 +272,26 @@ tr:hover td {
   overflow: hidden;
 }
 
-.editor-form input,
-.editor-form textarea {
-  border-width: 0;
-  background: transparent;
+.editor-container {
+  height: 394px;
 }
 
-.editor-title input {
-  color: var(--text-on-surface);
-  font-weight: 700;
-  font-size: 18px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+.editor-body {
+  flex: 1;
+  min-height: 0;
 }
 
-.line-numbers,
-.output-gutter {
+.output-container {
+  height: 300px;
+}
+
+.output-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.line-numbers {
   font-family: var(--font-mono);
   font-size: 14px;
   line-height: 1.5;
@@ -282,7 +301,8 @@ tr:hover td {
   user-select: none;
   min-width: 3em;
   background: transparent;
-  color: var(--text-console);
+  color: var(--text-dim);
+  overflow: hidden;
 }
 
 .line-numbers span {
@@ -301,7 +321,6 @@ tr:hover td {
   resize: none;
   tab-size: 2;
   white-space: pre;
-  min-height: 20em;
   background: var(--bg-panel);
   color: var(--text-console);
   caret-color: var(--accent);
@@ -311,22 +330,36 @@ tr:hover td {
   color: var(--text-console);
 }
 
-.output-pre {
-  flex: 1;
-  padding: 8px;
-  margin: 0;
-  white-space: pre;
-  min-height: 20em;
-  color: var(--text-console);
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
 .editor-actions {
   display: flex;
   gap: 8px;
   margin: 8px 8px 0;
+}
+
+/* Beige tactile buttons on grey surface areas (not alert variants) */
+.btn--tactile:not(.btn--tactile--alert) {
+  background: var(--tan);
+  border: 1px solid var(--btn-border);
+  border-bottom: 3px solid var(--btn-border-bottom);
+}
+.btn--tactile:not(.btn--tactile--alert):hover {
+  background: var(--btn-hover);
+}
+.btn--tactile:not(.btn--tactile--alert):active {
+  background: var(--btn-active);
+}
+
+/* Keep nav buttons grey (on red background) */
+nav .btn--tactile:not(.btn--tactile--alert) {
+  background: var(--bg-surface);
+  border: 1px solid var(--btn-border);
+  border-bottom: 3px solid var(--btn-border-bottom);
+}
+nav .btn--tactile:not(.btn--tactile--alert):hover {
+  background: var(--btn-hover);
+}
+nav .btn--tactile:not(.btn--tactile--alert):active {
+  background: var(--btn-active);
 }
 
 .editor-actions button,
@@ -427,7 +460,7 @@ form > div > input[type="password"] {
   font-size: 14px;
   line-height: 1.5;
   padding: 12px 16px;
-  border: 2px solid #3a3020;
+  border: 2px solid var(--inset-border);
   border-radius: 4px;
   box-shadow:
     inset 0 2px 8px rgba(0, 0, 0, 0.6),
@@ -435,3 +468,157 @@ form > div > input[type="password"] {
     0 1px 0 rgba(255, 255, 255, 0.15);
   overflow-x: auto;
 }
+
+/* ── IDE grid layout ───────────────────────────────────── */
+.ide-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  grid-template-rows: auto 1fr auto;
+}
+
+.ide-content {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  position: relative;
+  overflow: hidden;
+}
+
+.ide-main {
+  margin-right: 296px;
+}
+
+.register-panel {
+  position: absolute;
+  top: 0;
+  right: 8px;
+  width: 280px;
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-panel);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.6),
+    inset 0 0 20px rgba(0, 0, 0, 0.3),
+    0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.register-panel-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.ide-layout-actions {
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+
+/* ── Register header ──────────────────────────────────── */
+.register-header {
+  padding: 8px 12px;
+  background: var(--bg-surface);
+  color: var(--text-on-surface);
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: none;
+}
+
+/* ── Register subpanels & rows ────────────────────────── */
+.register-subpanel {
+  border-bottom: 1px solid var(--inset-border);
+}
+
+.register-subpanel:last-child {
+  border-bottom: none;
+}
+
+.register-subpanel-header {
+  padding: 6px 12px;
+  color: var(--text-console);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.register-group-controls {
+  padding: 0 12px 6px;
+}
+
+.register-group-select {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--bg-input);
+  color: var(--text-console);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px 6px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.register-group-select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.register-group-container {
+  padding: 0 8px 8px;
+}
+
+.register-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 1px 4px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.register-row:hover {
+  background: rgba(212, 146, 42, 0.1);
+}
+
+.register-name {
+  width: 3em;
+  flex-shrink: 0;
+  color: var(--text-dim);
+  font-weight: 600;
+  text-align: right;
+}
+
+.register-hex {
+  color: var(--accent);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--bg-surface);
+  color: var(--text-on-surface);
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: none;
+}
+
+.panel-header-label {
+  flex: 1;
+}
+
+

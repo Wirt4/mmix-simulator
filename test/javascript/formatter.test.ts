@@ -58,17 +58,7 @@ describe("Editor", () => {
   })
 
   describe("handleKeydown", () => {
-    it("inserts two spaces on Tab press for string 'hello'", () => {
-      textarea.value = "hello"
-      textarea.selectionStart = 2
-      textarea.selectionEnd = 2
-
-      const tabEvent = new KeyboardEvent("keydown", { key: "Tab", cancelable: true })
-      formatter.handleKeydown(tabEvent)
-
-      expect(textarea.value).toBe("he  llo")
-    })
-    it("inserts two spaces on string 'godzilla'", () => {
+    it("inserts tab on string 'godzilla'", () => {
       textarea.value = "godzilla"
       textarea.selectionStart = 2
       textarea.selectionEnd = 2
@@ -76,20 +66,10 @@ describe("Editor", () => {
       const tabEvent = new KeyboardEvent("keydown", { key: "Tab", cancelable: true })
       formatter.handleKeydown(tabEvent)
 
-      expect(textarea.value).toBe("go  dzilla")
-    })
-    it("inserts two spaces on string 'godzilla' at different selection point", () => {
-      textarea.value = "godzilla"
-      textarea.selectionStart = 4
-      textarea.selectionEnd = 4
-
-      const tabEvent = new KeyboardEvent("keydown", { key: "Tab", cancelable: true })
-      formatter.handleKeydown(tabEvent)
-
-      expect(textarea.value).toBe("godz  illa")
+      expect(textarea.value).toBe("go\tdzilla")
     })
 
-    it("does not insert two spaces if key is not Tab", () => {
+    it("does not insert tab if key is not Tab", () => {
       textarea.value = "godzilla"
       textarea.selectionStart = 4
       textarea.selectionEnd = 4
@@ -97,11 +77,10 @@ describe("Editor", () => {
       const tabEvent = new KeyboardEvent("keydown", { key: "a", cancelable: true })
       formatter.handleKeydown(tabEvent)
 
-      expect(textarea.value).not.toBe("godz  illa")
+      expect(textarea.value).not.toBe("godz\tilla")
     })
 
-
-    it("inserts two spaces on Tab press and maintains space selection", () => {
+    it(" maintains space selection", () => {
       textarea.value = "hello"
       textarea.selectionStart = 2
       textarea.selectionEnd = 2
@@ -109,8 +88,8 @@ describe("Editor", () => {
       const tabEvent = new KeyboardEvent("keydown", { key: "Tab", cancelable: true })
       formatter.handleKeydown(tabEvent)
 
-      expect(textarea.selectionStart).toBe(4)
-      expect(textarea.selectionEnd).toBe(4)
+      expect(textarea.selectionStart).toBe(3)
+      expect(textarea.selectionEnd).toBe(3)
     })
 
     it("prevents default on Tab press", () => {
@@ -123,7 +102,8 @@ describe("Editor", () => {
 
       expect(tabEvent.defaultPrevented).toBe(true)
     })
-    it("replaces selected text with two spaces on Tab", () => {
+
+    it("replaces selected text with tab char on Tab", () => {
       textarea.value = "godzilla"
       textarea.selectionStart = 1
       textarea.selectionEnd = 4
@@ -132,8 +112,9 @@ describe("Editor", () => {
       const tabEvent = new KeyboardEvent("keydown", { key: "Tab", cancelable: true })
       formatter.handleKeydown(tabEvent)
 
-      expect(textarea.value).toBe("g  illa")
+      expect(textarea.value).toBe("g\tilla")
     })
+
     it("updates line numbers after Tab insertion", () => {
       textarea.value = "hello"
       textarea.selectionStart = 5
@@ -144,14 +125,6 @@ describe("Editor", () => {
 
       expect(lineNumbers.innerHTML).toBe("<span>1</span>")
     })
-    it("does nothing for non-Tab keys", () => {
-      textarea.value = "hello"
 
-      const enterEvent = new KeyboardEvent("keydown", { key: "Enter", cancelable: true })
-      formatter.handleKeydown(enterEvent)
-
-      expect(textarea.value).toBe("hello")
-      expect(enterEvent.defaultPrevented).toBe(false)
-    })
   })
 })

@@ -6,12 +6,16 @@ export default class Simulator implements ISimulator {
   private _outText: HTMLTextAreaElement
   private _moduleAdapter: IModuleAdapter
 
+  //for linting now, but this information may very well belong to the wasm module
+  readonly generalRegisterCount = 256
+
   constructor(inText: HTMLTextAreaElement, outText: HTMLTextAreaElement, moduleAdapter: IModuleAdapter) {
     this._inText = inText
     this._outText = outText
     this._moduleAdapter = moduleAdapter
   }
 
+  /** Assembles and executes the user's MMIXAL program, writing output to the output textarea. */
   public runUserProgram(): void {
     const successfullyAssembled = this._moduleAdapter.assembleMMIXAL(this._inText.value)
     if (!successfullyAssembled) {
@@ -22,6 +26,23 @@ export default class Simulator implements ISimulator {
     const timeout = 800;
     const instructionBatch = 1000;
     this._outText.value = this.simulateWithTimeout(timeout, instructionBatch)
+  }
+
+  /** Returns the current hex value of the given register. */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public getRegisterValue(register: string): string {
+    //stub
+    return "0x0000000000000000"
+  }
+
+  /** The list of MMIX special register names. */
+  get specialRegisters(): string[] {
+    return [
+      "rA", "rB", "rC", "rD", "rE", "rF", "rG", "rH",
+      "rI", "rJ", "rK", "rL", "rM", "rN", "rO", "rP",
+      "rQ", "rR", "rS", "rT", "rTT", "rU", "rV", "rW",
+      "rX", "rY", "rZ", "rBB", "rWW", "rXX", "rYY", "rZZ"
+    ]
   }
 
   private simulateWithTimeout(timeout: number, instructionsPerInterval: number): string {
