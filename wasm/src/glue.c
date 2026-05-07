@@ -102,7 +102,7 @@ int general_register_count(void){
 	return general_registers();
 }
 
-int special_rgister_count(void){
+int special_register_count(void){
 	return special_registers();
 }
 

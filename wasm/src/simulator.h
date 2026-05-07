@@ -56,7 +56,13 @@ unsigned int get_general_register_data(int index, int partition);
  */
 unsigned int get_special_register_data(int index, int partition);
 
+/**
+ * Returns the number of special registers in the MMIX architecture.
+ */
 int special_registers(void);
 
+/**
+ * Returns the number of general registers in the MMIX architecture.
+ */
 int general_registers(void);
 #endif

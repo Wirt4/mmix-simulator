@@ -34,6 +34,9 @@ describe("Module Adapter", () => {
       _mmix_finalize_simulator: vi.fn(),
       _mmix_perform_instructions: vi.fn(),
       _is_halted: vi.fn(),
+      _general_register_count: vi.fn(),
+      _special_register_count: vi.fn(),
+      _get_register_data: vi.fn(),
     }
   })
 

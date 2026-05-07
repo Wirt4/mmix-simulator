@@ -92,7 +92,13 @@ int is_halted(void);
  * */
 unsigned int get_register_data(int register_type, int index, int partition); 
 
+/**
+ * Returns the number of general registers in the MMIX architecture.
+ */
 int general_register_count(void);
 
-int special_rgister_count(void);
+/**
+ * Returns the number of special registers in the MMIX architecture.
+ */
+int special_register_count(void);
 #endif /*GLUE_H */
