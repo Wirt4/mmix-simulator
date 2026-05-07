@@ -91,4 +91,8 @@ int is_halted(void);
  * @return unisigned int containing 32 bits of data, 0 on failure
  * */
 unsigned int get_register_data(int register_type, int index, int partition); 
+
+int general_register_count(void);
+
+int special_rgister_count(void);
 #endif /*GLUE_H */

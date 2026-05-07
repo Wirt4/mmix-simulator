@@ -96,3 +96,12 @@ unsigned int get_register_data(int register_type, int index, int partition){
 	}
 	return get_general_register_data(index, partition);
 }
+
+int general_register_count(void){
+	return general_registers();
+}
+
+int special_rgister_count(void){
+	return special_registers();
+}
+

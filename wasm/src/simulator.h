@@ -55,4 +55,8 @@ unsigned int get_general_register_data(int index, int partition);
  * postconditions: none
  */
 unsigned int get_special_register_data(int index, int partition);
+
+int special_registers(void);
+
+int general_registers(void);
 #endif
