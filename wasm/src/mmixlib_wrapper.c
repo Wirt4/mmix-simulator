@@ -1,9 +1,13 @@
 #include "mmixlib_wrapper.h"
 #include "mmixlib.h"
-
 extern mmix_opcode op;
 extern bool halted;
 extern bool resuming;
+
+static tetra get_tetra(octa payload, int partition){
+	// partition is 0 for higher bits, 1 for lower: reflects big endian architecture
+	return partition ? payload.l : payload.h; 
+}
 
 int mmixal_w(char *mms_name, char *mmo_name, char *mml_name){
 	return mmixal(mms_name, mmo_name, mml_name);
@@ -61,4 +65,24 @@ void mmix_lib_finalize_w(void){
 
 void mmix_finalize_w(void){
 	mmix_finalize();
+}
+
+int get_local_register_count(void){
+	return L;
+}
+
+int get_global_register_start(void){
+	return G;
+}
+
+unsigned int get_local_register_data(int index, int partition){
+	return get_tetra(l[index], partition);
+}
+
+unsigned int get_global_register_data(int index, int partition){
+	return get_tetra(g[index], partition);
+}
+
+int get_local_ring_mask(void){
+	return lring_mask;
 }

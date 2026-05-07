@@ -65,6 +65,19 @@ static const char *infinite_loop_source =
     "\tTRAP\t0,Fputs,StdOut\n"
     "\tJMP\tMain\n";
 
+static const char *add_two_numbers_source =
+    "\tLOC\t#100\n"
+    "Main\tSET\t$1,30\n"
+    "\tSET\t$2,12\n"
+    "\tADD\t$0,$1,$2\n"
+    "\tTRAP\t0,Halt,0\n";
+
+static const char *set_and_negate_source =
+    "\tLOC\t#100\n"
+    "Main\tSET\t$0,100\n"
+    "\tNEG\t$1,0,$0\n"
+    "\tTRAP\t0,Halt,0\n";
+
 static const char *expected_assembly_stderr =
     "\"program.mms\", line 2: unknown operation code `BADOP'!\n"
     "\"program.mms\", line 3: unknown operation code `ALSOBAD'!\n"
@@ -172,6 +185,46 @@ static void test_perform_instructions_terminates_on_infinite_loop(void) {
     TEST_PASS();
 }
 
+static void test_add_two_numbers_register_value(void) {
+    int len = (int)strlen(add_two_numbers_source);
+    unsigned char *buf = get_source_code_pointer();
+    memcpy(buf, add_two_numbers_source, len + 1);
+    int assembled = assemble_mmixal(len);
+    TEST_ASSERT_EQUAL_INT(0, assembled);
+
+    mmix_initialize_simulator();
+    mmix_perform_instructions(50);
+    mmix_finalize_simulator();
+
+    // $0 = 30 + 12 = 42, fits in low tetra
+    unsigned int low = get_register_data(0, 0, 1);
+    unsigned int high = get_register_data(0, 0, 0);
+    TEST_ASSERT_EQUAL_UINT(42, low);
+    TEST_ASSERT_EQUAL_UINT(0, high);
+}
+
+static void test_set_and_negate_register_value(void) {
+    int len = (int)strlen(set_and_negate_source);
+    unsigned char *buf = get_source_code_pointer();
+    memcpy(buf, set_and_negate_source, len + 1);
+    int assembled = assemble_mmixal(len);
+    TEST_ASSERT_EQUAL_INT(0, assembled);
+
+    mmix_initialize_simulator();
+    mmix_perform_instructions(50);
+    mmix_finalize_simulator();
+
+    // $0 should be 100 (low tetra)
+    unsigned int r0_low = get_register_data(0, 0, 1);
+    TEST_ASSERT_EQUAL_UINT(100, r0_low);
+
+    // $1 = NEG 0,100 = -100, which in unsigned 64-bit is 0xFFFFFFFF FFFFFF9C
+    unsigned int r1_high = get_register_data(0, 1, 0);
+    unsigned int r1_low = get_register_data(0, 1, 1);
+    TEST_ASSERT_EQUAL_HEX32(0xFFFFFFFF, r1_high);
+    TEST_ASSERT_EQUAL_HEX32(0xFFFFFF9C, r1_low);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_source_code_pointer_is_non_null);
@@ -183,5 +236,7 @@ int main(void) {
     RUN_TEST(test_simulation_error);
     RUN_TEST(test_mmix_simulate_hello_world_std_out);
     RUN_TEST(test_perform_instructions_terminates_on_infinite_loop);
+    RUN_TEST(test_add_two_numbers_register_value);
+    RUN_TEST(test_set_and_negate_register_value);
     return UNITY_END();
 }

@@ -16,6 +16,9 @@ static size_t get_file_size(FILE *fileP, size_t bufferSize){
 	ASSERT(seek == 0);
 	size_t fileSize = ftell(fileP);
 	ASSERT(fileSize <= bufferSize);
+	if (fileSize > bufferSize){
+		return 0;
+	}
 	int rewind = fseek(fileP, 0L, SEEK_SET);
 	ASSERT(rewind == 0);
 	return fileSize;

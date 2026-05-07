@@ -35,4 +35,24 @@ int is_halted(void);
  * Returns 0 on success, -1 on failure
 */
 int finalize_simulator(void);
+
+/**
+ * Gets 32 bits of data from a general register.
+ * inputs: int index: the register number (0-255),
+ *         int partition: which 32-bit partition of the 64-bit register (0 = high, 1 = low)
+ * outputs: the 32-bit value of the specified partition
+ * preconditions: the simulator is initialized, 0 <= index <= 255, partition is 0 or 1
+ * postconditions: none
+ */
+unsigned int get_general_register_data(int index, int partition);
+
+/**
+ * Gets 32 bits of data from a special register.
+ * inputs: int index: the special register number,
+ *         int partition: which 32-bit partition of the 64-bit register (0 = high, 1 = low)
+ * outputs: the 32-bit value of the specified partition
+ * preconditions: the simulator is initialized, index is a valid special register number, partition is 0 or 1
+ * postconditions: none
+ */
+unsigned int get_special_register_data(int index, int partition);
 #endif
