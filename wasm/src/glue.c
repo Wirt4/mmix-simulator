@@ -91,6 +91,7 @@ int mmix_finalize_simulator(void){
 }
 
 unsigned int get_register_data(int register_type, int index, int partition){
+	// type: 0 for general register, 1 for special
 	if (register_type){
 		return get_special_register_data(index, partition);
 	}
