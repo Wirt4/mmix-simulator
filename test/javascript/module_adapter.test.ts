@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-empty-function */
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import ModuleAdapter from "../../app/javascript/moduleAdapter/module_adapter"
-import { SpecialRegister } from "../../app/javascript/moduleAdapter/module_adapter.interface"
 import type { MainModule } from "../../wasm/build/wasm/module"
 
 describe("Module Adapter", () => {
@@ -230,7 +229,7 @@ describe("Module Adapter", () => {
     const spy = vi.spyOn(mockModule, '_get_register_data').mockReturnValue(0)
     const adapter = new ModuleAdapter(mockModule)
 
-    const reg = SpecialRegister.RB
+    const reg = 0
     const rbIndex = 0
     const expectedType = 1
     adapter.getSpecialRegisterValue(reg)
@@ -245,6 +244,6 @@ describe("Module Adapter", () => {
     })
     const expected = "0xffffffffffffff9c"
     const adapter = new ModuleAdapter(mockModule)
-    expect(adapter.getSpecialRegisterValue(SpecialRegister.RA)).toEqual(expected)
+    expect(adapter.getSpecialRegisterValue(1)).toEqual(expected)
   })
 })

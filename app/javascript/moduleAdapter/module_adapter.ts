@@ -164,6 +164,10 @@ export default class ModuleAdapter implements IModuleAdapter {
     return this.getRegisterValue(RegisterType.SPECIAL, reg)
   }
 
+  get generalRegisterCount(): number {
+    return this._module._general_register_count()
+  }
+
   private getRegisterValue(registerType: RegisterType, index: number): string {
     const high = this.getUnsignedRegisterValue(registerType, index, Partition.HIGH)
     const low = this.getUnsignedRegisterValue(registerType, index, Partition.LOW)
