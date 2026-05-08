@@ -61,25 +61,21 @@ export default class Simulator implements ISimulator {
     this._outText.value = this.simulateWithTimeout(timeout, instructionBatch)
   }
 
-  /** Returns the current hex value of the given register. */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public getRegisterValue(register: string): string {
-    const registerHexWidth = 16
-    const leadingChars = 2
     const re = new RegExp(/^[0-9]*$/, "i");
-    const arg = re.test(register) ? +register : this._specialRegisterMap.get(register) as number
-    const result = this._moduleAdapter.getGeneralRegisterValue(arg)
-    return [result.substring(0, leadingChars), this._leftPad(result.substring(leadingChars), registerHexWidth).toUpperCase()].join("")
-  }
-
-  private _leftPad(str: string, siz: number): string {
-    if (str.length === siz) return str
-    const zeros = Array<string>(siz - str.length).fill("0")
-    return zeros.join("") + str
+    if (re.test(register)) {
+      return this._moduleAdapter.getGeneralRegisterValue(+register)
+    }
+    const specialIndex = this._specialRegisterMap.get(register)
+    if (specialIndex == undefined) {
+      console.error(`undefined index for registerL ${register}`)
+      return `ERR`
+    }
+    return this._moduleAdapter.getSpecialRegisterValue(specialIndex)
   }
 
   get specialRegisters(): string[] {
-    return Array.from(this._specialRegisterMap.keys()).sort()
+    return Array.from(this._specialRegisterMap.keys()).sort((a, b) => a.length - b.length || a.localeCompare(b))
   }
 
   get generalRegisterCount(): number {

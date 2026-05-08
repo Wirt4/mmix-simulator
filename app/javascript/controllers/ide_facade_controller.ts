@@ -42,6 +42,8 @@ export default class IDEFacadeController extends Controller {
   /** Delegates program execution to the simulator. */
   runUserProgram(): void {
     this.simulator.runUserProgram()
+    this.renderSpecialRegisters()
+    this.renderGeneralRegisters()
   }
 
   /**

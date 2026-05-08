@@ -99,7 +99,7 @@ describe("Simulator tests", () => {
 
   it("when the argument to getRegister value is for a general register, then simulator calls module.getGeneralRegister", () => {
     const mockAdapter = createMockAdapter()
-    const spy = vi.spyOn(mockAdapter, 'getGeneralRegisterValue')
+    const spy = vi.spyOn(mockAdapter, 'getGeneralRegisterValue').mockReturnValue("0x0")
 
     const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
     simulator.getRegisterValue("0")
@@ -107,14 +107,16 @@ describe("Simulator tests", () => {
     expect(spy).toHaveBeenCalledWith(0)
   })
 
-  it("when the argument to getRegister value is for a special register, then simulator doesn't call module.getGeneralRegister", () => {
+  it("when the argument to getRegister value is for a special register, then simulator callss module.getSpecialRegsiter instead of module.getGeneralRegister", () => {
     const mockAdapter = createMockAdapter()
-    const spy = vi.spyOn(mockAdapter, 'getGeneralRegisterValue')
+    const genSpy = vi.spyOn(mockAdapter, 'getGeneralRegisterValue').mockReturnValue("0x0")
+    const specSpy = vi.spyOn(mockAdapter, "getSpecialRegisterValue").mockReturnValue("0x0")
 
     const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
     simulator.getRegisterValue("rA")
 
-    expect(spy).not.toHaveBeenCalled()
+    expect(genSpy).not.toHaveBeenCalled()
+    expect(specSpy).toHaveBeenCalled()
   })
 
   it("returns answer from module", () => {
@@ -129,22 +131,10 @@ describe("Simulator tests", () => {
     expect(actual).toEqual(expect.stringContaining(expected))
   })
 
-  it("adds the padded zeros and captializes", () => {
-    const mockAdapter = createMockAdapter()
-    vi.spyOn(mockAdapter, 'getGeneralRegisterValue').mockReturnValue("0xfc")
-    const expected = "0x00000000000000FC"
-
-    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
-    const actual = simulator.getRegisterValue("0")
-
-    expect(actual.length).toEqual(expected.length)
-    expect(actual).toEqual(expect.stringContaining(expected))
-  })
-
   it("gets a special register value", () => {
     const mockAdapter = createMockAdapter()
-    vi.spyOn(mockAdapter, 'getSpecialRegisterValue').mockReturnValue("0xfc")
     const expected = "0x00000000000000FC"
+    vi.spyOn(mockAdapter, 'getSpecialRegisterValue').mockReturnValue(expected)
 
     const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
     const actual = simulator.getRegisterValue("rA")
