@@ -4,17 +4,27 @@
   </div>
   <div class="register-panel-scroll">
     <div class="register-subpanel">
-      <div class="register-subpanel-header">Special Purpose</div>
-      <div class="register-group-container" data-ide-facade-target="specialContainer">
+      <div class="register-subpanel-header register-subpanel-header--toggle" data-action="click->ide-facade#toggleSubpanel">
+        <span class="spin-arrow">&#9656;</span>
+        Special Purpose
+      </div>
+      <div class="register-subpanel-body register-subpanel-body--collapsed" data-ide-facade-target="specialBody">
+        <div class="register-group-container" data-ide-facade-target="specialContainer">
+        </div>
       </div>
     </div>
     <div class="register-subpanel">
-      <div class="register-subpanel-header">General Purpose</div>
-      <div class="register-group-controls">
-        <select class="register-group-select" data-ide-facade-target="groupSelect" data-action="ide-facade#switchRegisterTab">
-        </select>
+      <div class="register-subpanel-header register-subpanel-header--toggle" data-action="click->ide-facade#toggleSubpanel">
+        <span class="spin-arrow">&#9656;</span>
+        General Purpose
       </div>
-      <div class="register-group-container" data-ide-facade-target="generalContainer">
+      <div class="register-subpanel-body register-subpanel-body--collapsed" data-ide-facade-target="generalBody">
+        <div class="register-group-controls">
+          <select class="register-group-select" data-ide-facade-target="groupSelect" data-action="ide-facade#switchRegisterTab">
+          </select>
+        </div>
+        <div class="register-group-container" data-ide-facade-target="generalContainer">
+        </div>
       </div>
     </div>
   </div>
