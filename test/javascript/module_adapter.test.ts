@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import ModuleAdapter from "../../app/javascript/moduleAdapter/module_adapter"
 import { SpecialRegister } from "../../app/javascript/moduleAdapter/module_adapter.interface"
 import type { MainModule } from "../../wasm/build/wasm/module"
-import { Id64 } from "@itwin/core-bentley"
 
 describe("Module Adapter", () => {
   let heap: Uint8Array
