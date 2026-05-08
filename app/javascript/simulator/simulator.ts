@@ -68,7 +68,7 @@ export default class Simulator implements ISimulator {
     }
     const specialIndex = this._specialRegisterMap.get(register)
     if (specialIndex == undefined) {
-      console.error(`undefined index for registerL ${register}`)
+      console.error(`undefined index for register: ${register}`)
       return `ERR`
     }
     return this._moduleAdapter.getSpecialRegisterValue(specialIndex)
