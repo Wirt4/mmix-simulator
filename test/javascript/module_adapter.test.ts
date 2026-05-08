@@ -235,7 +235,7 @@ describe("Module Adapter", () => {
     const spy = vi.spyOn(mockModule, '_get_register_data').mockReturnValue(0)
     const adapter = new ModuleAdapter(mockModule)
 
-    const reg = SpecialRegister.rB
+    const reg = SpecialRegister.RB
     const rbIndex = 0
     const expectedType = 1
     adapter.getSpecialRegisterValue(reg)
@@ -255,6 +255,6 @@ describe("Module Adapter", () => {
     //  create adapter
     const adapter = new ModuleAdapter(mockModule)
     //  assert actual is expected 
-    expect(adapter.getSpecialRegisterValue(SpecialRegister.rA)).toEqual(expected)
+    expect(adapter.getSpecialRegisterValue(SpecialRegister.RA)).toEqual(expected)
   })
 })

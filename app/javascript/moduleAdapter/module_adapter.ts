@@ -165,8 +165,13 @@ export default class ModuleAdapter implements IModuleAdapter {
   }
 
   private getRegisterValue(registerType: RegisterType, index: number): string {
-    const high = this._module._get_register_data(registerType, index, Partition.HIGH) >>> 0
-    const low = this._module._get_register_data(registerType, index, Partition.LOW) >>> 0
+    const high = this.getUnsignedRegisterValue(registerType, index, Partition.HIGH)
+    const low = this.getUnsignedRegisterValue(registerType, index, Partition.LOW)
     return Id64.fromUint32Pair(low, high)
+  }
+
+  private getUnsignedRegisterValue(registerType: RegisterType, index: number, partition: Partition): number {
+    //  little unsigned right shift to coerce the return from the module
+    return this._module._get_register_data(registerType, index, partition) >>> 0
   }
 }
