@@ -11,7 +11,9 @@ function createMockAdapter(): IModuleAdapter {
     finalizeMMIX: vi.fn(),
     isHalted: vi.fn(),
     intitializeMMIX: vi.fn(),
-    performInstructions: vi.fn()
+    performInstructions: vi.fn(),
+    getGeneralRegisterValue: vi.fn(),
+    getSpecialRegisterValue: vi.fn()
   }
 }
 

@@ -31,7 +31,8 @@
   },
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",
-    "@hotwired/turbo-rails": "^8.0.0"
+    "@hotwired/turbo-rails": "^8.0.0",
+    "@itwin/core-bentley": "^5.9.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

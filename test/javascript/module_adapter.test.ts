@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-empty-function */
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import ModuleAdapter from "../../app/javascript/moduleAdapter/module_adapter"
+import { SpecialRegister } from "../../app/javascript/moduleAdapter/module_adapter.interface"
 import type { MainModule } from "../../wasm/build/wasm/module"
 
 describe("Module Adapter", () => {
@@ -182,5 +183,68 @@ describe("Module Adapter", () => {
     const result = adapter.assembleMMIXAL('stub')
 
     expect(result).toBe(false)
+  })
+
+  it("given _get_register_data returns -1 for high and -100 for low, when getGeneralRegisterValue is called, then it returns  0xFFFFFFFFFFFFFF9C,", () => {
+    // mock the calls for _get_register_data: high is all Fs, low is 0xFFFFFF9C
+    vi.spyOn(mockModule, '_get_register_data').mockImplementation((t, i, p) => {
+      return p == 0 ? -1 : -100
+    })
+    const expected = "0xffffffffffffff9c"
+    const adapter = new ModuleAdapter(mockModule)
+    expect(adapter.getGeneralRegisterValue(0)).toEqual(expected)
+  })
+
+  it("given _get_register_data returns 0 for high and 100 for low, when getGeneralRegisterValue is called, then it should return 0x64", () => {
+    //100 in decimal is 0x64
+    vi.spyOn(mockModule, '_get_register_data').mockImplementation((t, i, p) => {
+      return p == 0 ? 0 : 100
+    })
+    const expected = "0x64"
+
+    const adapter = new ModuleAdapter(mockModule)
+
+    expect(adapter.getGeneralRegisterValue(0)).toEqual(expected)
+  })
+
+  it("when getGeneralRegisterValue is called, then it should call _get_register_data with the reg_id 0", () => {
+    const spy = vi.spyOn(mockModule, '_get_register_data').mockReturnValue(0)
+    const adapter = new ModuleAdapter(mockModule)
+
+    adapter.getGeneralRegisterValue(0)
+    const expected = 0
+
+    expect(spy).toHaveBeenCalledWith(expected, expect.anything(), expect.anything())
+  })
+
+  it("when getGeneralRegisterValue is called with an index, then it should call _get_register_data with the index", () => {
+    const spy = vi.spyOn(mockModule, '_get_register_data').mockReturnValue(0)
+    const adapter = new ModuleAdapter(mockModule)
+
+    const index = 5
+    adapter.getGeneralRegisterValue(index)
+
+    expect(spy).toHaveBeenCalledWith(expect.anything(), index, expect.anything())
+  })
+  it("when getSpecialRegisterValue is called with a register enum, then it should call _get_register_data with the correct regsiter type and index", () => {
+    const spy = vi.spyOn(mockModule, '_get_register_data').mockReturnValue(0)
+    const adapter = new ModuleAdapter(mockModule)
+
+    const reg = SpecialRegister.RB
+    const rbIndex = 0
+    const expectedType = 1
+    adapter.getSpecialRegisterValue(reg)
+
+    expect(spy).toHaveBeenCalledWith(expectedType, rbIndex, expect.anything())
+  })
+
+  it("given _get_register_data returns -1 for high and -100 for low, when getSpecialRegisterValue is called, then it returns  0xFFFFFFFFFFFFFF9C,", () => {
+    // mock the calls for _get_register_data
+    vi.spyOn(mockModule, '_get_register_data').mockImplementation((t, i, p) => {
+      return p == 0 ? -1 : -100
+    })
+    const expected = "0xffffffffffffff9c"
+    const adapter = new ModuleAdapter(mockModule)
+    expect(adapter.getSpecialRegisterValue(SpecialRegister.RA)).toEqual(expected)
   })
 })
