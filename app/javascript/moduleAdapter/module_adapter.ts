@@ -7,7 +7,20 @@
 // Since this is the wrapper for a foreign asset, we'll swallow the TSlint style warning here and remember to check the adapter if anything breaks
 
 import type { IModuleAdapter } from './module_adapter.interface'
+import { SpecialRegister } from './module_adapter.interface'
 import type { MainModule } from "../../../wasm/build/wasm/module"
+import { Id64 } from "@itwin/core-bentley"
+import type { Id64String } from "@itwin/core-bentley"
+
+enum RegisterType {
+  GENERAL = 0,
+  SPECIAL = 1
+}
+
+enum Partition {
+  HIGH = 0,
+  LOW = 1
+}
 
 export default class ModuleAdapter implements IModuleAdapter {
   private _module: MainModule
@@ -141,5 +154,19 @@ export default class ModuleAdapter implements IModuleAdapter {
     }
 
     return new TextDecoder().decode(this._module.HEAPU8.slice(ptr, end))
+  }
+
+  public getGeneralRegisterValue(index: number): Id64String {
+    return this.getRegisterValue(RegisterType.GENERAL, index)
+  }
+
+  public getSpecialRegisterValue(reg: SpecialRegister) {
+    return this.getRegisterValue(RegisterType.SPECIAL, reg)
+  }
+
+  private getRegisterValue(registerType: RegisterType, index: number): string {
+    const high = this._module._get_register_data(registerType, index, Partition.HIGH) >>> 0
+    const low = this._module._get_register_data(registerType, index, Partition.LOW) >>> 0
+    return Id64.fromUint32Pair(low, high)
   }
 }

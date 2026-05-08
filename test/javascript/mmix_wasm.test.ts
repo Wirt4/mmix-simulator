@@ -149,9 +149,11 @@ describe("MMIX WASM Module", () => {
 
     // $1 = NEG 0,100 = -100, which in unsigned 64-bit is 0xFFFFFFFF FFFFFF9C
     // Emscripten returns unsigned int as signed; use >>> 0 to interpret as unsigned
-    const r1High: number = Module._get_register_data(0, 1, 0) >>> 0
-    const r1Low: number = Module._get_register_data(0, 1, 1) >>> 0
-    expect(r1High).toBe(0xFFFFFFFF)
-    expect(r1Low).toBe(0xFFFFFF9C)
+    const r1High: number = Module._get_register_data(0, 1, 0)
+    const r1Low: number = Module._get_register_data(0, 1, 1)
+    console.log("r1High", r1High)
+    console.log("r1Low", r1Low)
+    expect(r1High >>> 0).toBe(0xFFFFFFFF)
+    expect(r1Low >>> 0).toBe(0xFFFFFF9C)
   })
 })
