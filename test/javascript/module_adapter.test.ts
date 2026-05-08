@@ -187,21 +187,17 @@ describe("Module Adapter", () => {
   })
 
   it("given _get_register_data returns -1 for high and -100 for low, when getGeneralRegisterValue is called, then it returns  0xFFFFFFFFFFFFFF9C,", () => {
-    // mock the calls for _get_register_data
+    // mock the calls for _get_register_data: high is all Fs, low is 0xFFFFFF9C
     vi.spyOn(mockModule, '_get_register_data').mockImplementation((t, i, p) => {
       return p == 0 ? -1 : -100
     })
-    // set expected to 0xFFFFFFFFFFFFFF9C,
-    const high = 0xFFFFFFFF
-    const low = 0xFFFFFF9C
-    const expected = Id64.fromUint32Pair(low, high)
-    //  create adapter
+    const expected = "0xffffffffffffff9c"
     const adapter = new ModuleAdapter(mockModule)
-    //  assert actual is expected 
     expect(adapter.getGeneralRegisterValue(0)).toEqual(expected)
   })
 
   it("given _get_register_data returns 0 for high and 100 for low, when getGeneralRegisterValue is called, then it should return 0x64", () => {
+    //100 in decimal is 0x64
     vi.spyOn(mockModule, '_get_register_data').mockImplementation((t, i, p) => {
       return p == 0 ? 0 : 100
     })
@@ -248,13 +244,8 @@ describe("Module Adapter", () => {
     vi.spyOn(mockModule, '_get_register_data').mockImplementation((t, i, p) => {
       return p == 0 ? -1 : -100
     })
-    // set expected to 0xFFFFFFFFFFFFFF9C,
-    const high = 0xFFFFFFFF
-    const low = 0xFFFFFF9C
-    const expected = Id64.fromUint32Pair(low, high)
-    //  create adapter
+    const expected = "0xffffffffffffff9c"
     const adapter = new ModuleAdapter(mockModule)
-    //  assert actual is expected 
     expect(adapter.getSpecialRegisterValue(SpecialRegister.RA)).toEqual(expected)
   })
 })
