@@ -63,7 +63,6 @@ function resolveFilepath(path: string): string {
 }
 
 /** Loads the MMIX WASM script and instantiates the module. Returns null on failure. */
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export default async function moduleFactory(): Promise<MainModule | null> {
 	if (typeof createMmixModule === 'undefined') {
 		const scriptLoaded = await loadScript('/mmix.js')
@@ -76,7 +75,6 @@ export default async function moduleFactory(): Promise<MainModule | null> {
 	try {
 		interface moduleConfig { locateFile: (path: string) => string; }
 		const config: moduleConfig = { locateFile: resolveFilepath }
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		return await createMmixModule(config)
 	} catch (error) {
 		console.error("error creating mmixModule")
