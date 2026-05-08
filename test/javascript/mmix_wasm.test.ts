@@ -151,8 +151,6 @@ describe("MMIX WASM Module", () => {
     // Emscripten returns unsigned int as signed; use >>> 0 to interpret as unsigned
     const r1High: number = Module._get_register_data(0, 1, 0)
     const r1Low: number = Module._get_register_data(0, 1, 1)
-    console.log("r1High", r1High)
-    console.log("r1Low", r1Low)
     expect(r1High >>> 0).toBe(0xFFFFFFFF)
     expect(r1Low >>> 0).toBe(0xFFFFFF9C)
   })
