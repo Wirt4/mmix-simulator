@@ -42,6 +42,8 @@ export default class IDEFacadeController extends Controller {
   /** Delegates program execution to the simulator. */
   runUserProgram(): void {
     this.simulator.runUserProgram()
+    this.renderSpecialRegisters()
+    this.renderGeneralRegisters()
   }
 
   /**
@@ -114,7 +116,7 @@ export default class IDEFacadeController extends Controller {
         arr[p] = `</div><div id="gp-group-${(i / groupSize).toString()}" class="register-group" style="display: none;">`
         p++;
       }
-      arr[p] = this.createRegisterDiv("$" + i.toString())
+      arr[p] = this.createRegisterDiv(i.toString())
       p++
       // if is the last register, append a closing div for a group
       if (i === regCount - 1) {
@@ -127,6 +129,6 @@ export default class IDEFacadeController extends Controller {
 
   private createRegisterDiv(reg: string): string {
     const val = this.simulator.getRegisterValue(reg)
-    return `<div class="register-row"><span class="register-name">${reg}</span><span class="register-hex">${val}</span></div>`
+    return `<div class="register-row"><span class="register-name">$${reg}</span><span class="register-hex">${val}</span></div>`
   }
 }

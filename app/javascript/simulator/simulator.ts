@@ -5,14 +5,47 @@ export default class Simulator implements ISimulator {
   private _inText: HTMLTextAreaElement
   private _outText: HTMLTextAreaElement
   private _moduleAdapter: IModuleAdapter
-
-  //for linting now, but this information may very well belong to the wasm module
-  readonly generalRegisterCount = 256
+  private _specialRegisterMap: Map<string, number>
+  //maintain a map of special register names to indeces
 
   constructor(inText: HTMLTextAreaElement, outText: HTMLTextAreaElement, moduleAdapter: IModuleAdapter) {
     this._inText = inText
     this._outText = outText
     this._moduleAdapter = moduleAdapter
+    this._specialRegisterMap = new Map([
+      ["rA", 21],
+      ["rB", 0],
+      ["rC", 8],
+      ["rD", 1],
+      ["rE", 2],
+      ["rF", 22],
+      ["rG", 19],
+      ["rH", 3],
+      ["rI", 12],
+      ["rJ", 4],
+      ["rK", 15],
+      ["rL", 20],
+      ["rM", 5],
+      ["rN", 9],
+      ["rO", 10],
+      ["rP", 23],
+      ["rQ", 16],
+      ["rR", 6],
+      ["rS", 11],
+      ["rT", 13],
+      ["rU", 17],
+      ["rV", 18],
+      ["rW", 24],
+      ["rX", 25],
+      ["rY", 26],
+      ["rZ", 27],
+      ["rBB", 7],
+      ["rTT", 14],
+      ["rWW", 28],
+      ["rXX", 29],
+      ["rYY", 30],
+      ["rZZ", 31],
+    ])
   }
 
   /** Assembles and executes the user's MMIXAL program, writing output to the output textarea. */
@@ -28,21 +61,25 @@ export default class Simulator implements ISimulator {
     this._outText.value = this.simulateWithTimeout(timeout, instructionBatch)
   }
 
-  /** Returns the current hex value of the given register. */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public getRegisterValue(register: string): string {
-    //stub
-    return "0x0000000000000000"
+    const re = new RegExp(/^[0-9]*$/, "i");
+    if (re.test(register)) {
+      return this._moduleAdapter.getGeneralRegisterValue(+register)
+    }
+    const specialIndex = this._specialRegisterMap.get(register)
+    if (specialIndex == undefined) {
+      console.error(`undefined index for register: ${register}`)
+      return `ERR`
+    }
+    return this._moduleAdapter.getSpecialRegisterValue(specialIndex)
   }
 
-  /** The list of MMIX special register names. */
   get specialRegisters(): string[] {
-    return [
-      "rA", "rB", "rC", "rD", "rE", "rF", "rG", "rH",
-      "rI", "rJ", "rK", "rL", "rM", "rN", "rO", "rP",
-      "rQ", "rR", "rS", "rT", "rTT", "rU", "rV", "rW",
-      "rX", "rY", "rZ", "rBB", "rWW", "rXX", "rYY", "rZZ"
-    ]
+    return Array.from(this._specialRegisterMap.keys()).sort((a, b) => a.length - b.length || a.localeCompare(b))
+  }
+
+  get generalRegisterCount(): number {
+    return this._moduleAdapter.generalRegisterCount
   }
 
   private simulateWithTimeout(timeout: number, instructionsPerInterval: number): string {

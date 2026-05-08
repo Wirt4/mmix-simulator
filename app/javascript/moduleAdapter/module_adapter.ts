@@ -1,16 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-// HEAP8 is exported from wasm as type "any" and the linter is inconsistent on enforcement
-// Since this is the wrapper for a foreign asset, we'll swallow the TSlint style warning here and remember to check the adapter if anything breaks
-
 import type { IModuleAdapter } from './module_adapter.interface'
-import { SpecialRegister } from './module_adapter.interface'
 import type { MainModule } from "../../../wasm/build/wasm/module"
-import { Id64 } from "@itwin/core-bentley"
-import type { Id64String } from "@itwin/core-bentley"
 
 enum RegisterType {
   GENERAL = 0,
@@ -156,18 +145,30 @@ export default class ModuleAdapter implements IModuleAdapter {
     return new TextDecoder().decode(this._module.HEAPU8.slice(ptr, end))
   }
 
-  public getGeneralRegisterValue(index: number): Id64String {
+  public getGeneralRegisterValue(index: number): string {
     return this.getRegisterValue(RegisterType.GENERAL, index)
   }
 
-  public getSpecialRegisterValue(reg: SpecialRegister) {
+  public getSpecialRegisterValue(reg: number) {
     return this.getRegisterValue(RegisterType.SPECIAL, reg)
+  }
+
+  get generalRegisterCount(): number {
+    return this._module._general_register_count()
   }
 
   private getRegisterValue(registerType: RegisterType, index: number): string {
     const high = this.getUnsignedRegisterValue(registerType, index, Partition.HIGH)
     const low = this.getUnsignedRegisterValue(registerType, index, Partition.LOW)
-    return Id64.fromUint32Pair(low, high)
+    return this.formatRegister(high, low)
+  }
+
+  private formatRegister(high: number, low: number): string {
+    return `0x${this.toHexString(high, 8)}${this.toHexString(low, 8)}`
+  }
+
+  private toHexString(value: number, size: number): string {
+    return value.toString(16).padStart(size, '0').toUpperCase()
   }
 
   private getUnsignedRegisterValue(registerType: RegisterType, index: number, partition: Partition): number {

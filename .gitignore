@@ -40,7 +40,10 @@
 
 **/*.mmo
 # WASM build artifacts
-/wasm/build/
+/wasm/build/*
+!/wasm/build/wasm/
+/wasm/build/wasm/*
+!/wasm/build/wasm/module.d.ts
 /wasm/test_unit
 /wasm/test_integration
 /wasm/mmix.js
