@@ -83,5 +83,22 @@ int mmix_finalize_simulator(void);
 */
 int is_halted(void);
 
+/**
+ * Returns a tetrabyte (32 bits) of data from the specified register. 
+ * @param register_type: 0 for general register, 1 for special register
+ * @param index: value 0 through 255 for general or 0 through 31 for special 
+ * @param partition: 0 to access higher tetra, 1 to access lower tetra
+ * @return unisigned int containing 32 bits of data, 0 on failure
+ * */
+unsigned int get_register_data(int register_type, int index, int partition); 
 
+/**
+ * Returns the number of general registers in the MMIX architecture.
+ */
+int general_register_count(void);
+
+/**
+ * Returns the number of special registers in the MMIX architecture.
+ */
+int special_register_count(void);
 #endif /*GLUE_H */

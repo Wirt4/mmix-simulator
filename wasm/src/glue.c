@@ -48,14 +48,6 @@ size_t get_stdout_size(void){
 	return stdout_ref.size;
 }
 
-/**Performs a specified amount of mmix instructions and redirects the console outputs of those instructions to buffer
- *
- * @param instructions the number of mmix instructions to execute
- * @pre mmix_intialize has been successfully called
- * @post 
- *      state of simulator has advanced by specified instruction state (or exited if)
- *      outputs of performed code are stored in buffers
- */
 int mmix_perform_instructions(unsigned int instructions){
 	// check if code is assembled
 	// check if sim initialized
@@ -82,14 +74,6 @@ int mmix_perform_instructions(unsigned int instructions){
 	return 0;
 }
 
-/**
- * Executes a compiled .mmo binary.
- *
- * @pre  assemble_mmixal() has been called successfully.
- * @post get_stdout_pointer()/get_stdout_size() return the program's stdout;
- *       get_stderr_pointer()/get_stderr_size() return the program's stderr.
- * @return 0 on success, non-zero on failure.
- */
 int mmix_initialize_simulator(void){
 	int init = initialize_simulator(mmo);
 	ASSERT(init == 0);
@@ -97,12 +81,6 @@ int mmix_initialize_simulator(void){
 	return init;
 }
 
-/**
- * Cleans up the mmix simulator. Calls teardown methods in mmix and mmixware library. 
- * Removes files or assets created by the user's mmix program, excluding the initial mmo
- * preconditions: the simulator is initialized
- * Returns 0 on success, -1 on failure
-*/
 int mmix_finalize_simulator(void){
 	int fin = finalize_simulator();
 	ASSERT(fin == 0);
@@ -111,3 +89,20 @@ int mmix_finalize_simulator(void){
 	}
 	return fin;
 }
+
+unsigned int get_register_data(int register_type, int index, int partition){
+	// type: 0 for general register, 1 for special
+	if (register_type){
+		return get_special_register_data(index, partition);
+	}
+	return get_general_register_data(index, partition);
+}
+
+int general_register_count(void){
+	return general_registers();
+}
+
+int special_register_count(void){
+	return special_registers();
+}
+

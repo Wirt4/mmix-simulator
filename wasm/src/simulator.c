@@ -10,7 +10,6 @@
 static int g_simulator_initialized = 0;
 static char g_current_mmo[FILE_NAME_SIZE];
 
-
 static int ends_with_mmo(char*filename){
 	if (filename == NULL || strlen(filename) >= FILE_NAME_SIZE){
 		return 0;
@@ -79,4 +78,30 @@ int finalize_simulator(void){
 	mmix_lib_finalize_w();
 	g_simulator_initialized = 0;
 	return remove(g_current_mmo);
+}
+
+unsigned int get_general_register_data(int index, int partition){
+	if (get_global_register_start() <= index && index < GENERAL_REGISTER_COUNT){
+		return get_global_register_data(index, partition);
+	}
+	if (0 <= index && index < get_local_register_count()){
+		const int offsetIndex = (0 + index) & get_local_ring_mask();
+		return get_local_register_data(offsetIndex, partition);
+	}
+	return 0;
+}
+
+unsigned int get_special_register_data(int index, int partition){
+	if (0 <= index && index < SPECIAL_REGISTER_COUNT){
+		return get_global_register_data(index, partition);
+	}
+	return 0;
+}
+
+int special_registers(void){
+	return SPECIAL_REGISTER_COUNT;
+}
+
+int general_registers(void){
+	return GENERAL_REGISTER_COUNT;
 }

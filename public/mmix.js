@@ -4667,6 +4667,9 @@ var _get_stdout_size = Module['_get_stdout_size'] = createExportWrapper('get_std
 var _mmix_perform_instructions = Module['_mmix_perform_instructions'] = createExportWrapper('mmix_perform_instructions', 1);
 var _mmix_initialize_simulator = Module['_mmix_initialize_simulator'] = createExportWrapper('mmix_initialize_simulator', 0);
 var _mmix_finalize_simulator = Module['_mmix_finalize_simulator'] = createExportWrapper('mmix_finalize_simulator', 0);
+var _get_register_data = Module['_get_register_data'] = createExportWrapper('get_register_data', 3);
+var _general_register_count = Module['_general_register_count'] = createExportWrapper('general_register_count', 0);
+var _special_rgister_count = Module['_special_rgister_count'] = createExportWrapper('special_rgister_count', 0);
 var _get_source_code_pointer = Module['_get_source_code_pointer'] = createExportWrapper('get_source_code_pointer', 0);
 var _is_halted = Module['_is_halted'] = createExportWrapper('is_halted', 0);
 var _fflush = createExportWrapper('fflush', 1);
