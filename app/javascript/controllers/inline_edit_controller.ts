@@ -13,9 +13,11 @@ export default class InlineEditController extends Controller {
   edit() {
     this.displayTarget.hidden = true
     this.formTarget.hidden = false
-    const input = this.formTarget.querySelector("input[type='text']") as HTMLInputElement | null
-    input?.focus()
-    input?.select()
+    const input = this.formTarget.querySelector<HTMLInputElement>("input[type='text']")
+    if (input) {
+      input.focus()
+      input.select()
+    }
   }
 
   submit() {
