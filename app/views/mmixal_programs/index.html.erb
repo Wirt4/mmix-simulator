@@ -1,12 +1,15 @@
   <nav><%= render "layouts/navbar" %></nav>
+<div class="programs-index">
 <table>
   <% @mmixal_programs.each do |program| %>
     <tr>
-      <td><%= form_with model: program do |f| %>
-        <%= f.text_field :title, class: "input--inline" %>
-        <%= f.hidden_field :source, value: program.source %>
-        <%= f.submit "Rename", class: "btn--tactile" %>
-      <% end %></td>
+      <td data-controller="inline-edit">
+        <span data-inline-edit-target="display" data-action="click->inline-edit#edit" style="cursor: pointer"><%= program.title %></span>
+        <%= form_with model: program, html: { "data-inline-edit-target": "form" } do |f| %>
+          <%= f.text_field :title, class: "input--inline", "data-action": "blur->inline-edit#submit" %>
+          <%= f.hidden_field :source, value: program.source %>
+        <% end %>
+      </td>
       <td><%= link_to mmixal_program_path(program) do %><button class="btn--tactile">Open</button><% end %></td>
       <td><%= button_to "Delete", mmixal_program_path(program), method: :delete, class: "btn--tactile" %></td>
     </tr>
@@ -16,3 +19,4 @@
 <%= form_with url: mmixal_programs_path do |f| %>
   <button class="btn--tactile">Create New</button>
 <% end %>
+</div>
