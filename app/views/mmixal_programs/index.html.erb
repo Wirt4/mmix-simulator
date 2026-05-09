@@ -2,7 +2,11 @@
 <table>
   <% @mmixal_programs.each do |program| %>
     <tr>
-      <td><%= program.title %></td>
+      <td><%= form_with model: program do |f| %>
+        <%= f.text_field :title, class: "input--inline" %>
+        <%= f.hidden_field :source, value: program.source %>
+        <%= f.submit "Rename", class: "btn--tactile" %>
+      <% end %></td>
       <td><%= link_to mmixal_program_path(program) do %><button class="btn--tactile">Open</button><% end %></td>
       <td><%= button_to "Delete", mmixal_program_path(program), method: :delete, class: "btn--tactile" %></td>
     </tr>
