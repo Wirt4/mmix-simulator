@@ -57,9 +57,24 @@ test "updates mmixal_program source code" do
       title: "new title",
       source: "new content"
     }
-  }
+  }, headers: { "HTTP_REFERER" => mmixal_program_url(program) }
 
   assert_equal "new content", program.reload.source
   assert_redirected_to mmixal_program_url(program)
+end
+
+test "PATCH from index redirects back to index" do
+  sign_in_as(@user)
+  program = mmixal_programs(:one)
+
+  patch mmixal_program_url(program), params: {
+    mmixal_program: {
+      title: "renamed",
+      source: program.source
+    }
+  }, headers: { "HTTP_REFERER" => mmixal_programs_url }
+
+  assert_equal "renamed", program.reload.title
+  assert_redirected_to mmixal_programs_url
 end
 end
