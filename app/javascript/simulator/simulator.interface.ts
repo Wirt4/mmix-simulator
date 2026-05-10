@@ -8,5 +8,7 @@ export interface ISimulator {
   generalRegisterCount: number
   /** Returns the current hex value of the given register. */
   getRegisterValue(register: string): string
+  /** Returns a brief description of the given register */
+  getRegisterDescription(register: string): string
 }
 

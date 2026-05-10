@@ -52,9 +52,8 @@ export default class IDEFacadeController extends Controller {
   toggleSubpanel(event: Event): void {
     const header = (event.currentTarget as HTMLElement)
     const body = header.nextElementSibling as HTMLElement
-    const arrow = header.querySelector(".spin-arrow") as HTMLElement
-    if (!body || !arrow) return
-
+    const arrow = header.querySelector(".spin-arrow")
+    if (!arrow) return
     body.classList.toggle("register-subpanel-body--collapsed")
     arrow.classList.toggle("spin-arrow--open")
   }
@@ -84,44 +83,9 @@ export default class IDEFacadeController extends Controller {
     if (target) target.style.display = "block"
   }
 
-  private static readonly SPECIAL_REGISTER_DESCRIPTIONS: Record<string, string> = {
-    rA: "arithmetic status register",
-    rB: "bootstrap register (trip)",
-    rC: "continuation register",
-    rD: "dividend register",
-    rE: "epsilon register",
-    rF: "failure location register",
-    rG: "global threshold register",
-    rH: "himult register",
-    rI: "interval counter",
-    rJ: "return-jump register",
-    rK: "interrupt mask register",
-    rL: "local threshold register",
-    rM: "multiplex mask register",
-    rN: "serial number",
-    rO: "register stack offset",
-    rP: "prediction register",
-    rQ: "interrupt request register",
-    rR: "remainder register",
-    rS: "register stack pointer",
-    rT: "trap address register",
-    rU: "usage counter",
-    rV: "virtual translation register",
-    rW: "where-interrupted register (trip)",
-    rX: "execution register (trip)",
-    rY: "Y operand (trip)",
-    rZ: "Z operand (trip)",
-    rBB: "bootstrap register (trap)",
-    rTT: "dynamic trap address register",
-    rWW: "where-interrupted register (trap)",
-    rXX: "execution register (trap)",
-    rYY: "Y operand (trap)",
-    rZZ: "Z operand (trap)",
-  }
-
   private renderSpecialRegisters(): void {
     this.specialContainerTarget.innerHTML = this.simulator.specialRegisters.map((reg) => {
-      const tooltip = IDEFacadeController.SPECIAL_REGISTER_DESCRIPTIONS[reg] ?? ""
+      const tooltip = this.simulator.getRegisterDescription(reg)
       return this.createRegisterDiv(reg, tooltip)
     }).join("")
     this.attachTooltipListeners()
@@ -134,14 +98,16 @@ export default class IDEFacadeController extends Controller {
       row.addEventListener("mouseenter", () => {
         const text = row.dataset.tooltip
         if (!text) return
-        const tip = document.createElement("div")
-        tip.className = "register-tooltip"
-        tip.textContent = text
-        document.body.appendChild(tip)
+        const toolTip = document.createElement("div")
+        toolTip.className = "register-tooltip"
+        toolTip.textContent = text
+        document.body.appendChild(toolTip)
         const rect = row.getBoundingClientRect()
-        tip.style.top = `${rect.top + rect.height / 2 - tip.offsetHeight / 2}px`
-        tip.style.left = `${rect.left - tip.offsetWidth - 8}px`
-        this.tooltipEl = tip
+        const toolTipTop = rect.top + rect.height / 2 - toolTip.offsetHeight / 2
+        toolTip.style.top = `${toolTipTop.toString()}px`
+        const toolTipLeft = rect.left - toolTip.offsetWidth - 8
+        toolTip.style.left = `${toolTipLeft.toString()}px`
+        this.tooltipEl = toolTip
       })
       row.addEventListener("mouseleave", () => {
         this.tooltipEl?.remove()
