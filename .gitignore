@@ -57,3 +57,6 @@
 #don't want to accidentally commit personal notes
 *.md
 !README.md
+
+/app/assets/builds/*
+!/app/assets/builds/.keep

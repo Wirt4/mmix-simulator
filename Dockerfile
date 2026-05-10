@@ -148,6 +148,7 @@ COPY --from=mmix /usr/local/bin/mmixal /usr/local/bin/mmixal
 # App code copied LAST — only this layer rebuilds on code changes
 COPY . .
 
+RUN bin/rails dartsass:build
 RUN cd wasm && make wasm
 RUN cp wasm/build/wasm/mmix.js wasm/build/wasm/mmix.wasm public/
 RUN mkdir -p /opt/wasm-cache && \
