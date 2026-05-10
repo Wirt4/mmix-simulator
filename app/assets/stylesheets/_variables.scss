@@ -1,0 +1,66 @@
+:root {
+  /* ── Base palette (11 colors) ──────────────────────────── */
+  --black:         #1a1510;
+  --charcoal:      #231e17;
+  --surface:       #d7d7d7;
+  --border:        #5c4a2e;
+  --gold:          #b89a4a;
+  --brown:         #5a4520;
+  --tan:           #c8b88a;
+  --accent:        #d4922a;
+  --red:           #8b3a2a;
+  --green-bright:  #b1ff7d;
+  --green-dark:    #2d5a18;
+  --white:         #fff;
+  --grey-dark:     #333;
+  --grey-mid:      #888;
+  --grey-light:    #ccc;
+  --near-black:    #111;
+
+  /* ── Semantic aliases (derived from base 11) ───────────── */
+  --bg-deep:       var(--black);
+  --bg-panel:      var(--charcoal);
+  --bg-surface:    var(--surface);
+  --bg-input:      var(--black);
+  --border-light:  color-mix(in srgb, var(--border), var(--surface) 30%);
+  --text-primary:  var(--black);
+  --text-secondary: var(--gold);
+  --text-on-surface: var(--brown);
+  --text-dim:      color-mix(in srgb, var(--gold), var(--brown) 30%);
+  --text-dim-surface: color-mix(in srgb, var(--brown), var(--black) 20%);
+  --text-bright:   color-mix(in srgb, var(--brown), var(--black) 40%);
+  --text-console:  var(--green-bright);
+  --console-shadow: var(--black);
+  --accent-glow:   color-mix(in srgb, var(--accent) 12%, transparent);
+  --error:         var(--red);
+  --success:       var(--green-dark);
+  --link:          color-mix(in srgb, var(--brown), var(--accent) 30%);
+  --link-hover:    color-mix(in srgb, var(--brown), var(--black) 30%);
+  --gutter-bg:     var(--charcoal);
+
+  /* ── Button derived colors ─────────────────────────────── */
+  --btn-border:        color-mix(in srgb, var(--tan), var(--brown) 30%);
+  --btn-border-bottom: color-mix(in srgb, var(--tan), var(--black) 45%);
+  --btn-hover:         color-mix(in srgb, var(--tan), var(--brown) 15%);
+  --btn-active:        color-mix(in srgb, var(--tan), var(--brown) 20%);
+  --btn-hover-border:  color-mix(in srgb, var(--tan), var(--black) 50%);
+  --btn-active-border: color-mix(in srgb, var(--tan), var(--black) 60%);
+
+  /* ── Alert button derived colors ───────────────────────── */
+  --alert-text:          color-mix(in srgb, var(--red), white 75%);
+  --alert-border:        color-mix(in srgb, var(--red), var(--black) 25%);
+  --alert-border-bottom: color-mix(in srgb, var(--red), var(--black) 55%);
+  --alert-hover:         color-mix(in srgb, var(--red), var(--black) 15%);
+  --alert-hover-border:  color-mix(in srgb, var(--red), var(--black) 40%);
+  --alert-hover-bottom:  color-mix(in srgb, var(--red), var(--black) 65%);
+  --alert-active:        color-mix(in srgb, var(--red), var(--black) 30%);
+
+  /* ── Inset/panel border ────────────────────────────────── */
+  --inset-border:  color-mix(in srgb, var(--charcoal), var(--black) 30%);
+
+  /* ── Tokens ────────────────────────────────────────────── */
+  --font-mono:     "IBM Plex Mono", "SF Mono", "Cascadia Mono", "Fira Mono", Menlo, Consolas, monospace;
+  --font-display:  "IBM Plex Mono", monospace;
+  --font-size-sm:  14px;
+  --radius:        3px;
+}

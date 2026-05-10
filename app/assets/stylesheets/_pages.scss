@@ -1,0 +1,44 @@
+/* ── Landing page ────────────────────────────────────── */
+.landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.landing-logo {
+  height: 145px;
+  margin-bottom: 1.5em;
+}
+.landing-buttons{
+  margin-top: 25px;
+}
+.landing-links {
+  display: flex;
+  align-items: center;
+  gap: 2em;
+  font-size: var(--font-size-sm);
+}
+
+/* ── About page ─────────────────────────────────────── */
+.about {
+  max-width: 42em;
+}
+
+.about pre {
+  background: var(--bg-panel);
+  color: var(--text-console);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  padding: 12px 16px;
+  border: 2px solid var(--inset-border);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.6),
+    inset 0 0 20px rgba(0, 0, 0, 0.3),
+    0 1px 0 rgba(255, 255, 255, 0.15);
+  overflow-x: auto;
+}

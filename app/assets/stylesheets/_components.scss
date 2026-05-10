@@ -1,0 +1,203 @@
+/* ── Button base: typography, cursor, transition ──────── */
+button,
+input[type="submit"],
+.btn {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 6px 16px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: background 0.1s, border-color 0.1s, box-shadow 0.1s, transform 0.1s;
+}
+
+/* ── Tactile: raised 3D pressable appearance ──────────── */
+.btn--tactile {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--btn-border);
+  border-bottom: 3px solid var(--btn-border-bottom);
+  box-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.btn--tactile:hover {
+  background: var(--btn-hover);
+  border-color: var(--btn-hover-border);
+  border-bottom-color: var(--btn-active-border);
+  color: var(--text-primary);
+}
+.btn--tactile:active {
+  background: var(--btn-active);
+  border-bottom-width: 1px;
+  transform: translateY(2px);
+  box-shadow:
+    0 0 1px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Tactile: red variant ──────────────────────── */
+.btn--tactile--alert {
+  background: var(--red);
+  color: var(--alert-text);
+  border: 1px solid var(--alert-border);
+  border-bottom: 3px solid var(--alert-border-bottom);
+  box-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+.btn--tactile--alert:hover {
+  background: var(--alert-hover);
+  border-color: var(--alert-hover-border);
+  border-bottom-color: var(--alert-hover-bottom);
+  color: var(--alert-text);
+}
+.btn--tactile--alert:active {
+  background: var(--alert-active);
+  border-bottom-width: 1px;
+  transform: translateY(2px);
+  box-shadow:
+    0 0 1px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Beige tactile buttons on grey surface areas (not alert variants) */
+.btn--tactile:not(.btn--tactile--alert) {
+  background: var(--tan);
+  border: 1px solid var(--btn-border);
+  border-bottom: 3px solid var(--btn-border-bottom);
+}
+.btn--tactile:not(.btn--tactile--alert):hover {
+  background: var(--btn-hover);
+}
+.btn--tactile:not(.btn--tactile--alert):active {
+  background: var(--btn-active);
+}
+
+/* Keep nav buttons grey (on red background) */
+nav .btn--tactile:not(.btn--tactile--alert) {
+  background: var(--bg-surface);
+  border: 1px solid var(--btn-border);
+  border-bottom: 3px solid var(--btn-border-bottom);
+}
+nav .btn--tactile:not(.btn--tactile--alert):hover {
+  background: var(--btn-hover);
+}
+nav .btn--tactile:not(.btn--tactile--alert):active {
+  background: var(--btn-active);
+}
+
+/* ── Nav inline forms (button_to wrappers) ─────────────── */
+nav form {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+nav button,
+nav .btn {
+  min-width: 7em;
+  text-align: center;
+}
+
+/* ── Inputs & forms ────────────────────────────────────── */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  background: var(--bg-input);
+  color: var(--text-console);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-glow);
+}
+
+.input--inline {
+  padding: 2px 6px;
+  font-size: var(--font-size-sm);
+}
+
+form > div {
+  margin-bottom: 0.6em;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.2em;
+  color: var(--text-dim-surface);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+form > div > input[type="text"],
+form > div > input[type="email"],
+form > div > input[type="password"] {
+  display: block;
+  width: 100%;
+  max-width: 24em;
+}
+
+/* ── Inline style overrides ────────────────────────────── */
+[style*="color:red"] {
+  color: var(--error) !important;
+  font-weight: 600;
+  padding: 0.4em 0;
+}
+[style*="color:green"] {
+  color: var(--success) !important;
+  font-weight: 600;
+  padding: 0.4em 0;
+}
+
+#error_explanation {
+  border: 1px solid var(--error);
+  border-radius: var(--radius);
+  background: rgba(196, 74, 42, 0.1);
+  padding: 0.6em 1em;
+  margin-bottom: 1em;
+}
+#error_explanation ul {
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--error);
+}
+
+/* ── Tables ────────────────────────────────────────────── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+th, td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  color: var(--text-dim-surface);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+tr:hover td {
+  background: var(--accent-glow);
+}
