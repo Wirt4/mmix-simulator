@@ -300,3 +300,88 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.register-subpanel-header--toggle {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.register-subpanel-header--toggle:hover {
+  background: rgba(212, 146, 42, 0.1);
+}
+
+.spin-arrow {
+  display: inline-block;
+  font-size: 11px;
+  transition: transform 0.2s ease;
+  transform: rotate(0deg);
+}
+
+.spin-arrow--open {
+  transform: rotate(90deg);
+}
+
+.register-subpanel-body {
+  overflow: hidden;
+}
+
+.register-subpanel-body--collapsed {
+  display: none;
+}
+
+.register-group-controls {
+  padding: 0 12px 6px;
+}
+
+.register-name {
+  width: 3em;
+  flex-shrink: 0;
+  color: var(--text-dim);
+  color: var(--border);
+  font-weight: 600;
+  text-align: right;
+}
+
+.register-hex {
+  color: var(--accent);
+  color: var(--border);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.register-row--active .register-name {
+  color: var(--text-dim);
+}
+
+.register-row--active .register-hex {
+  color: var(--accent);
+}
+
+  .register-row--active .register-name {
+  color: var(--text-dim);
+}
+
+.register-row--active .register-hex {
+  color: var(--accent);
+}
+
+  /* ── Register tooltips ───────────────────────────────── */
+.register-tooltip {
+  position: fixed;
+  padding: 4px 8px;
+  background: var(--bg-deep);
+  color: var(--text-console);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  pointer-events: none;
+  z-index: 9999;
+}
