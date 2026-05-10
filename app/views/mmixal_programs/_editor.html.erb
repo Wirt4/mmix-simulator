@@ -9,8 +9,9 @@
     <%= render "registers" %>
   </div>
   <div class="editor-actions ide-layout-actions">
+        <%= button_tag "Assemble", type: "button", class: "btn--tactile" %>
     <%= button_tag "Run", type: "button", class: "btn--tactile btn--tactile--alert", data: {ide_facade_target:"runButton", action: "click->ide-facade#runUserProgram"}%>
-    <%= form.submit "Save", class: "btn--tactile" %>
+    <%= form.submit "Save", class: "btn--tactile", style: "margin-left: auto;" %>
   </div>
 </div>
 <% end %>
