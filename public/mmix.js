@@ -4671,6 +4671,8 @@ var _get_register_data = Module['_get_register_data'] = createExportWrapper('get
 var _general_register_count = Module['_general_register_count'] = createExportWrapper('general_register_count', 0);
 var _special_register_count = Module['_special_register_count'] = createExportWrapper('special_register_count', 0);
 var _get_source_code_pointer = Module['_get_source_code_pointer'] = createExportWrapper('get_source_code_pointer', 0);
+var _get_listing_pointer = Module['_get_listing_pointer'] = createExportWrapper('get_listing_pointer', 0);
+var _get_listing_size = Module['_get_listing_size'] = createExportWrapper('get_listing_size', 0);
 var _is_halted = Module['_is_halted'] = createExportWrapper('is_halted', 0);
 var _fflush = createExportWrapper('fflush', 1);
 var _emscripten_stack_get_end = wasmExports['emscripten_stack_get_end']
