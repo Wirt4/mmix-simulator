@@ -16,7 +16,6 @@ static char g_mmo[FILE_NAME_SIZE] = "program.mmo";
 static char g_mms[FILE_NAME_SIZE] = "program.mms";
 static char g_list[FILE_NAME_SIZE] = "listing.txt";
 static size_t g_listing_size = (size_t)-1;
-//set a file to write listing to
 
 static int setup_assembly(size_t src_len){
 	if (!ASSERT(src_len <= (size_t)(MAX_SRC_SIZE))){
