@@ -37,6 +37,8 @@ describe("Module Adapter", () => {
       _general_register_count: vi.fn(),
       _special_register_count: vi.fn(),
       _get_register_data: vi.fn(),
+      _get_listing_pointer: vi.fn(),
+      _get_listing_size: vi.fn()
     }
   })
 
@@ -106,6 +108,23 @@ describe("Module Adapter", () => {
 
     const adapter = new ModuleAdapter(mockModule)
     const result = adapter.getStdErr()
+
+    expect(result.length).toEqual(expected.length)
+    expect(result).toEqual(expect.stringContaining(expected))
+  })
+
+  it("getListing returns text from listing pointer", () => {
+    const expected = "#089abcdef00000000"
+    const mockHeap = new Uint8Array(260)
+    const encoded = new TextEncoder().encode(expected)
+    const mockPtr = 10
+    mockHeap.set(encoded, mockPtr)
+    mockModule.HEAPU8 = mockHeap
+    vi.spyOn(mockModule, '_get_listing_size').mockReturnValue(encoded.length)
+    vi.spyOn(mockModule, '_get_listing_pointer').mockReturnValue(mockPtr)
+
+    const adapter = new ModuleAdapter(mockModule)
+    const result = adapter.getListing()
 
     expect(result.length).toEqual(expected.length)
     expect(result).toEqual(expect.stringContaining(expected))

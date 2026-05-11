@@ -18,6 +18,10 @@ export default class ModuleAdapter implements IModuleAdapter {
     this._module = module
   }
 
+  public getListing(): string {
+    return this._decode_and_return(this._module._get_listing_pointer(), this._module._get_listing_size())
+  }
+
   /** Assembles MMIXAL source code by writing it into the WASM heap and invoking the assembler. */
   public assembleMMIXAL(sourceCode: string): boolean {
     if (sourceCode.length === 0) {
@@ -57,40 +61,12 @@ export default class ModuleAdapter implements IModuleAdapter {
 
   /** Reads and decodes the simulator's stdout buffer from the WASM heap. */
   public getStdOut(): string {
-    const ptr = this._module._get_stdout_pointer()
-
-    if (ptr <= 0) {
-      console.error("bad value for stdout pointer")
-      return "simulator error - check logs"
-    }
-
-    const len = this._module._get_stdout_size()
-
-    if (len < 0) {
-      console.error("length may not be negative")
-      return "simulator error - check logs"
-    }
-
-    return this._decode_and_return(ptr, len)
+    return this._decode_and_return(this._module._get_stdout_pointer(), this._module._get_stdout_size())
   }
 
   /** Reads and decodes the simulator's stderr buffer from the WASM heap. */
   public getStdErr(): string {
-    const ptr = this._module._get_stderr_pointer()
-
-    if (ptr <= 0) {
-      console.error("bad value for stderr pointer")
-      return "simulator error - check logs"
-    }
-
-    const len = this._module._get_stderr_size()
-
-    if (len < 0) {
-      console.error("length may not be negative")
-      return "simulator error - check logs"
-    }
-
-    return this._decode_and_return(ptr, len)
+    return this._decode_and_return(this._module._get_stderr_pointer(), this._module._get_stderr_size())
   }
 
   /** Initializes the MMIX simulator state via the WASM module. */
