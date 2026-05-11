@@ -13,6 +13,7 @@
 static unsigned char g_source_code_pointer[MAX_SRC_SIZE];
 static char g_mmo[FILE_NAME_SIZE] = "program.mmo";
 static char g_mms[FILE_NAME_SIZE] = "program.mms";
+//set a file to write listing to
 
 static int setup_assembly(size_t src_len){
 	if (!ASSERT(src_len <= (size_t)(MAX_SRC_SIZE))){
@@ -45,11 +46,23 @@ int assemble_source(size_t length){
 	if (!ASSERT (assembly_setup == 0)){
 		return -1;
 	}
-	// call the library function to assemble mmixal
+	// pass the listing file to mmixal_w 
 	int result = mmixal_w(g_mms, g_mmo, NULL);
+	// if result is 0, then copy listing contents to heap
 	int teardown = teardown_assembly();
 	if (!ASSERT(teardown == 0)){
 		return -1;
 	}
 	return result;
 }
+
+size_t get_listing_size(void){
+	return 0;
+}
+
+unsigned char* get_listing_pointer(void){
+	return NULL;
+}
+
+
+

@@ -20,6 +20,15 @@
  */
 int assemble_mmixal(size_t len);
 
+/** Returns the size in bytes of the assembly listing */
+size_t get_listing_size(void);
+
+/**
+ * Returns a pointer to the buffer containing the listing  (string representation of compiled code)
+ * A listing is created by a successful run of `assemble_mmixal`
+ */
+unsigned char* get_listing_pointer(void);
+
 /**
  * Returns the size in bytes of the simulator's stderr output.
  */
@@ -27,9 +36,6 @@ size_t get_stderr_size(void);
 
 /**
  * Returns a pointer to the buffer containing the simulator's stdout output.
- *
- * After assemble_mmixal(), this holds the assembler listing.
- * After simulation, this holds the simulated program's stdout.
  */
 unsigned char* get_stdout_pointer(void);
 

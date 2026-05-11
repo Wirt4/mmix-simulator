@@ -24,35 +24,34 @@ static size_t get_file_size(FILE *fileP, size_t bufferSize){
 	return fileSize;
 }
 
-static size_t read_to_heap(const char* filename, unsigned char* heap_pointer, size_t bufferSize){
-	if (!(ASSERT(filename != NULL) && ASSERT(heap_pointer != NULL))){ 
-		return (size_t)-1;
-	}
-	FILE *fileP = fopen(filename, "rb");
-	size_t size = (size_t)-1;
-	int readError = 0;
-	int closed;
-	if (fileP){
-		size_t fileSize = get_file_size(fileP, bufferSize);
-		if (fileSize > 0){
-			size = fread(heap_pointer, 1, fileSize, fileP);
-		}else{
-			size = 0;
-		}
-		readError = ferror(fileP);
-		closed = fclose(fileP);
-		ASSERT(closed == 0);
-	}
-	int deleted = remove(filename);
-	ASSERT(deleted == 0);
-	if (!ASSERT(!readError)){
-		return (size_t)-1;
-	}
-	ASSERT(size <= bufferSize);
-	//add null terminator
-	heap_pointer[size] = '\0';
-	return size;
-}
+// static size_t read_to_heap(const char* filename, unsigned char* heap_pointer, size_t bufferSize){
+// 	if (!(ASSERT(filename != NULL) && ASSERT(heap_pointer != NULL))){ 
+// 		return (size_t)-1;
+// 	}
+// 	FILE *fileP = fopen(filename, "rb");
+// 	size_t size = (size_t)-1;
+// 	int readError = 0;
+// 	if (fileP){
+// 		size_t fileSize = get_file_size(fileP, bufferSize);
+// 		if (fileSize > 0){
+// 			size = fread(heap_pointer, 1, fileSize, fileP);
+// 		}else{
+// 			size = 0;
+// 		}
+// 		readError = ferror(fileP);
+// 		int closed = fclose(fileP);
+// 		ASSERT(closed == 0);
+// 	}
+// 	int deleted = remove(filename);
+// 	ASSERT(deleted == 0);
+// 	if (!ASSERT(!readError)){
+// 		return (size_t)-1;
+// 	}
+// 	ASSERT(size <= bufferSize);
+// 	//add null terminator
+// 	heap_pointer[size] = '\0';
+// 	return size;
+// }
 
 static int restore_stream(int redirected_fileno, int original_fileno, FILE* stream){
 	if (!(ASSERT(redirected_fileno) >=0 && ASSERT(original_fileno >=0))){
@@ -214,3 +213,46 @@ void strcopy_and_trim(char* dest, const char*src, int len){
 	strncpy(dest, src, len);
 	dest[len] = '\0';
 }
+
+
+/**
+ * copies information the file to the heap
+ * inputs: filename: name of file, heap_pointer: pointer to target heap, buffer_size: allocated space on heap
+ * outputs: size of information written on success, 0 on failure
+ * preconditions: 
+ * 
+ * 	filename is non-null
+ * 	filename length is < FILE_NAME_SIZE
+ * 	tgt is non-null
+ * postcondition(s): the contents of the file at filename are written to the heap at tgt
+*/
+size_t read_to_heap(const char* filename, unsigned char* heap_pointer, size_t buffer_size){
+	if (!(ASSERT(filename != NULL) && ASSERT(heap_pointer != NULL))){ 
+		return (size_t)-1;
+	}
+	FILE *fileP = fopen(filename, "rb");
+	size_t size = (size_t)-1;
+	int readError = 0;
+	if (fileP){
+		size_t fileSize = get_file_size(fileP, buffer_size);
+		if (fileSize > 0){
+			size = fread(heap_pointer, 1, fileSize, fileP);
+		}else{
+			size = 0;
+		}
+		readError = ferror(fileP);
+		int closed = fclose(fileP);
+		ASSERT(closed == 0);
+	}
+	int deleted = remove(filename);
+	ASSERT(deleted == 0);
+	if (!ASSERT(!readError)){
+		return (size_t)-1;
+	}
+	ASSERT(size <= buffer_size);
+	//add null terminator
+	heap_pointer[size] = '\0';
+	return size;
+}
+
+
