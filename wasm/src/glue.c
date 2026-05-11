@@ -106,3 +106,19 @@ int special_register_count(void){
 	return special_registers();
 }
 
+unsigned char* get_source_code_pointer(void){
+	return source_code_buffer();
+}
+
+unsigned char* get_listing_pointer(void){
+	return listing_buffer();
+}
+
+size_t get_listing_size(void){
+	return listing_size();
+}
+
+int is_halted(void){
+	return sim_halted();
+}
+

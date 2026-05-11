@@ -8,18 +8,21 @@
 #include "mmixlib_wrapper.h"
 #include "io_utils.h"
 #include "assert.h"
-
+#define MAX_LISTING_SIZE MAX_SRC_SIZE
 //HIDDEN INFORMATION
 static unsigned char g_source_code_pointer[MAX_SRC_SIZE];
+static unsigned char g_listing_pointer[MAX_LISTING_SIZE];
 static char g_mmo[FILE_NAME_SIZE] = "program.mmo";
 static char g_mms[FILE_NAME_SIZE] = "program.mms";
+static char g_list[FILE_NAME_SIZE] = "listing.txt";
+static size_t g_listing_size = (size_t)-1;
 //set a file to write listing to
 
 static int setup_assembly(size_t src_len){
 	if (!ASSERT(src_len <= (size_t)(MAX_SRC_SIZE))){
 		return -1;
 	}
-	int written = write_from_heap(get_source_code_pointer(), src_len, g_mms);
+	int written = write_from_heap(source_code_buffer(), src_len, g_mms);
 	if (!ASSERT(written == 0)){
 		return -1;
 	}
@@ -33,7 +36,7 @@ static int teardown_assembly(void){
 	return 0;
 }
 
-unsigned char * get_source_code_pointer(void){
+unsigned char * source_code_buffer(void){
 	return g_source_code_pointer;
 }
 
@@ -46,9 +49,13 @@ int assemble_source(size_t length){
 	if (!ASSERT (assembly_setup == 0)){
 		return -1;
 	}
-	// pass the listing file to mmixal_w 
-	int result = mmixal_w(g_mms, g_mmo, NULL);
-	// if result is 0, then copy listing contents to heap
+	int result = mmixal_w(g_mms, g_mmo, g_list);
+	if (result == 0){
+		g_listing_size = read_to_heap(g_list, g_listing_pointer, (size_t)MAX_LISTING_SIZE);
+	}else{
+		//no success -> no listing to read
+		g_listing_size = 0;
+	}
 	int teardown = teardown_assembly();
 	if (!ASSERT(teardown == 0)){
 		return -1;
@@ -56,13 +63,12 @@ int assemble_source(size_t length){
 	return result;
 }
 
-size_t get_listing_size(void){
-	return 0;
+size_t listing_size(void){
+	ASSERT(g_listing_size != (size_t)-1);
+	return g_listing_size;
 }
 
-unsigned char* get_listing_pointer(void){
-	return NULL;
+unsigned char* listing_buffer(void){
+	ASSERT(g_listing_pointer != NULL);
+	return g_listing_pointer;
 }
-
-
-

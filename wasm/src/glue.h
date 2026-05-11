@@ -2,6 +2,14 @@
 #define GLUE_H
 #include <stdint.h>
 #include <stdio.h>
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#define WASM_EXPORT EMSCRIPTEN_KEEPALIVE
+#else
+#define WASM_EXPORT
+#endif
+
 /*
  * glue.h
  *
@@ -18,41 +26,41 @@
  *       On failure, get_stderr_pointer()/get_stderr_size() return assembler error output.
  * @returns heapRef to binary on success, non-zero on failure.
  */
-int assemble_mmixal(size_t len);
+WASM_EXPORT int assemble_mmixal(size_t len);
 
 /** Returns the size in bytes of the assembly listing */
-size_t get_listing_size(void);
+WASM_EXPORT size_t get_listing_size(void);
 
 /**
  * Returns a pointer to the buffer containing the listing  (string representation of compiled code)
  * A listing is created by a successful run of `assemble_mmixal`
  */
-unsigned char* get_listing_pointer(void);
+WASM_EXPORT unsigned char* get_listing_pointer(void);
 
 /**
  * Returns the size in bytes of the simulator's stderr output.
  */
-size_t get_stderr_size(void);
+WASM_EXPORT size_t get_stderr_size(void);
 
 /**
  * Returns a pointer to the buffer containing the simulator's stdout output.
  */
-unsigned char* get_stdout_pointer(void);
+WASM_EXPORT unsigned char* get_stdout_pointer(void);
 
 /**
  * Returns a pointer to the input buffer for writing MMIXAL source code.
  */
-unsigned char* get_source_code_pointer(void);
+WASM_EXPORT unsigned char* get_source_code_pointer(void);
 
 /**
  * Returns the size in bytes of the stdout output buffer.
  */
-size_t get_stdout_size(void);
+WASM_EXPORT size_t get_stdout_size(void);
 
 /**
  * Returns a pointer to the buffer containing the simulator's stderr output.
  */
-unsigned char* get_stderr_pointer(void);
+WASM_EXPORT unsigned char* get_stderr_pointer(void);
 
 /**
  * Executes a compiled .mmo binary.
@@ -62,7 +70,7 @@ unsigned char* get_stderr_pointer(void);
  *       get_stderr_pointer()/get_stderr_size() return the program's stderr.
  * @return 0 on success, non-zero on failure.
  */
-int mmix_initialize_simulator(void);
+WASM_EXPORT int mmix_initialize_simulator(void);
 
 /**Performs a specified amount of mmix instructions and redirects the console outputs of those instructions to buffer
  *
@@ -72,7 +80,7 @@ int mmix_initialize_simulator(void);
  *      state of simulator has advanced by specified instruction state (or exited if)
  *      outputs of performed code are stored in buffers
  */
-int mmix_perform_instructions(unsigned int instructions);
+WASM_EXPORT int mmix_perform_instructions(unsigned int instructions);
 
 /**
  * Cleans up the mmix simulator. Calls teardown methods in mmix and mmixware library. 
@@ -80,14 +88,14 @@ int mmix_perform_instructions(unsigned int instructions);
  * preconditions: the simulator is initialized
  * Returns 0 on success, -1 on failure
 */
-int mmix_finalize_simulator(void); 
+WASM_EXPORT int mmix_finalize_simulator(void);
 
 /*
  * returns 1 if the simulator is halted, 0 if not
  * preconditions: simulator is in an initialized state
  * postconditions: simulator is in an intitialized state
 */
-int is_halted(void);
+WASM_EXPORT int is_halted(void);
 
 /**
  * Returns a tetrabyte (32 bits) of data from the specified register. 
@@ -96,15 +104,17 @@ int is_halted(void);
  * @param partition: 0 to access higher tetra, 1 to access lower tetra
  * @return unisigned int containing 32 bits of data, 0 on failure
  * */
-unsigned int get_register_data(int register_type, int index, int partition); 
+WASM_EXPORT unsigned int get_register_data(int register_type, int index, int partition);
 
 /**
  * Returns the number of general registers in the MMIX architecture.
  */
-int general_register_count(void);
+WASM_EXPORT int general_register_count(void);
 
 /**
  * Returns the number of special registers in the MMIX architecture.
  */
-int special_register_count(void);
+WASM_EXPORT int special_register_count(void);
+
+WASM_EXPORT int is_halted(void);
 #endif /*GLUE_H */

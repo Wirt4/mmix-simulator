@@ -51,6 +51,15 @@ static const char *hello_world_source =
 static const char *expected_output = "Hello world!\n";
 static const char *expected_stderr ="Error message!\n";
 
+static const char*expected_add_two_numbers_listing ="                   \tLOC\t#100\n"
+ " ...100: e301001e  Main\tSET\t$1,30\n"
+ " ...104: e302000c  \tSET\t$2,12\n"
+ " ...108: 20000102  \tADD\t$0,$1,$2\n"
+ " ...10c: 00000000  \tTRAP\t0,Halt,0\n"
+ "\n"
+ "Symbol table:\n"
+ " Main = #0000000000000100 (1)\n";
+
 static const char *bad_mmixal_source =
     "\tLOC\t#100\n"
     "Main\tBADOP\t1,2,3\n"
@@ -114,7 +123,6 @@ static void test_assemble_mmixal_error_output(void) {
     TEST_ASSERT_EQUAL_STRING(expected_assembly_stderr, errMsg);
 }
 
-
 static void test_assemble_mmixal_is_non_null(void){
     int len =(int)strlen(hello_world_source);
     char unsigned *buf = get_source_code_pointer();
@@ -123,6 +131,18 @@ static void test_assemble_mmixal_is_non_null(void){
     int result = assemble_mmixal(len);
 
     TEST_ASSERT_EQUAL(0, result);
+}
+
+
+static void test_assemble_mmixal_listing(void){
+    int len =(int)strlen(add_two_numbers_source);
+    char unsigned *buf = get_source_code_pointer();
+    memcpy(buf, add_two_numbers_source, len + 1);
+
+    assemble_mmixal(len);
+    char listing[get_listing_size()];
+    strcpy(listing, (char*)get_listing_pointer());
+    TEST_ASSERT_EQUAL_STRING(expected_add_two_numbers_listing, listing); 
 }
 
 static void test_stderr_is_non_null(void){
@@ -231,6 +251,7 @@ int main(void) {
     RUN_TEST(test_assemble_mmixal_error);
     RUN_TEST(test_assemble_mmixal_error_output);
     RUN_TEST(test_assemble_mmixal_is_non_null);
+    RUN_TEST(test_assemble_mmixal_listing);
     RUN_TEST(test_stdout_pointer_is_non_null);
     RUN_TEST(test_stderr_is_non_null);
     RUN_TEST(test_simulation_error);

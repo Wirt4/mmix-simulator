@@ -28,6 +28,8 @@ interface WasmModule {
   _general_register_count(): number;
   _special_register_count(): number;
   _get_source_code_pointer(): number;
+  _get_listing_pointer(): number;
+  _get_listing_size(): number;
   _is_halted(): number;
 }
 
