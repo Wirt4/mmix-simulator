@@ -142,6 +142,17 @@ describe("Simulator tests", () => {
     expect(actual.length).toEqual(expected.length)
     expect(actual).toEqual(expect.stringContaining(expected))
   })
+
+  it("returns a correct description for a register", () => {
+    const mockAdapter = createMockAdapter()
+    const expected = "epsilon register"
+
+    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+
+    const result = simulator.getRegisterDescription("rE")
+    expect(result.length).toEqual(expected.length)
+    expect(result).toEqual(expect.stringContaining(expected))
+  })
 })
 
 function createTextarea(value = ""): HTMLTextAreaElement {

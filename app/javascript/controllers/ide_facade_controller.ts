@@ -6,7 +6,7 @@ import moduleAdapterFactory from "../moduleAdapter/factory"
 const GROUP_SIZE = 32
 
 export default class IDEFacadeController extends Controller {
-  static targets = ["textarea", "lineNumbers", "output", "runButton", "specialContainer", "generalContainer", "groupSelect"]
+  static targets = ["textarea", "lineNumbers", "output", "runButton", "specialContainer", "generalContainer", "groupSelect", "specialBody", "generalBody"]
 
   declare textareaTarget: HTMLTextAreaElement
   declare outputTarget: HTMLTextAreaElement
@@ -14,6 +14,8 @@ export default class IDEFacadeController extends Controller {
   declare specialContainerTarget: HTMLElement
   declare generalContainerTarget: HTMLElement
   declare groupSelectTarget: HTMLSelectElement
+  declare specialBodyTarget: HTMLElement
+  declare generalBodyTarget: HTMLElement
 
   private simulator!: Simulator
   private generalRegistersRendered = false
@@ -46,6 +48,16 @@ export default class IDEFacadeController extends Controller {
     this.renderGeneralRegisters()
   }
 
+  /** Toggles a register subpanel open/closed when its header is clicked. */
+  toggleSubpanel(event: Event): void {
+    const header = (event.currentTarget as HTMLElement)
+    const body = header.nextElementSibling as HTMLElement
+    const arrow = header.querySelector(".spin-arrow")
+    if (!arrow) return
+    body.classList.toggle("register-subpanel-body--collapsed")
+    arrow.classList.toggle("spin-arrow--open")
+  }
+
   /**
   * information hidden : the reorganization of display between groups of general registers
   * inputs: none
@@ -72,7 +84,36 @@ export default class IDEFacadeController extends Controller {
   }
 
   private renderSpecialRegisters(): void {
-    this.specialContainerTarget.innerHTML = this.simulator.specialRegisters.map((reg) => this.createRegisterDiv(reg)).join("")
+    this.specialContainerTarget.innerHTML = this.simulator.specialRegisters.map((reg) => {
+      const tooltip = this.simulator.getRegisterDescription(reg)
+      return this.createRegisterDiv(reg, tooltip)
+    }).join("")
+    this.attachTooltipListeners()
+  }
+
+  private tooltipEl: HTMLElement | null = null
+
+  private attachTooltipListeners(): void {
+    this.specialContainerTarget.querySelectorAll<HTMLElement>(".register-row[data-tooltip]").forEach((row) => {
+      row.addEventListener("mouseenter", () => {
+        const text = row.dataset.tooltip
+        if (!text) return
+        const toolTip = document.createElement("div")
+        toolTip.className = "register-tooltip"
+        toolTip.textContent = text
+        document.body.appendChild(toolTip)
+        const rect = row.getBoundingClientRect()
+        const toolTipTop = rect.top + rect.height / 2 - toolTip.offsetHeight / 2
+        toolTip.style.top = `${toolTipTop.toString()}px`
+        const toolTipLeft = rect.left - toolTip.offsetWidth - 8
+        toolTip.style.left = `${toolTipLeft.toString()}px`
+        this.tooltipEl = toolTip
+      })
+      row.addEventListener("mouseleave", () => {
+        this.tooltipEl?.remove()
+        this.tooltipEl = null
+      })
+    })
   }
 
   private renderGeneralRegisters(): void {
@@ -127,8 +168,12 @@ export default class IDEFacadeController extends Controller {
     return arr.join("")
   }
 
-  private createRegisterDiv(reg: string): string {
+  private static readonly ZERO_REGISTER = "0x0000000000000000"
+
+  private createRegisterDiv(reg: string, tooltip?: string): string {
     const val = this.simulator.getRegisterValue(reg)
-    return `<div class="register-row"><span class="register-name">$${reg}</span><span class="register-hex">${val}</span></div>`
+    const activeClass = val !== IDEFacadeController.ZERO_REGISTER ? " register-row--active" : ""
+    const tooltipAttr = tooltip ? ` data-tooltip="${tooltip}"` : ""
+    return `<div class="register-row${activeClass}"${tooltipAttr}><span class="register-name">$${reg}</span><span class="register-hex">${val}</span></div>`
   }
 }
