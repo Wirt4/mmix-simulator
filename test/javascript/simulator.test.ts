@@ -14,7 +14,8 @@ function createMockAdapter(): IModuleAdapter {
     performInstructions: vi.fn(),
     getGeneralRegisterValue: vi.fn(),
     getSpecialRegisterValue: vi.fn(),
-    generalRegisterCount: 100
+    generalRegisterCount: 100,
+    getListing: vi.fn()
   }
 }
 
