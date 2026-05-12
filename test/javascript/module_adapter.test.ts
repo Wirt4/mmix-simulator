@@ -37,6 +37,8 @@ describe("Module Adapter", () => {
       _general_register_count: vi.fn(),
       _special_register_count: vi.fn(),
       _get_register_data: vi.fn(),
+      _get_listing_pointer: vi.fn(),
+      _get_listing_size: vi.fn()
     }
   })
 
@@ -111,21 +113,38 @@ describe("Module Adapter", () => {
     expect(result).toEqual(expect.stringContaining(expected))
   })
 
-  it("intitializeMMIX calls _mmix_initialize_simulator", () => {
+  it("getListing returns text from listing pointer", () => {
+    const expected = "#089abcdef00000000"
+    const mockHeap = new Uint8Array(260)
+    const encoded = new TextEncoder().encode(expected)
+    const mockPtr = 10
+    mockHeap.set(encoded, mockPtr)
+    mockModule.HEAPU8 = mockHeap
+    vi.spyOn(mockModule, '_get_listing_size').mockReturnValue(encoded.length)
+    vi.spyOn(mockModule, '_get_listing_pointer').mockReturnValue(mockPtr)
+
+    const adapter = new ModuleAdapter(mockModule)
+    const result = adapter.getListing()
+
+    expect(result.length).toEqual(expected.length)
+    expect(result).toEqual(expect.stringContaining(expected))
+  })
+
+  it("initializeMMIX calls _mmix_initialize_simulator", () => {
     const initSpy = vi.spyOn(mockModule, '_mmix_initialize_simulator').mockReturnValue(0)
 
     const adapter = new ModuleAdapter(mockModule)
-    adapter.intitializeMMIX()
+    adapter.initializeMMIX()
 
     expect(initSpy).toHaveBeenCalledOnce()
   })
 
-  it("intitializeMMIX logs error when initialization fails", () => {
+  it("initializeMMIX logs error when initialization fails", () => {
     vi.spyOn(mockModule, '_mmix_initialize_simulator').mockReturnValue(-1)
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
     const adapter = new ModuleAdapter(mockModule)
-    adapter.intitializeMMIX()
+    adapter.initializeMMIX()
 
     expect(errorSpy).toHaveBeenCalledWith("did not initialize simulator")
   })

@@ -80,11 +80,17 @@ unsigned char* get_stderr_heap(void);
 unsigned char* get_stdout_heap(void);
 
 /**
- * Reads a file into the stdout heap buffer.
- * Returns a HeapRef with exit_code 0 on success, -1 on failure.
- * The file is deleted after reading.
- */
-struct HeapRef read_file_to_stdout_heap(const char *filename);
+ * copies information the file to the heap
+ * inputs: filename: name of file, heap_pointer: pointer to target heap, buffer_size: allocated space on heap
+ * outputs: size of information written on success, 0 on failure
+ * preconditions: 
+ * 
+ * 	filename is non-null
+ * 	filename length is < FILE_NAME_SIZE
+ * 	tgt is non-null
+ * postcondition(s): the contents of the file at filename are written to the heap at tgt
+*/
+size_t read_to_heap(const char* filename, unsigned char* heap_pointer, size_t buffer_size);
 
 /**
  * void

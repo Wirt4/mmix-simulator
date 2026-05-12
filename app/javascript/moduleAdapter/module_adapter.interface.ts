@@ -7,7 +7,7 @@ export interface IModuleAdapter {
   /** Returns the contents of the simulator's stderr buffer. */
   getStdErr(): string
   /** Initializes the MMIX simulator state. */
-  intitializeMMIX(): void
+  initializeMMIX(): void
   /** Tears down the MMIX simulator and releases resources. */
   finalizeMMIX(): void
   /** Returns true if the simulator has halted execution. */
@@ -20,4 +20,6 @@ export interface IModuleAdapter {
   getSpecialRegisterValue(index: number): string
   /** returns number of general registers*/
   generalRegisterCount: number
+  /** returns string representation of assembled code */
+  getListing(): string
 }

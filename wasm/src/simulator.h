@@ -26,7 +26,7 @@ void execute_instructions(unsigned int n);
  * preconditions: simulator is in an initialized state
  * postconditions: none
 */
-int is_halted(void);
+int sim_halted(void);
 
 /**
  * Cleans up the mmix simulator. Calls teardown methods in mmix and mmixware library. 

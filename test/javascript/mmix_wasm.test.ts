@@ -94,6 +94,35 @@ describe("MMIX WASM Module", () => {
     expect(stderrOutput).toEqual(expect.stringContaining(stdErrFragment))
   })
 
+  it("add two numbers produces correct listing", () => {
+    const src =
+      "\tLOC\t#100\n" +
+      "Main\tSET\t$1,30\n" +
+      "\tSET\t$2,12\n" +
+      "\tADD\t$0,$1,$2\n" +
+      "\tTRAP\t0,Halt,0\n"
+
+    const expected = "                   \tLOC\t#100\n" +
+      " ...100: e301001e  Main\tSET\t$1,30\n" +
+      " ...104: e302000c  \tSET\t$2,12\n" +
+      " ...108: 20000102  \tADD\t$0,$1,$2\n" +
+      " ...10c: 00000000  \tTRAP\t0,Halt,0\n" +
+      "\n" +
+      "Symbol table:\n" +
+      " Main = #0000000000000100 (1)\n"
+    const ptr: number = Module._get_source_code_pointer()
+    const encoded: Uint8Array = new TextEncoder().encode(src)
+    Module.HEAPU8.set(encoded, ptr)
+    Module.HEAPU8[ptr + encoded.length] = 0
+    Module._assemble_mmixal(encoded.length)
+    const listingPtr: number = Module._get_listing_pointer()
+    const size: number = Module._get_listing_size()
+
+    const bytes: Uint8Array = Module.HEAPU8.slice(listingPtr, listingPtr + size)
+    const listingContent: string = new TextDecoder().decode(bytes)
+    expect(listingContent).toEqual(expected)
+  })
+
   it("add two numbers produces correct register value", () => {
     const src =
       "\tLOC\t#100\n" +

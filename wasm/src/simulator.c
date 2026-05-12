@@ -64,7 +64,7 @@ void execute_instructions(unsigned int n){
 	}
 }
 
-int is_halted(void){
+int sim_halted(void){
 	ASSERT(g_simulator_initialized);
 	return get_halted();
 }

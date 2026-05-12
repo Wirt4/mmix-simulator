@@ -185,7 +185,6 @@ wasm: $(WASM_SRC_OBJ) $(WASM_LIBMMIX)
 	$(EMCC) $(CFLAGS) $(WASM_SRC_OBJ) \
 		-L$(WASM_BUILD) -lmmix \
 		-o $(WASM_BUILD)/mmix.js \
-		-sEXPORTED_FUNCTIONS='["_assemble_mmixal","_mmix_initialize_simulator","_mmix_finalize_simulator","_mmix_perform_instructions","_is_halted","_get_stdout_pointer","_get_source_code_pointer","_get_stderr_pointer","_get_stdout_size","_get_stderr_size", "_get_register_data", "_general_register_count", "_special_register_count"]' \
 		-sEXPORTED_RUNTIME_METHODS='["ccall","cwrap","HEAPU8"]' \
 		-sMODULARIZE=1 \
 		-sEXPORT_NAME='createMmixModule' --emit-tsd module.d.ts
