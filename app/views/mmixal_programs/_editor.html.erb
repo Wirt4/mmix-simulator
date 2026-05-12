@@ -1,13 +1,13 @@
 <%= form_with model: mmixal_program do |form|%>
-<div class="ide-layout" data-controller="ide-facade listing-panel">
+<div class="ide-layout" data-controller="ide-facade">
   <%= form.hidden_field :title %>
   <div class="ide-content">
     <div class="ide-main">
       <div class="panel-header">
         <span class="panel-header-label">Source</span>
-        <button type="button" class="listing-toggle" data-action="click->listing-panel#toggle">listing</button>
+        <button type="button" class="listing-toggle" disabled data-ide-facade-target="listingToggle" data-action="click->ide-facade#toggleListingPanel">listing</button>
       </div>
-      <div class="editor-container" data-listing-panel-target="panel">
+      <div class="editor-container" data-ide-facade-target="panel">
         <div class="editor-body" data-controller="text-format">
           <div class="line-numbers" data-text-format-target="lineNumbers">
             <span>1</span>
@@ -19,14 +19,17 @@
               ide_facade_target: "textarea",
               text_format_target: "textarea",
               line_numbers_target: "textarea",
-              action: "input->text-format#updateLineNumbers scroll->text-format#syncScroll keydown->text-format#handleKeydown"
+              action: "input->text-format#updateLineNumbers scroll->text-format#syncScroll keydown->text-format#handleKeydown input->ide-facade#sourceEdited"
             },
             spellcheck: false,
             autocomplete: "off",
             autocorrect: "off",
             autocapitalize: "off"
           %>
-          <%= render "listing" %>
+          <div class="listing-divider"></div>
+          <div class="listing-pane" data-text-format-target="listingPane" data-action="scroll->text-format#syncFromListing">
+            <div data-ide-facade-target="listing" class="listing-content"></div>
+          </div>
         </div>
       </div>
       <%= render "output" %>
@@ -36,7 +39,7 @@
   <div class="editor-actions ide-layout-actions">
         <%= button_tag "Assemble", type: "button", class: "btn--tactile", data: {ide_facade_target:"assembleButton", action: "click->ide-facade#assembleUserProgram"} %>
     <%= button_tag "Run", type: "button", class: "btn--tactile btn--tactile--alert", data: {ide_facade_target:"runButton", action: "click->ide-facade#runUserProgram"}%>
-    <%= form.submit "Save", class: "btn--tactile", style: "margin-left: auto;" %>
+    <%= form.submit "Save", class: "btn--tactile", style: "margin-left: auto;", data: { action: "click->ide-facade#beforeSave" } %>
   </div>
 </div>
 <% end %>

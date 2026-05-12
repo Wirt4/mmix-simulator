@@ -6,7 +6,21 @@ import moduleAdapterFactory from "../moduleAdapter/factory"
 const GROUP_SIZE = 32
 
 export default class IDEFacadeController extends Controller {
-  static targets = ["textarea", "lineNumbers", "output", "runButton", "specialContainer", "generalContainer", "groupSelect", "specialBody", "generalBody", "assembleButton", "listing"]
+  static targets = [
+    "textarea",
+    "lineNumbers",
+    "output",
+    "runButton",
+    "specialContainer",
+    "generalContainer",
+    "groupSelect",
+    "specialBody",
+    "generalBody",
+    "assembleButton",
+    "listing",
+    "listingToggle",
+    "panel"
+  ]
 
   declare textareaTarget: HTMLTextAreaElement
   declare outputTarget: HTMLTextAreaElement
@@ -17,23 +31,28 @@ export default class IDEFacadeController extends Controller {
   declare specialBodyTarget: HTMLElement
   declare generalBodyTarget: HTMLElement
   declare listingTarget: HTMLElement
+  declare listingToggleTarget: HTMLButtonElement
+  declare panelTarget: HTMLElement
 
   private simulator!: Simulator
+  private listingCollapsed = false
   private generalRegistersRendered = false
+  private unpaddedSource: string | null = null
+  private suppressSourceEdited = false
 
   /** Initializes the WASM module adapter, simulator, and register display on connect. */
   connect(): void {
-    // initialize the simulator
     this.runButtonTarget.disabled = true
     this.textareaTarget.disabled = true
+    //collapse the listing
+    if (!this.listingCollapsed) this.toggleListingPanel()
+
     moduleAdapterFactory().then((adapter) => {
       if (adapter === null) {
         console.error("moduleAdapter is null")
         return
       }
-      //      this.simulator = new Simulator(this.textareaTarget, this.outputTarget, adapter)
       this.simulator = new Simulator(adapter)
-      this.runButtonTarget.disabled = false
       this.textareaTarget.disabled = false
       this.renderSpecialRegisters()
       this.renderGeneralRegisters()
@@ -43,12 +62,84 @@ export default class IDEFacadeController extends Controller {
   }
 
   assembleUserProgram(): void {
-    const result = this.simulator.assemble(this.textareaTarget.value)
-    if (!result) {
-      this.outputTarget.value = this.simulator.getStdOut()
-    } else {
+    const source = this.unpaddedSource ?? this.textareaTarget.value
+    const result = this.simulator.assemble(source)
+    if (result) {
       this.listingTarget.textContent = this.simulator.getListing()
+      this.unpaddedSource = source
+      this.applyPadding()
+      this.runButtonTarget.disabled = false
+      this.listingToggleTarget.disabled = false
+      if (this.listingCollapsed) this.toggleListingPanel()
+    } else {
+      //collapse the listing
+      if (!this.listingCollapsed) this.toggleListingPanel()
+      this.outputTarget.value = this.simulator.getStdOut()
+      this.runButtonTarget.disabled = true
+      this.listingToggleTarget.disabled = true
     }
+  }
+
+  toggleListingPanel(): void {
+    this.listingCollapsed = !this.listingCollapsed
+    this.panelTarget.classList.toggle("listing-panel--collapsed", this.listingCollapsed)
+    if (this.listingCollapsed) {
+      this.removePadding()
+    } else if (this.listingTarget.textContent) {
+      this.unpaddedSource = this.textareaTarget.value
+      this.applyPadding()
+    }
+  }
+
+  sourceEdited(): void {
+    if (this.suppressSourceEdited || this.unpaddedSource === null) return
+    const { selectionStart, selectionEnd } = this.textareaTarget
+    const listingLines = (this.listingTarget.textContent ?? "").split("\n").length
+    const sourceLines = this.unpaddedSource.split("\n").length
+    const paddingCount = listingLines - sourceLines
+
+    const currentValue = this.textareaTarget.value
+    let value = currentValue
+    let removed = 0
+    while (removed < paddingCount && value.endsWith("\n")) {
+      value = value.slice(0, -1)
+      removed++
+    }
+
+    this.unpaddedSource = null
+    this.suppressSourceEdited = true
+    this.textareaTarget.value = value
+    this.textareaTarget.selectionStart = Math.min(selectionStart, value.length)
+    this.textareaTarget.selectionEnd = Math.min(selectionEnd, value.length)
+    this.textareaTarget.dispatchEvent(new Event("input", { bubbles: true }))
+    this.suppressSourceEdited = false
+    this.runButtonTarget.disabled = true
+    this.listingToggleTarget.disabled = true
+    if (!this.listingCollapsed) this.toggleListingPanel()
+  }
+
+  beforeSave(): void {
+    this.removePadding()
+    this.textareaTarget.value = this.textareaTarget.value.replace(/\n{2,}$/, "\n")
+  }
+
+  private applyPadding(): void {
+    if (!this.unpaddedSource) return
+    const listingLines = (this.listingTarget.textContent ?? "").split("\n").length
+    const sourceLines = this.unpaddedSource.split("\n").length
+    const extra = listingLines - sourceLines
+    if (extra > 0) {
+      this.suppressSourceEdited = true
+      this.textareaTarget.value = this.unpaddedSource + "\n".repeat(extra)
+      this.textareaTarget.dispatchEvent(new Event("input", { bubbles: true }))
+      this.suppressSourceEdited = false
+    }
+  }
+
+  private removePadding(): void {
+    this.textareaTarget.value = this.textareaTarget.value.replace(/\n{2,}$/, "\n")
+    this.textareaTarget.dispatchEvent(new Event("input", { bubbles: true }))
+    this.suppressSourceEdited = false
   }
 
   runUserProgram(): void {
@@ -56,6 +147,16 @@ export default class IDEFacadeController extends Controller {
     this.outputTarget.value = this.simulator.getStdOut()
     this.renderSpecialRegisters()
     this.renderGeneralRegisters()
+    this.openAllRegisterSubpanels()
+  }
+
+  private openAllRegisterSubpanels(): void {
+    this.element.querySelectorAll<HTMLElement>(".register-subpanel").forEach((subpanel) => {
+      const body = subpanel.querySelector<HTMLElement>(".register-subpanel-body")
+      const arrow = subpanel.querySelector<HTMLElement>(".spin-arrow")
+      if (body) body.classList.remove("register-subpanel-body--collapsed")
+      if (arrow) arrow.classList.add("spin-arrow--open")
+    })
   }
 
   toggleSubpanel(event: Event): void {
