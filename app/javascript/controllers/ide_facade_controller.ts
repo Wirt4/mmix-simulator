@@ -42,16 +42,15 @@ export default class IDEFacadeController extends Controller {
   }
 
   assembleUserProgram(): void {
-    console.log("button clicked")
+    this.simulator.assemble()
   }
-  /** Delegates program execution to the simulator. */
+
   runUserProgram(): void {
     this.simulator.runUserProgram()
     this.renderSpecialRegisters()
     this.renderGeneralRegisters()
   }
 
-  /** Toggles a register subpanel open/closed when its header is clicked. */
   toggleSubpanel(event: Event): void {
     const header = (event.currentTarget as HTMLElement)
     const body = header.nextElementSibling as HTMLElement

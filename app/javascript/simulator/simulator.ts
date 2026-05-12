@@ -11,9 +11,11 @@ export default class Simulator implements ISimulator {
   private _outText: HTMLTextAreaElement
   private _moduleAdapter: IModuleAdapter
   private _specialRegisterMap: Map<string, IRegisterInfo>
+  private _successfulAssembly: boolean
   //maintain a map of special register names to indeces
 
   constructor(inText: HTMLTextAreaElement, outText: HTMLTextAreaElement, moduleAdapter: IModuleAdapter) {
+    this._successfulAssembly = false
     this._inText = inText
     this._outText = outText
     this._moduleAdapter = moduleAdapter
@@ -53,17 +55,12 @@ export default class Simulator implements ISimulator {
     ])
   }
 
-  /** Assembles and executes the user's MMIXAL program, writing output to the output textarea. */
   public runUserProgram(): void {
-    const successfullyAssembled = this._moduleAdapter.assembleMMIXAL(this._inText.value)
-    if (!successfullyAssembled) {
-      this._outText.value = this._moduleAdapter.getStdErr()
-      return
+    if (this._successfulAssembly) {
+      const timeout = 800;
+      const instructionBatch = 1000;
+      this._outText.value = this.simulateWithTimeout(timeout, instructionBatch)
     }
-
-    const timeout = 800;
-    const instructionBatch = 1000;
-    this._outText.value = this.simulateWithTimeout(timeout, instructionBatch)
   }
 
   public getRegisterValue(register: string): string {
@@ -85,6 +82,14 @@ export default class Simulator implements ISimulator {
       return info.description
     }
     return "Undefined Register"
+  }
+
+  assemble(): boolean {
+    this._successfulAssembly = this._moduleAdapter.assembleMMIXAL(this._inText.value)
+    if (!this._successfulAssembly) {
+      this._outText.value = this._moduleAdapter.getStdErr()
+    }
+    return this._successfulAssembly
   }
 
   get specialRegisters(): string[] {

@@ -1,6 +1,8 @@
 /** Controls the MMIX simulator lifecycle: assembling, running, and inspecting register state. */
 export interface ISimulator {
-  /** Assembles and executes the user's MMIXAL program, writing output to the output area. */
+  /** Assembles the user's MMIXAL program, if there's an error */
+  assemble(): boolean
+  /** Executes the user's MMIXAL program, writing output to the output area. */
   runUserProgram(): void
   /** The list of MMIX special register names (rA, rB, etc.). */
   specialRegisters: string[]
