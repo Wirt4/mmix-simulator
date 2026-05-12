@@ -30,7 +30,8 @@ export default class IDEFacadeController extends Controller {
         console.error("moduleAdapter is null")
         return
       }
-      this.simulator = new Simulator(this.textareaTarget, this.outputTarget, adapter)
+      //      this.simulator = new Simulator(this.textareaTarget, this.outputTarget, adapter)
+      this.simulator = new Simulator(adapter)
       this.runButtonTarget.disabled = false
       this.textareaTarget.disabled = false
       this.renderSpecialRegisters()
@@ -42,11 +43,15 @@ export default class IDEFacadeController extends Controller {
   }
 
   assembleUserProgram(): void {
-    this.simulator.assemble()
+    const result = this.simulator.assemble(this.textareaTarget.value)
+    if (!result) {
+      this.outputTarget.value = this.simulator.getStdOut()
+    }
   }
 
   runUserProgram(): void {
     this.simulator.runUserProgram()
+    this.outputTarget.value = this.simulator.getStdOut()
     this.renderSpecialRegisters()
     this.renderGeneralRegisters()
   }
@@ -69,13 +74,10 @@ export default class IDEFacadeController extends Controller {
   * postconditions: the selected group is displayed
   **/
   switchRegisterTab(): void {
-    // check preconditions
     if (!this.generalRegistersRendered) {
       throw new Error("general registers not rendered")
     }
-    // get index of group to display from the dropdown widget
     const selected = this.groupSelectTarget.value
-    // hide all register groups
     this.generalContainerTarget.querySelectorAll<HTMLElement>(".register-group").forEach((g) => {
       //NOTE: can this be iterated through cleaner??
       g.style.display = "none"

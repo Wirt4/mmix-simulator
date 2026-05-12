@@ -1,9 +1,11 @@
 /** Controls the MMIX simulator lifecycle: assembling, running, and inspecting register state. */
 export interface ISimulator {
-  /** Assembles the user's MMIXAL program, if there's an error */
-  assemble(): boolean
+  /** Assembles the user's MMIXAL program*/
+  assemble(mmixal: string): boolean
   /** Executes the user's MMIXAL program, writing output to the output area. */
   runUserProgram(): void
+  /** returns contents of both stdOut and stdErr*/
+  getStdOut(): string
   /** The list of MMIX special register names (rA, rB, etc.). */
   specialRegisters: string[]
   /** The total number of general-purpose registers (0–255). */

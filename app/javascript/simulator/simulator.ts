@@ -7,17 +7,14 @@ interface IRegisterInfo {
 }
 
 export default class Simulator implements ISimulator {
-  private _inText: HTMLTextAreaElement
-  private _outText: HTMLTextAreaElement
   private _moduleAdapter: IModuleAdapter
   private _specialRegisterMap: Map<string, IRegisterInfo>
   private _successfulAssembly: boolean
+  private _out: string
   //maintain a map of special register names to indeces
 
-  constructor(inText: HTMLTextAreaElement, outText: HTMLTextAreaElement, moduleAdapter: IModuleAdapter) {
+  constructor(moduleAdapter: IModuleAdapter) {
     this._successfulAssembly = false
-    this._inText = inText
-    this._outText = outText
     this._moduleAdapter = moduleAdapter
     this._specialRegisterMap = new Map([
       ["rA", { code: 21, description: "arithmetic status register" }],
@@ -53,13 +50,18 @@ export default class Simulator implements ISimulator {
       ["rYY", { code: 30, description: "Y operand (trap)" }],
       ["rZZ", { code: 31, description: "Z operand (trap)" }],
     ])
+    this._out = ""
+  }
+
+  public getStdOut(): string {
+    return this._out
   }
 
   public runUserProgram(): void {
     if (this._successfulAssembly) {
       const timeout = 800;
       const instructionBatch = 1000;
-      this._outText.value = this.simulateWithTimeout(timeout, instructionBatch)
+      this._out = this.simulateWithTimeout(timeout, instructionBatch)
     }
   }
 
@@ -84,10 +86,10 @@ export default class Simulator implements ISimulator {
     return "Undefined Register"
   }
 
-  assemble(): boolean {
-    this._successfulAssembly = this._moduleAdapter.assembleMMIXAL(this._inText.value)
+  assemble(mmixal: string): boolean {
+    this._successfulAssembly = this._moduleAdapter.assembleMMIXAL(mmixal)
     if (!this._successfulAssembly) {
-      this._outText.value = this._moduleAdapter.getStdErr()
+      this._out = this._moduleAdapter.getStdErr()
     }
     return this._successfulAssembly
   }

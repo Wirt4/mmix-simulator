@@ -23,25 +23,25 @@ describe("Simulator tests", () => {
   it("assemble calls assembleMMIXAL", () => {
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'assembleMMIXAL')
-    const simulator = new Simulator(createTextarea("USER CODE"), createTextarea(), mockAdapter)
+    const simulator = new Simulator(mockAdapter)
 
-    simulator.assemble()
+    simulator.assemble("USER CODE")
 
     expect(mockAdapter.assembleMMIXAL).toHaveBeenCalledWith("USER CODE")
   })
   it("if assembleMMIXAL is okay, then assemble returns true", () => {
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
-    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+    const simulator = new Simulator(mockAdapter)
 
-    const result = simulator.assemble()
+    const result = simulator.assemble("USER CODE")
 
     expect(result).toBe(true)
   })
   it("runUserProgram doesn't call assembleMMIXAL", () => {
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'assembleMMIXAL')
-    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+    const simulator = new Simulator(mockAdapter)
 
     simulator.runUserProgram()
 
@@ -50,9 +50,9 @@ describe("Simulator tests", () => {
   it("on successful assembly, runUserProgram calls initializeMMIX", () => {
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
-    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+    const simulator = new Simulator(mockAdapter)
 
-    simulator.assemble()
+    simulator.assemble("USER CODE")
     simulator.runUserProgram()
 
     expect(mockAdapter.initializeMMIX).toHaveBeenCalledTimes(1)
@@ -60,9 +60,9 @@ describe("Simulator tests", () => {
   it("if assembly isn't successful, runUserProgram does not call initializeMMIX", () => {
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(false)
-    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+    const simulator = new Simulator(mockAdapter)
 
-    simulator.assemble()
+    simulator.assemble("USER CODE")
     simulator.runUserProgram()
 
     expect(mockAdapter.initializeMMIX).not.toHaveBeenCalled()
@@ -71,9 +71,9 @@ describe("Simulator tests", () => {
   it("on successful assembly, runUserProgram calls finalizeMMIX", () => {
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
-    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+    const simulator = new Simulator(mockAdapter)
 
-    simulator.assemble()
+    simulator.assemble("USER CODE")
     simulator.runUserProgram()
 
     expect(mockAdapter.finalizeMMIX).toHaveBeenCalledTimes(1)
@@ -81,9 +81,9 @@ describe("Simulator tests", () => {
   it("on successful assembly, runUserProgram calls isHalted()  at least once", () => {
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
-    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+    const simulator = new Simulator(mockAdapter)
 
-    simulator.assemble()
+    simulator.assemble("USER CODE")
     simulator.runUserProgram()
 
     expect(mockAdapter.isHalted).toHaveBeenCalled()
@@ -92,56 +92,52 @@ describe("Simulator tests", () => {
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
     vi.spyOn(mockAdapter, 'isHalted').mockReturnValue(false)
-    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+    const simulator = new Simulator(mockAdapter)
 
-    simulator.assemble()
+    simulator.assemble("TRAP 0")
     simulator.runUserProgram()
 
     expect(mockAdapter.performInstructions).toHaveBeenCalled()
   })
 
   it("runUserProgram calls assembleMMIXAL with the code from the inText field", () => {
-    const userCode = "TRAP 0"
-    const inText = createTextarea(userCode)
     const mockAdapter = createMockAdapter()
-    const simulator = new Simulator(inText, createTextarea(), mockAdapter)
-
-    simulator.assemble()
+    const simulator = new Simulator(mockAdapter)
+    const userCode = "TRAP 0"
+    simulator.assemble(userCode)
     simulator.runUserProgram()
 
     expect(mockAdapter.assembleMMIXAL).toHaveBeenCalledWith(userCode)
   })
   it("if assembleMMIXAL returns false, then assemble writes the stdErr to the outtext", () => {
     const expected = "OOPS! an error message!"
-    const outText = createTextarea()
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(false)
     vi.spyOn(mockAdapter, 'getStdErr').mockReturnValue(expected)
 
-    const simulator = new Simulator(createTextarea(), outText, mockAdapter)
-    simulator.assemble()
+    const simulator = new Simulator(mockAdapter)
+    simulator.assemble("bad code")
 
-    expect(outText.value).toEqual(expect.stringContaining(expected))
+    expect(simulator.getStdOut()).toEqual(expect.stringContaining(expected))
   })
   it('writes std out to outfile', () => {
-    const outText = createTextarea()
     const expected = "Hello world!"
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
     vi.spyOn(mockAdapter, 'getStdOut').mockReturnValue(expected)
     vi.spyOn(mockAdapter, 'isHalted').mockReturnValueOnce(false).mockReturnValueOnce(true)
 
-    const simulator = new Simulator(createTextarea(), outText, mockAdapter)
-    simulator.assemble()
+    const simulator = new Simulator(mockAdapter)
+    simulator.assemble("TRAP 0")
     simulator.runUserProgram()
 
-    expect(outText.value).toEqual(expect.stringContaining(expected))
+    expect(simulator.getStdOut()).toEqual(expect.stringContaining(expected))
   })
   it("when the argument to getRegister value is for a general register, then simulator calls module.getGeneralRegister", () => {
     const mockAdapter = createMockAdapter()
     const spy = vi.spyOn(mockAdapter, 'getGeneralRegisterValue').mockReturnValue("0x0")
 
-    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+    const simulator = new Simulator(mockAdapter)
     simulator.getRegisterValue("0")
 
     expect(spy).toHaveBeenCalledWith(0)
@@ -151,7 +147,7 @@ describe("Simulator tests", () => {
     const genSpy = vi.spyOn(mockAdapter, 'getGeneralRegisterValue').mockReturnValue("0x0")
     const specSpy = vi.spyOn(mockAdapter, "getSpecialRegisterValue").mockReturnValue("0x0")
 
-    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+    const simulator = new Simulator(mockAdapter)
     simulator.getRegisterValue("rA")
 
     expect(genSpy).not.toHaveBeenCalled()
@@ -162,7 +158,7 @@ describe("Simulator tests", () => {
     const expected = "0x3080210401289212"
     vi.spyOn(mockAdapter, 'getGeneralRegisterValue').mockReturnValue(expected)
 
-    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+    const simulator = new Simulator(mockAdapter)
     const actual = simulator.getRegisterValue("0")
 
     expect(actual.length).toEqual(expected.length)
@@ -173,7 +169,7 @@ describe("Simulator tests", () => {
     const expected = "0x00000000000000FC"
     vi.spyOn(mockAdapter, 'getSpecialRegisterValue').mockReturnValue(expected)
 
-    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+    const simulator = new Simulator(mockAdapter)
     const actual = simulator.getRegisterValue("rA")
 
     expect(actual.length).toEqual(expected.length)
@@ -183,16 +179,10 @@ describe("Simulator tests", () => {
     const mockAdapter = createMockAdapter()
     const expected = "epsilon register"
 
-    const simulator = new Simulator(createTextarea(), createTextarea(), mockAdapter)
+    const simulator = new Simulator(mockAdapter)
 
     const result = simulator.getRegisterDescription("rE")
     expect(result.length).toEqual(expected.length)
     expect(result).toEqual(expect.stringContaining(expected))
   })
 })
-
-function createTextarea(value = ""): HTMLTextAreaElement {
-  const textarea = document.createElement("textarea")
-  textarea.value = value
-  return textarea
-}
