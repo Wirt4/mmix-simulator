@@ -6,7 +6,7 @@ import moduleAdapterFactory from "../moduleAdapter/factory"
 const GROUP_SIZE = 32
 
 export default class IDEFacadeController extends Controller {
-  static targets = ["textarea", "lineNumbers", "output", "runButton", "specialContainer", "generalContainer", "groupSelect", "specialBody", "generalBody", "assembleButton"]
+  static targets = ["textarea", "lineNumbers", "output", "runButton", "specialContainer", "generalContainer", "groupSelect", "specialBody", "generalBody", "assembleButton", "listing"]
 
   declare textareaTarget: HTMLTextAreaElement
   declare outputTarget: HTMLTextAreaElement
@@ -16,6 +16,7 @@ export default class IDEFacadeController extends Controller {
   declare groupSelectTarget: HTMLSelectElement
   declare specialBodyTarget: HTMLElement
   declare generalBodyTarget: HTMLElement
+  declare listingTarget: HTMLElement
 
   private simulator!: Simulator
   private generalRegistersRendered = false
@@ -39,13 +40,14 @@ export default class IDEFacadeController extends Controller {
     }).catch((err: unknown) => {
       console.error("could not initialize simulator", err)
     })
-
   }
 
   assembleUserProgram(): void {
     const result = this.simulator.assemble(this.textareaTarget.value)
     if (!result) {
       this.outputTarget.value = this.simulator.getStdOut()
+    } else {
+      this.listingTarget.textContent = this.simulator.getListing()
     }
   }
 

@@ -94,6 +94,10 @@ export default class Simulator implements ISimulator {
     return this._successfulAssembly
   }
 
+  public getListing(): string {
+    return this._moduleAdapter.getListing()
+  }
+
   get specialRegisters(): string[] {
     return Array.from(this._specialRegisterMap.keys()).sort((a, b) => a.length - b.length || a.localeCompare(b))
   }
