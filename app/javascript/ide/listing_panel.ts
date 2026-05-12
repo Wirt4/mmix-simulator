@@ -1,0 +1,107 @@
+import { IListingPanel } from './listing_panel.interface'
+
+const TRAILING_NEWLINES = /\n{2,}$/
+
+export default class ListingPanel implements IListingPanel {
+  private _isCollapsed = false
+  private _unpaddedSource: string | null = null
+  private _suppressSourceEdited = false
+
+  constructor(
+    private readonly panelEl: HTMLElement,
+    private readonly listingEl: HTMLElement,
+    private readonly listingToggleEl: HTMLButtonElement,
+    private readonly textareaEl: HTMLTextAreaElement
+  ) { }
+
+  get isCollapsed(): boolean {
+    return this._isCollapsed
+  }
+
+  collapse(): void {
+    if (this._isCollapsed) return
+    this._isCollapsed = true
+    this.panelEl.classList.add("listing-panel--collapsed")
+    this.removePadding()
+  }
+
+  expand(): void {
+    if (!this._isCollapsed) return
+    this._isCollapsed = false
+    this.panelEl.classList.remove("listing-panel--collapsed")
+    if (this.listingEl.textContent) {
+      this._unpaddedSource = this.textareaEl.value
+      this.applyPadding()
+    }
+  }
+
+  setListing(text: string): void {
+    this.listingEl.textContent = text
+  }
+
+  setUnpaddedSource(source: string): void {
+    this._unpaddedSource = source
+  }
+
+  getSource(): string {
+    return this._unpaddedSource ?? this.textareaEl.value
+  }
+
+  applyPadding(): void {
+    if (!this._unpaddedSource) return
+    const listingLines = this.listingEl.textContent.split("\n").length
+    const sourceLines = this._unpaddedSource.split("\n").length
+    const extra = listingLines - sourceLines
+    if (extra > 0) {
+      this._suppressSourceEdited = true
+      this.textareaEl.value = this._unpaddedSource + "\n".repeat(extra)
+      this.textareaEl.dispatchEvent(new Event("input", { bubbles: true }))
+      this._suppressSourceEdited = false
+    }
+  }
+
+  removePadding(): void {
+    this.textareaEl.value = this.textareaEl.value.replace(TRAILING_NEWLINES, "\n")
+    this.textareaEl.dispatchEvent(new Event("input", { bubbles: true }))
+  }
+
+  removePaddingForSave(): void {
+    this._suppressSourceEdited = true
+    this.textareaEl.value = this.textareaEl.value.replace(TRAILING_NEWLINES, "\n")
+    this.textareaEl.dispatchEvent(new Event("input", { bubbles: true }))
+    this._suppressSourceEdited = false
+  }
+
+  handleSourceEdited(): boolean {
+    if (this._suppressSourceEdited || this._unpaddedSource === null) return false
+    const { selectionStart, selectionEnd } = this.textareaEl
+    const listingLines = this.listingEl.textContent.split("\n").length
+    const sourceLines = this._unpaddedSource.split("\n").length
+    const paddingCount = listingLines - sourceLines
+
+    const currentValue = this.textareaEl.value
+    let value = currentValue
+    let removed = 0
+    while (removed < paddingCount && value.endsWith("\n")) {
+      value = value.slice(0, -1)
+      removed++
+    }
+
+    this._unpaddedSource = null
+    this._suppressSourceEdited = true
+    this.textareaEl.value = value
+    this.textareaEl.selectionStart = Math.min(selectionStart, value.length)
+    this.textareaEl.selectionEnd = Math.min(selectionEnd, value.length)
+    this.textareaEl.dispatchEvent(new Event("input", { bubbles: true }))
+    this._suppressSourceEdited = false
+    return true
+  }
+
+  enableToggle(): void {
+    this.listingToggleEl.disabled = false
+  }
+
+  disableToggle(): void {
+    this.listingToggleEl.disabled = true
+  }
+}

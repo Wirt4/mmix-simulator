@@ -105,15 +105,17 @@ async function connectController(adapter: IModuleAdapter): Promise<{ root: HTMLE
 
   // Wait for the async connect (moduleAdapterFactory promise)
   await vi.waitFor(() => {
-    const container = root.querySelector("[data-ide-facade-target='specialContainer']")!
-    if (container.innerHTML === "") throw new Error("registers not rendered yet")
+    const container = root.querySelector("[data-ide-facade-target='specialContainer']")
+    if (container?.innerHTML === "") throw new Error("registers not rendered yet")
   })
 
   return { root, app }
 }
 
 function getTarget(root: HTMLElement, name: string): HTMLElement {
-  return root.querySelector(`[data-ide-facade-target="${name}"]`)!
+  const el: HTMLElement | null = root.querySelector(`[data-ide-facade-target="${name}"]`)
+  if (el === null) throw new Error(`could not retrieve target ${name}`)
+  return el
 }
 
 describe("IDE facade UI snapshots", () => {

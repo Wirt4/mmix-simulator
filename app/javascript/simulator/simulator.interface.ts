@@ -6,6 +6,8 @@ export interface ISimulator {
   runUserProgram(): void
   /** returns contents of both stdOut and stdErr*/
   getStdOut(): string
+  /** Returns the assembly listing for the most recent successful assembly. */
+  getListing(): string
   /** The list of MMIX special register names (rA, rB, etc.). */
   specialRegisters: string[]
   /** The total number of general-purpose registers (0–255). */
