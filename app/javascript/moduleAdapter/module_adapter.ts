@@ -18,11 +18,6 @@ export default class ModuleAdapter implements IModuleAdapter {
     this._module = module
   }
 
-  public getListing(): string {
-    return this._decode_and_return(this._module._get_listing_pointer(), this._module._get_listing_size())
-  }
-
-  /** Assembles MMIXAL source code by writing it into the WASM heap and invoking the assembler. */
   public assembleMMIXAL(sourceCode: string): boolean {
     if (sourceCode.length === 0) {
       return true
@@ -59,18 +54,19 @@ export default class ModuleAdapter implements IModuleAdapter {
     return result === 0
   }
 
-  /** Reads and decodes the simulator's stdout buffer from the WASM heap. */
   public getStdOut(): string {
     return this._decode_and_return(this._module._get_stdout_pointer(), this._module._get_stdout_size())
   }
 
-  /** Reads and decodes the simulator's stderr buffer from the WASM heap. */
   public getStdErr(): string {
     return this._decode_and_return(this._module._get_stderr_pointer(), this._module._get_stderr_size())
   }
 
-  /** Initializes the MMIX simulator state via the WASM module. */
-  public intitializeMMIX(): void {
+  public getListing(): string {
+    return this._decode_and_return(this._module._get_listing_pointer(), this._module._get_listing_size())
+  }
+
+  public initializeMMIX(): void {
     const initialized = this._module._mmix_initialize_simulator();
 
     if (initialized !== 0) {
@@ -78,7 +74,6 @@ export default class ModuleAdapter implements IModuleAdapter {
     }
   }
 
-  /** Tears down the MMIX simulator and releases WASM resources. */
   public finalizeMMIX(): void {
     const finalized = this._module._mmix_finalize_simulator();
 
@@ -87,14 +82,44 @@ export default class ModuleAdapter implements IModuleAdapter {
     }
   }
 
-  /** Returns true if the MMIX simulator has halted execution. */
   public isHalted(): boolean {
     return this._module._is_halted() !== 0;
   }
 
-  /** Executes the given number of MMIX instructions. */
   public performInstructions(instructions: number): void {
     this._module._mmix_perform_instructions(instructions);
+  }
+
+  public getGeneralRegisterValue(index: number): string {
+    return this.getRegisterValue(RegisterType.GENERAL, index)
+  }
+
+  public getSpecialRegisterValue(reg: number) {
+    return this.getRegisterValue(RegisterType.SPECIAL, reg)
+  }
+
+  get generalRegisterCount(): number {
+    return this._module._general_register_count()
+  }
+
+  //PRIVATE METHODS
+  private getRegisterValue(registerType: RegisterType, index: number): string {
+    const high = this.getUnsignedRegisterValue(registerType, index, Partition.HIGH)
+    const low = this.getUnsignedRegisterValue(registerType, index, Partition.LOW)
+    return this.formatRegister(high, low)
+  }
+
+  private formatRegister(high: number, low: number): string {
+    return `0x${this.toHexString(high, 8)}${this.toHexString(low, 8)}`
+  }
+
+  private toHexString(value: number, size: number): string {
+    return value.toString(16).padStart(size, '0').toUpperCase()
+  }
+
+  private getUnsignedRegisterValue(registerType: RegisterType, index: number, partition: Partition): number {
+    //  little unsigned right shift to coerce the return from the module
+    return this._module._get_register_data(registerType, index, partition) >>> 0
   }
 
   private _decode_and_return(ptr: number, len: number): string {
@@ -121,34 +146,4 @@ export default class ModuleAdapter implements IModuleAdapter {
     return new TextDecoder().decode(this._module.HEAPU8.slice(ptr, end))
   }
 
-  public getGeneralRegisterValue(index: number): string {
-    return this.getRegisterValue(RegisterType.GENERAL, index)
-  }
-
-  public getSpecialRegisterValue(reg: number) {
-    return this.getRegisterValue(RegisterType.SPECIAL, reg)
-  }
-
-  get generalRegisterCount(): number {
-    return this._module._general_register_count()
-  }
-
-  private getRegisterValue(registerType: RegisterType, index: number): string {
-    const high = this.getUnsignedRegisterValue(registerType, index, Partition.HIGH)
-    const low = this.getUnsignedRegisterValue(registerType, index, Partition.LOW)
-    return this.formatRegister(high, low)
-  }
-
-  private formatRegister(high: number, low: number): string {
-    return `0x${this.toHexString(high, 8)}${this.toHexString(low, 8)}`
-  }
-
-  private toHexString(value: number, size: number): string {
-    return value.toString(16).padStart(size, '0').toUpperCase()
-  }
-
-  private getUnsignedRegisterValue(registerType: RegisterType, index: number, partition: Partition): number {
-    //  little unsigned right shift to coerce the return from the module
-    return this._module._get_register_data(registerType, index, partition) >>> 0
-  }
 }

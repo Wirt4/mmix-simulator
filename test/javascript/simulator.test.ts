@@ -10,7 +10,7 @@ function createMockAdapter(): IModuleAdapter {
     getStdErr: vi.fn(),
     finalizeMMIX: vi.fn(),
     isHalted: vi.fn(),
-    intitializeMMIX: vi.fn(),
+    initializeMMIX: vi.fn(),
     performInstructions: vi.fn(),
     getGeneralRegisterValue: vi.fn(),
     getSpecialRegisterValue: vi.fn(),
@@ -27,7 +27,7 @@ describe("Simulator tests", () => {
 
     simulator.runUserProgram()
 
-    expect(mockAdapter.intitializeMMIX).toHaveBeenCalledTimes(1)
+    expect(mockAdapter.initializeMMIX).toHaveBeenCalledTimes(1)
   })
 
   it("on successful assembly, runUserProgram calls finalizeMMIX", () => {

@@ -130,21 +130,21 @@ describe("Module Adapter", () => {
     expect(result).toEqual(expect.stringContaining(expected))
   })
 
-  it("intitializeMMIX calls _mmix_initialize_simulator", () => {
+  it("initializeMMIX calls _mmix_initialize_simulator", () => {
     const initSpy = vi.spyOn(mockModule, '_mmix_initialize_simulator').mockReturnValue(0)
 
     const adapter = new ModuleAdapter(mockModule)
-    adapter.intitializeMMIX()
+    adapter.initializeMMIX()
 
     expect(initSpy).toHaveBeenCalledOnce()
   })
 
-  it("intitializeMMIX logs error when initialization fails", () => {
+  it("initializeMMIX logs error when initialization fails", () => {
     vi.spyOn(mockModule, '_mmix_initialize_simulator').mockReturnValue(-1)
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
     const adapter = new ModuleAdapter(mockModule)
-    adapter.intitializeMMIX()
+    adapter.initializeMMIX()
 
     expect(errorSpy).toHaveBeenCalledWith("did not initialize simulator")
   })

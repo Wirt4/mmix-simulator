@@ -98,7 +98,7 @@ export default class Simulator implements ISimulator {
 
     let cur: number = Date.now()
     const deadline = cur + timeout
-    this._moduleAdapter.intitializeMMIX()
+    this._moduleAdapter.initializeMMIX()
     let hasTimedOut = false
 
     while (cur < deadline && !this._moduleAdapter.isHalted()) {

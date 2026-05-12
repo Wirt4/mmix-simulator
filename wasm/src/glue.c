@@ -12,21 +12,24 @@ static char mmo[FILE_NAME_SIZE];
 static int initialized = 0;
 
 size_t get_stderr_size(void){
+	ASSERT(stderr_ref.size != (size_t)-1);
 	return stderr_ref.size;
 }
 
 unsigned char* get_stdout_pointer(void){
-	ASSERT(get_stdout_heap() != NULL);
-	return get_stdout_heap();
+	unsigned char *heap = get_stdout_heap();
+	ASSERT(heap != NULL);
+	return heap;
 }
 
 unsigned char* get_stderr_pointer(void){
-	ASSERT(get_stdout_heap() != NULL);
-	return get_stderr_heap();
+	unsigned char* heap = get_stderr_heap();
+	ASSERT(heap != NULL);
+	return heap;
 }
 
 int assemble_mmixal(size_t len){
-	if (!ASSERT(len != 0 && len < (size_t)MAX_SRC_SIZE)) {
+	if (!(ASSERT(len > 0) && ASSERT(len < (size_t)MAX_SRC_SIZE))) {
 		return -1;
 	};
 
@@ -49,73 +52,77 @@ size_t get_stdout_size(void){
 }
 
 int mmix_perform_instructions(unsigned int instructions){
-	// check if code is assembled
-	// check if sim initialized
 	if (!ASSERT(initialized)){
 		return -1;
 	}
-	// if instructions == 0, do nothing
 	if (instructions == 0 ){
 		return 0;
 	}
-	// redirect stdout and stderr
 	struct Redirect stdErrRedirect = redirect_stderr();
 	struct Redirect stdOutRedirect = redirect_stdout();
-        // call execute_instructions 
 	execute_instructions(instructions);
-	// restore stdout and stderr
 	stdout_ref = restore_stdout(stdOutRedirect);
 	stderr_ref = restore_stderr(stdErrRedirect);
-	// check restoration of streams
 	if (!(ASSERT(stderr_ref.exit_code == 0) && ASSERT(stdout_ref.exit_code == 0))){
 		return -1;
 	}
-	// return clean
 	return 0;
 }
 
 int mmix_initialize_simulator(void){
 	int init = initialize_simulator(mmo);
 	ASSERT(init == 0);
-	initialized = init == 0 ? 1: 0;
+	initialized = !init;
 	return init;
 }
 
 int mmix_finalize_simulator(void){
 	int fin = finalize_simulator();
 	ASSERT(fin == 0);
-	if (fin==0){
-		initialized = 0;
-	}
+	initialized = fin;
 	return fin;
 }
 
-unsigned int get_register_data(int register_type, int index, int partition){
-	// type: 0 for general register, 1 for special
-	if (register_type){
+unsigned int get_register_data(int is_special_register, int index, int partition){
+	ASSERT(index > 0);
+	if (is_special_register){
 		return get_special_register_data(index, partition);
 	}
 	return get_general_register_data(index, partition);
 }
 
 int general_register_count(void){
-	return general_registers();
+	const int count = general_registers();
+	if (!ASSERT(count >=0)){
+		return 0;
+	}
+	return count;
 }
 
 int special_register_count(void){
-	return special_registers();
+	const int count = special_registers();
+	if (!ASSERT(count >=0)){
+		return 0;
+	}
+	return count;
 }
 
 unsigned char* get_source_code_pointer(void){
-	return source_code_buffer();
+	unsigned char* buf = source_code_buffer();
+	ASSERT(buf != NULL);
+	return buf;
 }
 
 unsigned char* get_listing_pointer(void){
-	return listing_buffer();
+	unsigned char* buf = listing_buffer();
+	ASSERT(buf != NULL);
+	return buf;
 }
 
 size_t get_listing_size(void){
-	return listing_size();
+	size_t size = listing_size();
+	ASSERT(size != (size_t)-1);
+	return size;
 }
 
 int is_halted(void){

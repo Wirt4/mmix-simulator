@@ -185,26 +185,14 @@ void strcopy_and_trim(char* dest, const char*src, int len){
 	dest[len] = '\0';
 }
 
-
-/**
- * copies information the file to the heap
- * inputs: filename: name of file, heap_pointer: pointer to target heap, buffer_size: allocated space on heap
- * outputs: size of information written on success, 0 on failure
- * preconditions: 
- * 
- * 	filename is non-null
- * 	filename length is < FILE_NAME_SIZE
- * 	tgt is non-null
- * postcondition(s): the contents of the file at filename are written to the heap at tgt
-*/
 size_t read_to_heap(const char* filename, unsigned char* heap_pointer, size_t buffer_size){
-	if (!(ASSERT(filename != NULL) && ASSERT(heap_pointer != NULL))){ 
+	if (!(ASSERT(filename != NULL) && ASSERT(heap_pointer != NULL) && ASSERT(buffer_size != (size_t)-1))){ 
 		return (size_t)-1;
 	}
 	FILE *fileP = fopen(filename, "rb");
 	size_t size = (size_t)-1;
 	int readError = 0;
-	if (fileP){
+	if (ASSERT(fileP)){
 		size_t fileSize = get_file_size(fileP, buffer_size);
 		if (fileSize > 0){
 			size = fread(heap_pointer, 1, fileSize, fileP);
