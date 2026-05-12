@@ -6,7 +6,7 @@ import moduleAdapterFactory from "../moduleAdapter/factory"
 const GROUP_SIZE = 32
 
 export default class IDEFacadeController extends Controller {
-  static targets = ["textarea", "lineNumbers", "output", "runButton", "specialContainer", "generalContainer", "groupSelect", "specialBody", "generalBody"]
+  static targets = ["textarea", "lineNumbers", "output", "runButton", "specialContainer", "generalContainer", "groupSelect", "specialBody", "generalBody", "assembleButton"]
 
   declare textareaTarget: HTMLTextAreaElement
   declare outputTarget: HTMLTextAreaElement
@@ -41,6 +41,9 @@ export default class IDEFacadeController extends Controller {
 
   }
 
+  assembleUserProgram(): void {
+    console.log("button clicked")
+  }
   /** Delegates program execution to the simulator. */
   runUserProgram(): void {
     this.simulator.runUserProgram()

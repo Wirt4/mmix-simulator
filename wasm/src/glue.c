@@ -84,7 +84,7 @@ int mmix_finalize_simulator(void){
 }
 
 unsigned int get_register_data(int is_special_register, int index, int partition){
-	ASSERT(index > 0);
+	ASSERT(index >= 0);
 	if (is_special_register){
 		return get_special_register_data(index, partition);
 	}
