@@ -17,7 +17,26 @@ Database records in this environment should persist (user accounts, user's asset
 ## Testing
 `bin/rails test` for Ruby
 `npm run test` for TypeScript
-or `bin/rake test` for the whole suite (includes `npm run typecheck`) 
+or `bin/rake test` for the whole suite (includes `npm run typecheck`)
+
+### UI Snapshot Tests
+Snapshot tests live in `test/javascript/ide_facade_snapshot.test.ts` and guard the IDE UI
+(registers, listing panel, output, button states) against visual regression.
+They use Vitest's built-in snapshot support with a mocked WASM adapter.
+
+**Running snapshot tests:**
+```
+npm run test -- --run test/javascript/ide_facade_snapshot.test.ts
+```
+
+**Updating snapshots** (after an intentional UI change):
+```
+npm run test -- --run -u test/javascript/ide_facade_snapshot.test.ts
+```
+
+Snapshot files are stored in `test/javascript/__snapshots__/` and should be committed to git.
+When a snapshot test fails it means the rendered HTML or DOM state has changed from the
+stored baseline — review the diff to confirm the change is intentional before updating.
 
 ## Linting
 `bin/rubocop` for Ruby
