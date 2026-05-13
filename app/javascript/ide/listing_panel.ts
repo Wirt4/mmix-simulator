@@ -44,7 +44,9 @@ export default class ListingPanel implements IListingPanel {
   }
 
   getSource(): string {
-    return this._unpaddedSource ?? this.textareaEl.value
+    const src = this._unpaddedSource ?? this.textareaEl.value
+    console.log("src", JSON.stringify(src))
+    return src
   }
 
   applyPadding(): void {
