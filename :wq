@@ -37,6 +37,7 @@ export default class ListingPanel implements IListingPanel {
 
   setListing(text: string): void {
     this.listingEl.textContent = text
+    console.log(JSON.stringify(text))
   }
 
   setUnpaddedSource(source: string): void {

@@ -1,12 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
 import Simulator from "../simulator/simulator"
 import moduleAdapterFactory from "../moduleAdapter/factory"
-import ListingPanel from "../ide/listing_panel"
-import { IListingPanel } from "../ide/listing_panel.interface"
 import RegisterPanel from "../ide/register_panel"
 import { IRegisterPanel } from "../ide/register_panel.interface"
 import OutputPanel from "../ide/output_panel"
 import { IOutputPanel } from "../ide/output_panel.interface"
+import { IInput } from "../ide/input.interface"
+import { Input } from "../ide/input"
+import { IListing } from "../ide/listing.interface"
+import { Listing } from "../ide/listing"
 
 export default class IDEFacadeController extends Controller {
   static targets = [
@@ -32,22 +34,17 @@ export default class IDEFacadeController extends Controller {
   declare panelTarget: HTMLElement
 
   private simulator!: Simulator
-  private listingPanel!: IListingPanel
   private registerPanel!: IRegisterPanel
   private outputPanel!: IOutputPanel
+  private inputFrame!: IInput
+  private listingFrame!: IListing
+  private suppressSourceEdited = false
 
   connect(): void {
     this.outputPanel = new OutputPanel(this.outputTarget)
-    this.listingPanel = new ListingPanel(
-      this.panelTarget,
-      this.listingTarget,
-      this.listingToggleTarget,
-      this.textareaTarget
-    )
-    // collapse the listing panel on initial connect
-    this.listingPanel.collapse()
+    this.inputFrame = new Input(this.textareaTarget)
+    this.listingFrame = new Listing(this.listingTarget, this.listingToggleTarget, this.panelTarget)
     this.runButtonTarget.disabled = true
-    this.textareaTarget.disabled = true
 
     moduleAdapterFactory().then((adapter) => {
       if (adapter === null) {
@@ -61,7 +58,7 @@ export default class IDEFacadeController extends Controller {
         this.groupSelectTarget,
         this.simulator
       )
-      this.textareaTarget.disabled = false
+      this.inputFrame.unlock()
       this.registerPanel.renderSpecialRegisters()
       this.registerPanel.renderGeneralRegisters()
     }).catch((err: unknown) => {
@@ -70,42 +67,58 @@ export default class IDEFacadeController extends Controller {
   }
 
   assembleUserProgram(): void {
-    const source = this.listingPanel.getSource()
+    //clear the output
+    this.outputPanel.clear()
+    const source = this.inputFrame.getContents()
     const result = this.simulator.assemble(source)
     if (result) {
-      this.listingPanel.setListing(this.simulator.getListing())
-      this.listingPanel.setUnpaddedSource(source)
-      this.listingPanel.applyPadding()
+      this.listingFrame.setContents(this.simulator.getListing())
+      //extend input frame to be same height as listing
+      this.inputFrame.pad(this.listingFrame.size - this.inputFrame.size)
       this.runButtonTarget.disabled = false
-      this.listingPanel.enableToggle()
-      this.listingPanel.expand()
+      // unlock listing
+      this.listingFrame.unlock()
+      this.listingFrame.toggle()
     } else {
-      this.listingPanel.collapse()
+      this.listingFrame.default()
       this.outputPanel.setValue(this.simulator.getStdOut())
       this.runButtonTarget.disabled = true
-      this.listingPanel.disableToggle()
     }
   }
 
   toggleListingPanel(): void {
-    if (this.listingPanel.isCollapsed) {
-      this.listingPanel.expand()
-    } else {
-      this.listingPanel.collapse()
+    this.listingFrame.toggle()
+    if (!this.listingFrame.isOpen) {
+      this.suppressSourceEdited = true
+      this.inputFrame.trim()
+      this.suppressSourceEdited = false
+      this.inputFrame.edited = false
     }
   }
 
   sourceEdited(): void {
-    const wasEdited = this.listingPanel.handleSourceEdited()
-    if (wasEdited) {
-      this.runButtonTarget.disabled = true
-      this.listingPanel.disableToggle()
-      this.listingPanel.collapse()
+    if (this.suppressSourceEdited) return
+    // clear the output
+    this.outputPanel.clear()
+    // check if listing panel is open
+    if (this.listingFrame.isOpen) {
+      //pad the input with the difference in sizes
+      this.inputFrame.pad(this.listingFrame.size - this.inputFrame.size)
     }
+    // set listing back to default
+    this.listingFrame.default()
+    if (!this.inputFrame.edited) {
+      this.listingFrame.unlock()
+      this.inputFrame.edited = true
+    }
+    // lock the run button 
+    this.runButtonTarget.disabled = true
   }
 
   beforeSave(): void {
-    this.listingPanel.removePaddingForSave()
+    this.suppressSourceEdited = true
+    this.inputFrame.trim()
+    this.suppressSourceEdited = false
   }
 
   runUserProgram(): void {

@@ -1,6 +1,9 @@
 export interface IInput {
-  /**returns the code entered by the user in the editable form **/
   getContents(): string
   pad(lines: number): void
+  trim(): void
   readonly size: number
+  lock(): void
+  unlock(): void
+  edited: boolean
 }
