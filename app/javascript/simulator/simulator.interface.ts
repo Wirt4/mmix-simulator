@@ -1,3 +1,4 @@
+import { EnumRegisterType, IRegisterData } from "../register_types.interface"
 /** Controls the MMIX simulator lifecycle: assembling, running, and inspecting register state. */
 export interface ISimulator {
   /** Assembles the user's MMIXAL program*/
@@ -16,5 +17,7 @@ export interface ISimulator {
   getRegisterValue(register: string): string
   /** Returns a brief description of the given register */
   getRegisterDescription(register: string): string
+
+  getRegisters(type: EnumRegisterType): IRegisterData[]
 }
 

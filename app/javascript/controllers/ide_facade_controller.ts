@@ -2,14 +2,17 @@ import { Controller } from "@hotwired/stimulus"
 import Simulator from "../simulator/simulator"
 import { ISimulator } from "../simulator/simulator.interface"
 import moduleAdapterFactory from "../moduleAdapter/factory"
-import RegisterPanel from "../ide/register_panel"
-import { IRegisterPanel } from "../ide/register_panel.interface"
 import OutputPanel from "../ide/output_panel"
 import { IOutputPanel } from "../ide/output_panel.interface"
 import { IInput } from "../ide/input.interface"
 import { Input } from "../ide/input"
 import { IListing } from "../ide/listing.interface"
 import { Listing } from "../ide/listing"
+import { EnumRegisterType } from "../ide/registers.interface"
+import { IRegistersPanel } from "../ide/registers_panel.interface"
+import { RegistersPanel } from "../ide/registers_panel"
+import { Registers } from "../ide/registers"
+import { TabbedRegisters } from "../ide/tabbed_registers"
 
 export default class IDEFacadeController extends Controller {
   static targets = [
@@ -35,10 +38,10 @@ export default class IDEFacadeController extends Controller {
   declare panelTarget: HTMLElement
 
   private simulator!: ISimulator
-  private registerPanel!: IRegisterPanel
   private outputPanel!: IOutputPanel
   private inputFrame!: IInput
   private listingFrame!: IListing
+  private registers!: IRegistersPanel
   private suppressSourceEdited = false
 
   connect(): void {
@@ -53,15 +56,18 @@ export default class IDEFacadeController extends Controller {
         return
       }
       this.simulator = new Simulator(adapter)
-      this.registerPanel = new RegisterPanel(
-        this.specialContainerTarget,
-        this.generalContainerTarget,
-        this.groupSelectTarget,
-        this.simulator
-      )
+
+      const specialSubpanel = this.specialContainerTarget.closest<HTMLElement>(".register-subpanel")
+      if (!specialSubpanel) return
+      const generalSubpanel = this.generalContainerTarget.closest<HTMLElement>(".register-subpanel")
+      if (!generalSubpanel) return
+      const specialRegisters = new Registers(specialSubpanel, EnumRegisterType.SPECIAL)
+      const generalRegisters = new Registers(generalSubpanel, EnumRegisterType.GENERAL)
+      const generalRegistersPerTab = 32
+      const tabbedGeneralRegisters = new TabbedRegisters(generalRegisters, this.groupSelectTarget, generalRegistersPerTab)
+      this.registers = new RegistersPanel(specialRegisters, tabbedGeneralRegisters)
       this.inputFrame.unlock()
-      this.registerPanel.renderSpecialRegisters()
-      this.registerPanel.renderGeneralRegisters()
+      this.registers.render(this.simulator.getRegisters(EnumRegisterType.SPECIAL), this.simulator.getRegisters(EnumRegisterType.GENERAL))
     }).catch((err: unknown) => {
       console.error("could not initialize simulator", err)
     })
@@ -125,16 +131,15 @@ export default class IDEFacadeController extends Controller {
   runUserProgram(): void {
     this.simulator.runUserProgram()
     this.outputPanel.setValue(this.simulator.getStdOut())
-    this.registerPanel.renderSpecialRegisters()
-    this.registerPanel.renderGeneralRegisters()
-    this.registerPanel.openAllSubpanels()
+    this.registers.render(this.simulator.getRegisters(EnumRegisterType.SPECIAL), this.simulator.getRegisters(EnumRegisterType.GENERAL))
+    this.registers.openAll()
   }
 
   toggleSubpanel(event: Event): void {
-    this.registerPanel.toggleSubpanel(event)
+    this.registers.toggle(event)
   }
 
   switchRegisterTab(): void {
-    this.registerPanel.switchTab()
+    this.registers.switchTab()
   }
 }

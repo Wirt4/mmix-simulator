@@ -2,6 +2,7 @@
 import { describe, it, vi, expect } from "vitest"
 import Simulator from '../../app/javascript/simulator/simulator'
 import { IModuleAdapter } from '../../app/javascript/moduleAdapter/module_adapter.interface'
+import { EnumRegisterType } from "../../app/javascript/ide/registers.interface"
 
 function createMockAdapter(): IModuleAdapter {
   return {
@@ -14,7 +15,7 @@ function createMockAdapter(): IModuleAdapter {
     performInstructions: vi.fn(),
     getGeneralRegisterValue: vi.fn(),
     getSpecialRegisterValue: vi.fn(),
-    generalRegisterCount: 100,
+    generalRegisterCount: 256,
     getListing: vi.fn()
   }
 }
@@ -184,5 +185,141 @@ describe("Simulator tests", () => {
     const result = simulator.getRegisterDescription("rE")
     expect(result.length).toEqual(expected.length)
     expect(result).toEqual(expect.stringContaining(expected))
+  })
+})
+
+describe("long register list tests", () => {
+  it("if getRegisters is called with General, then it returns an array of size 256", () => {
+    const expectedCount = 256
+    const mockAdapter = createMockAdapter()
+    const simulator = new Simulator(mockAdapter)
+
+    const actual = simulator.getRegisters(EnumRegisterType.GENERAL)
+
+    expect(actual.length).toEqual(expectedCount)
+  })
+  it("if getRegisters is called with Special, then it returns an array of size 32", () => {
+    const expectedCount = 32
+    const mockAdapter = createMockAdapter()
+    const simulator = new Simulator(mockAdapter)
+
+    const actual = simulator.getRegisters(EnumRegisterType.SPECIAL)
+
+    expect(actual.length).toEqual(expectedCount)
+  })
+  it("getRegisters returns results from the adapter", () => {
+    const expected = "0x00000000000000FF"
+    const mockAdapter = createMockAdapter()
+    vi.spyOn(mockAdapter, 'getGeneralRegisterValue')
+      .mockReturnValueOnce(expected)
+      .mockReturnValue("0x0000000000000000")
+    const simulator = new Simulator(mockAdapter)
+
+    const actual = simulator.getRegisters(EnumRegisterType.GENERAL)
+
+    expect(actual.some(r => r.value === expected)).toBe(true)
+  })
+  it("getRegisters maps correct values to general", () => {
+    const mockAdapter = createMockAdapter()
+    const hexA = "0x0000000000000042"
+    const hexB = "0xFFFFFFFFFFFFFFFF"
+    const hexC = "0x0000000000000003"
+    const ndxA = 5
+    const ndxB = 100
+    const ndxC = 207
+    const expectedA = "$5"
+    const expectedB = "$100"
+    const expectedC = "$207"
+
+    const hexZero = "0x0000000000000000"
+    vi.spyOn(mockAdapter, 'getGeneralRegisterValue').mockImplementation((reg: number) => {
+      switch (reg) {
+        case ndxA:
+          return hexA
+        case ndxB:
+          return hexB
+        case ndxC:
+          return hexC
+        default:
+          return hexZero
+      }
+    })
+    const simulator = new Simulator(mockAdapter)
+
+    const actual = simulator.getRegisters(EnumRegisterType.GENERAL)
+
+    expect(actual[ndxA]).toEqual({ id: expectedA, value: hexA })
+    expect(actual[ndxB]).toEqual({ id: expectedB, value: hexB })
+    expect(actual[ndxC]).toEqual({ id: expectedC, value: hexC })
+    const others = actual.filter((_, i) => !(i === ndxA || i === ndxB || i === ndxC))
+    expect(others.every(r => r.value === hexZero)).toBe(true)
+  })
+  it("getRegisters maps correct values to special", () => {
+    const mockAdapter = createMockAdapter()
+    const hexA = "0x0000000000000042"
+    const hexB = "0xFFFFFFFFFFFFFFFF"
+    const hexC = "0x0000000000000003"
+    /** note the peculiuar mapping:
+    * the special register code (or index as far as the module is concerned) 
+    * does not map to the special registers in lexigraphical order 
+    * see TAOCP MMIX Fascicle for more information
+    * */
+    const ndxA = 21
+    const expectedNdxA = 0
+    const ndxB = 0
+    const expectedNdxB = 1
+    const ndxC = 31
+    const expectedNdxC = 31
+    //TODO: determine where in the flow those damn $ signs should be appended
+    const expectedA = "$rA"
+    const expectedB = "$rB"
+    const expectedC = "$rZZ"
+
+    const hexZero = "0x0000000000000000"
+    vi.spyOn(mockAdapter, 'getSpecialRegisterValue').mockImplementation((reg: number) => {
+      switch (reg) {
+        case ndxA:
+          return hexA
+        case ndxB:
+          return hexB
+        case ndxC:
+          return hexC
+        default:
+          return hexZero
+      }
+    })
+    const simulator = new Simulator(mockAdapter)
+
+    const actual = simulator.getRegisters(EnumRegisterType.SPECIAL)
+
+    expect(actual[expectedNdxA]).toEqual(expect.objectContaining({ id: expectedA, value: hexA }))
+    expect(actual[expectedNdxB]).toEqual(expect.objectContaining({ id: expectedB, value: hexB }))
+    expect(actual[expectedNdxC]).toEqual(expect.objectContaining({ id: expectedC, value: hexC }))
+    const others = actual.filter((_, i) => !(i === expectedNdxA || i === expectedNdxB || i === expectedNdxC))
+    expect(others.every(r => r.value === hexZero)).toBe(true)
+  })
+  it("special registers also deliver descriptions", () => {
+    const mockAdapter = createMockAdapter()
+    /** note the peculiuar mapping:
+    * the special register code (or index as far as the module is concerned) 
+    * does not map to the special registers in lexigraphical order 
+    * see TAOCP MMIX Fascicle for more information
+    * */
+    const expectedNdxA = 0
+    const expectedNdxB = 1
+    const expectedNdxC = 31
+    const expectedDescriptionA = "arithmetic status register" //rA
+    const expectedDescriptionB = "bootstrap register (trip)" //rB
+    const expectedDescriptionC = "Z operand (trap)" //rZZ
+
+    const hexZero = "0x0000000000000000"
+    vi.spyOn(mockAdapter, 'getSpecialRegisterValue').mockReturnValue(hexZero)
+    const simulator = new Simulator(mockAdapter)
+
+    const actual = simulator.getRegisters(EnumRegisterType.SPECIAL)
+
+    expect(actual[expectedNdxA]).toEqual(expect.objectContaining({ description: expectedDescriptionA }))
+    expect(actual[expectedNdxB]).toEqual(expect.objectContaining({ description: expectedDescriptionB }))
+    expect(actual[expectedNdxC]).toEqual(expect.objectContaining({ description: expectedDescriptionC }))
   })
 })

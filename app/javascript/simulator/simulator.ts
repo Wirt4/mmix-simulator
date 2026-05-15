@@ -1,6 +1,6 @@
 import { ISimulator } from './simulator.interface'
 import { IModuleAdapter } from './../moduleAdapter/module_adapter.interface'
-
+import { EnumRegisterType, IRegisterData } from "../register_types.interface"
 interface IRegisterInfo {
   code: number,
   description: string
@@ -105,6 +105,42 @@ export default class Simulator implements ISimulator {
     return this._moduleAdapter.generalRegisterCount
   }
 
+  getRegisters(type: EnumRegisterType): IRegisterData[] {
+    switch (type) {
+      case EnumRegisterType.GENERAL:
+        return this.allGeneralRegisters()
+      case EnumRegisterType.SPECIAL:
+        return this.allSpecialRegisters()
+    }
+  }
+
+  private allGeneralRegisters(): IRegisterData[] {
+    const result = new Array<IRegisterData>(this._moduleAdapter.generalRegisterCount)
+    for (let i = 0; i < this._moduleAdapter.generalRegisterCount; i++) {
+      const id = `$${String(i)}`
+      const value = this._moduleAdapter.getGeneralRegisterValue(i)
+      result[i] = { id, value }
+    }
+    return result
+  }
+
+  private allSpecialRegisters(): IRegisterData[] {
+    const regKeys = Array.from(this._specialRegisterMap.keys())
+    const result = new Array<IRegisterData>(regKeys.length)
+    for (let i = 0; i < regKeys.length; i++) {
+      const regName = regKeys[i]
+      //get the register value
+      const data = this._specialRegisterMap.get(regName)
+      if (!data) continue
+      const ndx = data.code
+      const description = data.description
+      const id = `$${regName}`
+      const value = this._moduleAdapter.getSpecialRegisterValue(ndx)
+      //    set it in the return array
+      result[i] = { id, value, description }
+    }
+    return result
+  }
   private simulateWithTimeout(timeout: number, instructionsPerInterval: number): string {
     let programOutputs = "";
 
