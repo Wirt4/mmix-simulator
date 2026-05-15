@@ -13,6 +13,9 @@ enum Partition {
 
 export default class ModuleAdapter implements IModuleAdapter {
   private _module: MainModule
+  private get heapU8(): Uint8Array {
+    return this._module.HEAPU8 as Uint8Array
+  }
 
   constructor(module: MainModule) {
     this._module = module
@@ -38,7 +41,7 @@ export default class ModuleAdapter implements IModuleAdapter {
     }
 
     try {
-      this._module.HEAPU8.set(encoded, ptr)
+      this.heapU8.set(encoded, ptr)
     } catch (error: unknown) {
       console.error("range error writing source code to buffer")
       console.error(error?.toString())
@@ -46,8 +49,8 @@ export default class ModuleAdapter implements IModuleAdapter {
 
     const len = encoded.length
 
-    if (ptr + len < this._module.HEAPU8.length) {
-      this._module.HEAPU8[ptr + len] = 0
+    if (ptr + len < this.heapU8.length) {
+      this.heapU8[ptr + len] = 0
     }
 
     const result = this._module._assemble_mmixal(len)
@@ -132,18 +135,18 @@ export default class ModuleAdapter implements IModuleAdapter {
       return "simulator error - see logs"
     }
 
-    if (ptr >= this._module.HEAPU8.length) {
+    if (ptr >= this.heapU8.length) {
       console.error("pointer out of range")
       return "simulator error - check logs"
     }
 
     const end = ptr + len
 
-    if (end >= this._module.HEAPU8.length) {
-      return new TextDecoder().decode(this._module.HEAPU8.slice(ptr)) + "--truncated"
+    if (end >= this.heapU8.length) {
+      return new TextDecoder().decode(this.heapU8.slice(ptr)) + "--truncated"
     }
 
-    return new TextDecoder().decode(this._module.HEAPU8.slice(ptr, end))
+    return new TextDecoder().decode(this.heapU8.slice(ptr, end))
   }
 
 }

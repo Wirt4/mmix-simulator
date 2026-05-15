@@ -59,7 +59,7 @@ describe("MMIX WASM Module", () => {
     const stderrPtr: number = Module._get_stderr_pointer()
     Module._mmix_finalize_simulator()
 
-    const bytes = Module.HEAPU8.slice(stderrPtr, stderrPtr + stderrSize)
+    const bytes = (Module.HEAPU8 as Uint8Array).slice(stderrPtr, stderrPtr + stderrSize)
     const stderrOutput: string = new TextDecoder().decode(bytes)
 
     expect(stderrOutput).toBe(expected)
