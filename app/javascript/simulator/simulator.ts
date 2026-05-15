@@ -11,7 +11,6 @@ export default class Simulator implements ISimulator {
   private _specialRegisterMap: Map<string, IRegisterInfo>
   private _successfulAssembly: boolean
   private _out: string
-  //maintain a map of special register names to indeces
 
   constructor(moduleAdapter: IModuleAdapter) {
     this._successfulAssembly = false

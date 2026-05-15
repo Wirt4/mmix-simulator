@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import Simulator from "../simulator/simulator"
+import { ISimulator } from "../simulator/simulator.interface"
 import moduleAdapterFactory from "../moduleAdapter/factory"
 import RegisterPanel from "../ide/register_panel"
 import { IRegisterPanel } from "../ide/register_panel.interface"
@@ -33,7 +34,7 @@ export default class IDEFacadeController extends Controller {
   declare listingToggleTarget: HTMLButtonElement
   declare panelTarget: HTMLElement
 
-  private simulator!: Simulator
+  private simulator!: ISimulator
   private registerPanel!: IRegisterPanel
   private outputPanel!: IOutputPanel
   private inputFrame!: IInput
