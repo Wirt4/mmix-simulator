@@ -67,7 +67,15 @@ export class Registers implements IRegisters {
     return child
   }
 
-  private attachTooltipListeners(): void {
+  private temp(): void {
+    // information hidden: 
+    // - selection of html elements by class
+    // - attaching mouse listeners to selected elements
+    // - generating html elements for tootip style 
+    // inputs: NodeList Object "registerRows"
+    // outputs: none
+    // precondtions: registerRows do not have tooltips attached or mouse events added
+    // postcondtions: registerRows have tooltips attaced and mose events listeners set 
     this.container.querySelectorAll<HTMLElement>(".register-row[data-tooltip]").forEach((row) => {
       row.addEventListener("mouseenter", () => {
         const text = row.dataset.tooltip
@@ -88,5 +96,92 @@ export class Registers implements IRegisters {
         this._tooltipEl = null
       })
     })
+  }
+  // information hidden: 
+  // - selection of html elements by class
+  // - attaching mouse listeners to selected elements
+  // - generating html elements for tootip style 
+  // inputs: NodeList Object "registerRows"
+  // outputs: none
+  // precondtions: registerRows do not have tooltips attached or mouse events added
+  // postcondtions: registerRows have tooltips attaced and mose events listeners set 
+
+  private attachTooltipListeners(registerRows: NodeList): void {
+    // define a temporary elements
+    const toolTip = new ToolTip()
+
+    // iterate through registerRows with ForEach loop
+    registerRows.forEach(row => {
+      if (!(row instanceof HTMLElement && row.classList.contains("register-row[data-tooltip]"))) return;
+      const txt = row.dataset.tooltip
+      if (!txt) return
+      toolTip.setText(txt)
+      row.addEventListener("mouseover", toolTip.addDiv)
+      row.addEventListener("mouseleave", toolTip.removeDiv)
+
+    })
+  }
+}
+
+class ToolTip {
+  private txt = ""
+  private tempDiv: HTMLElement | null = null
+
+  setText(txt: string): void {
+    this.txt = txt
+  }
+
+  addDiv(): void {
+    // create the document element
+    const div = document.createElement("div")
+    // set the contents
+    div.textContent = this.txt
+    //place it
+    document.appendChild(div)
+    //size it
+    const { top, left } = this.size(div)
+    //style it
+    div.style.top = `${top.toString()}px`
+    div.style.left = `${left.toString()}px`
+    div.className = "register-tooltip"
+    // set tempDiv to refer to it
+    this.tempDiv = div
+  }
+  removeDiv(): void {
+    //remove tempDiv from the parent node
+    this.tempDiv?.remove()
+    //nullify tempDiv
+    this.tempDiv = null
+  }
+
+  // information hidden: how the element is placed in the document, and has it's bounding box sized appropriatley
+  // inputs: an HTMLElement and a leftMargin
+  // ouputs: {number, number} object containing top and left
+  // preconditions: div is a child of the document
+  // postconditions: none
+  private size(div: HTMLElement, leftMargin: number = 8): { top: number, left: number } {
+    // set result to 0,0
+    const result = { top: 0, left: 0 }
+    // if div is not a child of document, return early
+    if (!document.contains(div)) return result
+    // get the bounding box
+    const rect = div.getBoundingClientRect()
+    // calculate the top coordinate
+    result.top = this.calculateTopCoord(div, rect)//rect.top + (rect.height / 2) - (div.offsetHeight / 2)
+    // calculate the left coordinate (with a margin to avoid butt edges)
+    result.left = rect.left - div.offsetWidth - leftMargin
+    // return the answer
+    return result
+  }
+
+  private calculateTopCoord(div: HTMLElement, rect: DOMRect): number {
+    // set result to the top edge position of the div
+    let result = rect.top
+    // shift result down to vertical midpoint
+    result += rect.height / 2
+    // back it up by half the div's height
+    result -= div.offsetHeight / 2
+    // return the adjusted result
+    return result
   }
 }
