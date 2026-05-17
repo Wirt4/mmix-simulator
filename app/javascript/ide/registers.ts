@@ -39,7 +39,7 @@ export class Registers implements IRegisters {
       divs[i] = [openDiv, identifier, displayValue, "</div>"].join("")
     }
     this.container.innerHTML = divs.join("")
-    this.attachTooltipListeners()
+    this.attachTooltipListeners(this.container.querySelectorAll<HTMLElement>(".register-row[data-tooltip]"))
   }
 
   toggle(): void {
@@ -112,38 +112,32 @@ export class Registers implements IRegisters {
 
     // iterate through registerRows with ForEach loop
     registerRows.forEach(row => {
-      if (!(row instanceof HTMLElement && row.classList.contains("register-row[data-tooltip]"))) return;
+      if (!(row instanceof HTMLElement)) return
       const txt = row.dataset.tooltip
       if (!txt) return
-      toolTip.setText(txt)
-      row.addEventListener("mouseover", toolTip.addDiv)
-      row.addEventListener("mouseleave", toolTip.removeDiv)
-
+      row.addEventListener("mouseenter", () => toolTip.addDiv(row, txt))
+      row.addEventListener("mouseleave", () => toolTip.removeDiv())
     })
   }
 }
 
 class ToolTip {
-  private txt = ""
   private tempDiv: HTMLElement | null = null
 
-  setText(txt: string): void {
-    this.txt = txt
-  }
-
-  addDiv(): void {
+  addDiv(row: HTMLElement, txt: string): void {
     // create the document element
     const div = document.createElement("div")
     // set the contents
-    div.textContent = this.txt
+    div.textContent = txt
+    // set class before appending so styles apply before measuring
+    div.className = "register-tooltip"
     //place it
-    document.appendChild(div)
+    document.body.appendChild(div)
     //size it
-    const { top, left } = this.size(div)
+    const { top, left } = this.size(div, row)
     //style it
     div.style.top = `${top.toString()}px`
     div.style.left = `${left.toString()}px`
-    div.className = "register-tooltip"
     // set tempDiv to refer to it
     this.tempDiv = div
   }
@@ -155,19 +149,19 @@ class ToolTip {
   }
 
   // information hidden: how the element is placed in the document, and has it's bounding box sized appropriatley
-  // inputs: an HTMLElement and a leftMargin
+  // inputs: an HTMLElement (tooltip div), an HTMLElement (row to position relative to), and a leftMargin
   // ouputs: {number, number} object containing top and left
   // preconditions: div is a child of the document
   // postconditions: none
-  private size(div: HTMLElement, leftMargin: number = 8): { top: number, left: number } {
+  private size(div: HTMLElement, row: HTMLElement, leftMargin: number = 8): { top: number, left: number } {
     // set result to 0,0
     const result = { top: 0, left: 0 }
     // if div is not a child of document, return early
     if (!document.contains(div)) return result
-    // get the bounding box
-    const rect = div.getBoundingClientRect()
+    // get the bounding box of the row to position relative to it
+    const rect = row.getBoundingClientRect()
     // calculate the top coordinate
-    result.top = this.calculateTopCoord(div, rect)//rect.top + (rect.height / 2) - (div.offsetHeight / 2)
+    result.top = this.calculateTopCoord(div, rect)
     // calculate the left coordinate (with a margin to avoid butt edges)
     result.left = rect.left - div.offsetWidth - leftMargin
     // return the answer
