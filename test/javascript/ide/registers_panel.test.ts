@@ -58,7 +58,7 @@ describe("registersPanel tests", () => {
 
     const parent = document.createElement('div')
     parent.classList.add('register-subpanel-header')
-    parent.innerHTML = 'Special'
+    parent.classList.add('special-registers')
     const target = document.createElement('span')
     parent.appendChild(target)
     const event = new MouseEvent('click', { bubbles: true })
@@ -75,7 +75,7 @@ describe("registersPanel tests", () => {
 
     const parent = document.createElement('div')
     parent.classList.add('register-subpanel-header')
-    parent.innerHTML = 'General'
+    parent.classList.add('general-purpose-registers')
     const target = document.createElement('span')
     parent.appendChild(target)
     const event = new MouseEvent('click', { bubbles: true })

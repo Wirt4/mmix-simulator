@@ -1,8 +1,8 @@
 import { EnumRegisterType, IRegisters, IRegisterData } from "./registers.interface"
 
-const TYPE_CONFIG: Record<EnumRegisterType, { title: string; containerClass: string }> = {
-  [EnumRegisterType.GENERAL]: { title: "General", containerClass: "general-container" },
-  [EnumRegisterType.SPECIAL]: { title: "Special", containerClass: "special-container" },
+const TYPE_CONFIG: Record<EnumRegisterType, { label: string; containerClass: string }> = {
+  [EnumRegisterType.GENERAL]: { containerClass: "general-container", label: "general-purpose-registers" },
+  [EnumRegisterType.SPECIAL]: { containerClass: "special-container", label: "special-registers" },
 }
 
 export class Registers implements IRegisters {
@@ -14,11 +14,11 @@ export class Registers implements IRegisters {
 
   constructor(div: HTMLElement, type: EnumRegisterType) {
     this.isOpen = false
-    const { title, containerClass } = TYPE_CONFIG[type]
+    const { label, containerClass } = TYPE_CONFIG[type]
     this.container = this.elementSelect(div, "register-group-container")
     this.container.classList.add(containerClass)
     const header = this.elementSelect(div, "register-subpanel-header")
-    header.innerHTML += title
+    header.classList.add(label)
     this.wrapper = this.elementSelect(div, "register-subpanel-body")
     this.arrow = this.elementSelect(div, "spin-arrow")
     this._tooltipEl = null

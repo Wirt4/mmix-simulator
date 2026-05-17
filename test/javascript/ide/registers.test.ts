@@ -23,24 +23,24 @@ beforeEach(() => {
 
 describe("register object constructor tests", () => {
   it("if register type is general, then the subpanel-header will be 'General'", () => {
-    const expected = "General"
+    const expected = 'general-purpose-registers'
     const panel = buildPanel()
 
     new Registers(panel, EnumRegisterType.GENERAL)
 
     const header = panel.querySelector<HTMLElement>(".register-subpanel-header")
     expect(header).not.toBeNull()
-    expect(header?.innerHTML).toContain(expected)
+    expect(header?.classList.contains(expected)).toBe(true)
   })
   it("if register type is special, then the subpanel-header will be 'Special'", () => {
-    const expected = "Special"
+    const expected = "special-registers"
     const panel = buildPanel()
 
     new Registers(panel, EnumRegisterType.SPECIAL)
 
     const header = panel.querySelector<HTMLElement>(".register-subpanel-header")
     expect(header).not.toBeNull()
-    expect(header?.innerHTML).toContain(expected)
+    expect(header?.classList.contains(expected)).toBe(true)
   })
   it("Registers should have a spin arrow element", () => {
     const panel = buildPanel()
@@ -141,8 +141,6 @@ describe("render tests", () => {
     const registers = new Registers(panel, EnumRegisterType.SPECIAL)
     // set the data which includes a description field set to "expected"
     const data = [{ id: "$rA", description: "arithmetic status register", value: "0x00020300000000FF" }]
-    //
-    // render the data
     registers.render(data)
 
     // assert that there is an element with data-tooltip="arithmetic status register"

@@ -22,12 +22,12 @@ export class RegistersPanel implements IRegistersPanel {
 
     if (!header) return
 
-    if (header.innerHTML.includes('Special')) {
+    if (header.classList.contains('special-registers')) {
       this.specialRegisters.toggle()
       return
     }
 
-    if (header.innerHTML.includes('General')) this.generalRegisters.toggle()
+    if (header.classList.contains('general-purpose-registers')) this.generalRegisters.toggle()
   }
   switchTab(): void {
     this.generalRegisters.switchTab()
