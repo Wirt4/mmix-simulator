@@ -148,6 +148,86 @@ describe("render tests", () => {
   })
 })
 
+describe("tooltip behavior tests", () => {
+  it("mouseenter on a row with data-tooltip appends a tooltip div to document.body", () => {
+    // create a panel with one special register that has a description
+    const panel = buildPanel()
+    const registers = new Registers(panel, EnumRegisterType.SPECIAL)
+    const data = [{ id: "$rA", description: "arithmetic status register", value: "0x0000000000000000" }]
+    registers.render(data)
+
+    // fire mouseenter on the row
+    const row = panel.querySelector<HTMLElement>("[data-tooltip]")
+    row?.dispatchEvent(new MouseEvent("mouseenter"))
+
+    // a tooltip div should appear in the body with the correct text
+    const tooltip = document.body.querySelector(".register-tooltip")
+    expect(tooltip).not.toBeNull()
+    expect(tooltip?.textContent).toBe("arithmetic status register")
+  })
+
+  it("mouseleave removes the tooltip from document.body", () => {
+    // create and render a register with a tooltip
+    const panel = buildPanel()
+    const registers = new Registers(panel, EnumRegisterType.SPECIAL)
+    const data = [{ id: "$rA", description: "arithmetic status register", value: "0x0000000000000000" }]
+    registers.render(data)
+
+    const row = panel.querySelector<HTMLElement>("[data-tooltip]")
+    // trigger enter then leave
+    row?.dispatchEvent(new MouseEvent("mouseenter"))
+    expect(document.body.querySelector(".register-tooltip")).not.toBeNull()
+    row?.dispatchEvent(new MouseEvent("mouseleave"))
+
+    // tooltip should be gone
+    expect(document.body.querySelector(".register-tooltip")).toBeNull()
+  })
+
+  it("each row shows its own tooltip text, not the last row's text", () => {
+    // create two rows with distinct descriptions
+    const panel = buildPanel()
+    const registers = new Registers(panel, EnumRegisterType.SPECIAL)
+    const data = [
+      { id: "$rA", description: "first description", value: "0x0000000000000000" },
+      { id: "$rB", description: "second description", value: "0x0000000000000000" },
+    ]
+    registers.render(data)
+
+    const rows = panel.querySelectorAll<HTMLElement>("[data-tooltip]")
+
+    // hover first row - should show first description
+    rows[0].dispatchEvent(new MouseEvent("mouseenter"))
+    expect(document.body.querySelector(".register-tooltip")?.textContent).toBe("first description")
+    rows[0].dispatchEvent(new MouseEvent("mouseleave"))
+
+    // hover second row - should show second description
+    rows[1].dispatchEvent(new MouseEvent("mouseenter"))
+    expect(document.body.querySelector(".register-tooltip")?.textContent).toBe("second description")
+    rows[1].dispatchEvent(new MouseEvent("mouseleave"))
+  })
+
+  it("only one tooltip exists in document.body at a time", () => {
+    // create two rows with descriptions
+    const panel = buildPanel()
+    const registers = new Registers(panel, EnumRegisterType.SPECIAL)
+    const data = [
+      { id: "$rA", description: "first description", value: "0x0000000000000000" },
+      { id: "$rB", description: "second description", value: "0x0000000000000000" },
+    ]
+    registers.render(data)
+
+    const rows = panel.querySelectorAll<HTMLElement>("[data-tooltip]")
+
+    // enter and leave first row, then enter second row
+    rows[0].dispatchEvent(new MouseEvent("mouseenter"))
+    rows[0].dispatchEvent(new MouseEvent("mouseleave"))
+    rows[1].dispatchEvent(new MouseEvent("mouseenter"))
+
+    // only one tooltip should be in the document
+    expect(document.body.querySelectorAll(".register-tooltip").length).toBe(1)
+  })
+})
+
 describe("toggle() tests", () => {
   it("toggle() will switch arrow icon and open/closed class", () => {
     //create registers
