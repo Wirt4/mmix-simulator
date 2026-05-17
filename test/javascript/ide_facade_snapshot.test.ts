@@ -131,6 +131,7 @@ describe("IDE facade UI snapshots", () => {
 
   it("initial state after connect", async () => {
     const adapter = createMockAdapter()
+
     const { root } = await connectController(adapter)
 
     expect(root.innerHTML).toMatchSnapshot()
@@ -141,6 +142,7 @@ describe("IDE facade UI snapshots", () => {
     const { root } = await connectController(adapter)
 
     const specialContainer = getTarget(root, "specialContainer")
+
     expect(specialContainer.innerHTML).toMatchSnapshot()
   })
 
@@ -150,6 +152,7 @@ describe("IDE facade UI snapshots", () => {
 
     const generalContainer = getTarget(root, "generalContainer")
     const groupSelect = getTarget(root, "groupSelect")
+
     expect(groupSelect.innerHTML).toMatchSnapshot()
     expect(generalContainer.innerHTML).toMatchSnapshot()
   })
@@ -159,6 +162,7 @@ describe("IDE facade UI snapshots", () => {
     const { root } = await connectController(adapter)
 
     const panel = getTarget(root, "panel")
+
     expect(panel.outerHTML).toMatchSnapshot()
   })
 
@@ -168,19 +172,17 @@ describe("IDE facade UI snapshots", () => {
       getStdErr: vi.fn().mockReturnValue("Error at line 1: unknown opcode 'BAD'"),
     })
     const { root } = await connectController(adapter)
-
     // Type bad source and assemble
     const textarea = getTarget(root, "textarea") as HTMLTextAreaElement
     textarea.value = "BAD CODE"
-
     const assembleBtn = getTarget(root, "assembleButton") as HTMLButtonElement
+
     assembleBtn.click()
 
     const output = getTarget(root, "output") as HTMLTextAreaElement
     const runBtn = getTarget(root, "runButton") as HTMLButtonElement
     const listingToggle = getTarget(root, "listingToggle") as HTMLButtonElement
     const panel = getTarget(root, "panel")
-
     expect(output.value).toMatchSnapshot()
     expect(runBtn.disabled).toBe(true)
     expect(listingToggle.disabled).toBe(true)
@@ -194,18 +196,16 @@ describe("IDE facade UI snapshots", () => {
       getListing: vi.fn().mockReturnValue(listing),
     })
     const { root } = await connectController(adapter)
-
     const textarea = getTarget(root, "textarea") as HTMLTextAreaElement
     textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n"
-
     const assembleBtn = getTarget(root, "assembleButton") as HTMLButtonElement
+
     assembleBtn.click()
 
     const listingEl = getTarget(root, "listing")
     const runBtn = getTarget(root, "runButton") as HTMLButtonElement
     const listingToggle = getTarget(root, "listingToggle") as HTMLButtonElement
     const panel = getTarget(root, "panel")
-
     expect(listingEl.textContent).toMatchSnapshot()
     expect(runBtn.disabled).toBe(false)
     expect(listingToggle.disabled).toBe(false)
@@ -215,11 +215,10 @@ describe("IDE facade UI snapshots", () => {
   it("saving code trims trailing newlines", async () => {
     const adapter = createMockAdapter()
     const { root, app } = await connectController(adapter)
-
     const textarea = getTarget(root, "textarea") as HTMLTextAreaElement
     textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n\n\n\n"
-
     const ctrl = app.getControllerForElementAndIdentifier(root, "ide-facade") as IDEFacadeController
+
     ctrl.beforeSave()
 
     expect(textarea.value).toMatchSnapshot()
@@ -238,27 +237,20 @@ describe("IDE facade UI snapshots", () => {
       ),
     })
     const { root } = await connectController(adapter)
-
-    // Assemble
     const textarea = getTarget(root, "textarea") as HTMLTextAreaElement
     textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n"
-
     const assembleBtn = getTarget(root, "assembleButton") as HTMLButtonElement
     assembleBtn.click()
-
-    // Run
     const runBtn = getTarget(root, "runButton") as HTMLButtonElement
+
     runBtn.click()
 
     const output = getTarget(root, "output") as HTMLTextAreaElement
     const specialContainer = getTarget(root, "specialContainer")
     const generalContainer = getTarget(root, "generalContainer")
-
     expect(output.value).toMatchSnapshot()
     expect(specialContainer.innerHTML).toMatchSnapshot()
     expect(generalContainer.innerHTML).toMatchSnapshot()
-
-    // Register subpanels should be opened after run
     const subpanelBodies = root.querySelectorAll(".register-subpanel-body")
     const arrows = root.querySelectorAll(".spin-arrow")
     expect(
