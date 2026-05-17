@@ -270,7 +270,6 @@ describe("long register list tests", () => {
     const expectedNdxB = 1
     const ndxC = 31
     const expectedNdxC = 31
-    //TODO: determine where in the flow those damn $ signs should be appended
     const expectedA = "$rA"
     const expectedB = "$rB"
     const expectedC = "$rZZ"
@@ -300,11 +299,6 @@ describe("long register list tests", () => {
   })
   it("special registers also deliver descriptions", () => {
     const mockAdapter = createMockAdapter()
-    /** note the peculiuar mapping:
-    * the special register code (or index as far as the module is concerned) 
-    * does not map to the special registers in lexigraphical order 
-    * see TAOCP MMIX Fascicle for more information
-    * */
     const expectedNdxA = 0
     const expectedNdxB = 1
     const expectedNdxC = 31
