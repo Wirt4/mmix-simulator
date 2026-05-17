@@ -115,8 +115,8 @@ export class Registers implements IRegisters {
       if (!(row instanceof HTMLElement)) return
       const txt = row.dataset.tooltip
       if (!txt) return
-      row.addEventListener("mouseenter", () => toolTip.addDiv(row, txt))
-      row.addEventListener("mouseleave", () => toolTip.removeDiv())
+      row.addEventListener("mouseenter", () => { toolTip.addDiv(row, txt) })
+      row.addEventListener("mouseleave", () => { toolTip.removeDiv() })
     })
   }
 }
@@ -153,7 +153,7 @@ class ToolTip {
   // ouputs: {number, number} object containing top and left
   // preconditions: div is a child of the document
   // postconditions: none
-  private size(div: HTMLElement, row: HTMLElement, leftMargin: number = 8): { top: number, left: number } {
+  private size(div: HTMLElement, row: HTMLElement, leftMargin = 8): { top: number, left: number } {
     // set result to 0,0
     const result = { top: 0, left: 0 }
     // if div is not a child of document, return early
