@@ -2,12 +2,12 @@ import { Controller } from "@hotwired/stimulus"
 import Formatter from "../formatter/formatter"
 
 export default class TextFormatController extends Controller {
-  static targets = ["textarea", "lineNumbers", "listingPane"]
+  static targets = ["textarea", "lineNumbers", "listingPanel"]
 
   declare textareaTarget: HTMLTextAreaElement
   declare lineNumbersTarget: HTMLElement
-  declare listingPaneTarget: HTMLElement
-  declare hasListingPaneTarget: boolean
+  declare listingPanelTarget: HTMLElement
+  declare hasListingPanelTarget: boolean
 
   private formatter!: Formatter
   private syncing = false
@@ -29,7 +29,7 @@ export default class TextFormatController extends Controller {
     this.syncing = true
     this.formatter.syncScroll()
     if (this.hasListingPaneTarget) {
-      this.listingPaneTarget.scrollTop = this.textareaTarget.scrollTop
+      this.listingPanelTarget.scrollTop = this.textareaTarget.scrollTop
     }
     this.syncing = false
   }
@@ -38,7 +38,7 @@ export default class TextFormatController extends Controller {
   syncFromListing(): void {
     if (this.syncing) return
     this.syncing = true
-    this.textareaTarget.scrollTop = this.listingPaneTarget.scrollTop
+    this.textareaTarget.scrollTop = this.listingPanelTarget.scrollTop
     this.formatter.syncScroll()
     this.syncing = false
   }
