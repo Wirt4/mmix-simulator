@@ -80,7 +80,7 @@ describe("Editor", () => {
       expect(textarea.value).not.toBe("godz\tilla")
     })
 
-    it(" maintains space selection", () => {
+    it("maintains space selection", () => {
       textarea.value = "hello"
       textarea.selectionStart = 2
       textarea.selectionEnd = 2

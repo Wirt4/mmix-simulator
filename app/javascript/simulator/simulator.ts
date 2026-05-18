@@ -1,21 +1,19 @@
 import { ISimulator } from './simulator.interface'
 import { IModuleAdapter } from './../moduleAdapter/module_adapter.interface'
-
+import { EnumRegisterType, IRegisterData } from "../register_types.interface"
 interface IRegisterInfo {
   code: number,
   description: string
 }
 
 export default class Simulator implements ISimulator {
-  private _inText: HTMLTextAreaElement
-  private _outText: HTMLTextAreaElement
   private _moduleAdapter: IModuleAdapter
   private _specialRegisterMap: Map<string, IRegisterInfo>
-  //maintain a map of special register names to indeces
+  private _successfulAssembly: boolean
+  private _out: string
 
-  constructor(inText: HTMLTextAreaElement, outText: HTMLTextAreaElement, moduleAdapter: IModuleAdapter) {
-    this._inText = inText
-    this._outText = outText
+  constructor(moduleAdapter: IModuleAdapter) {
+    this._successfulAssembly = false
     this._moduleAdapter = moduleAdapter
     this._specialRegisterMap = new Map([
       ["rA", { code: 21, description: "arithmetic status register" }],
@@ -51,19 +49,19 @@ export default class Simulator implements ISimulator {
       ["rYY", { code: 30, description: "Y operand (trap)" }],
       ["rZZ", { code: 31, description: "Z operand (trap)" }],
     ])
+    this._out = ""
   }
 
-  /** Assembles and executes the user's MMIXAL program, writing output to the output textarea. */
-  public runUserProgram(): void {
-    const successfullyAssembled = this._moduleAdapter.assembleMMIXAL(this._inText.value)
-    if (!successfullyAssembled) {
-      this._outText.value = this._moduleAdapter.getStdErr()
-      return
-    }
+  public getStdOut(): string {
+    return this._out
+  }
 
-    const timeout = 800;
-    const instructionBatch = 1000;
-    this._outText.value = this.simulateWithTimeout(timeout, instructionBatch)
+  public runUserProgram(): void {
+    if (this._successfulAssembly) {
+      const timeout = 800;
+      const instructionBatch = 1000;
+      this._out = this.simulateWithTimeout(timeout, instructionBatch)
+    }
   }
 
   public getRegisterValue(register: string): string {
@@ -87,6 +85,18 @@ export default class Simulator implements ISimulator {
     return "Undefined Register"
   }
 
+  assemble(mmixal: string): boolean {
+    this._successfulAssembly = this._moduleAdapter.assembleMMIXAL(mmixal)
+    if (!this._successfulAssembly) {
+      this._out = this._moduleAdapter.getStdErr()
+    }
+    return this._successfulAssembly
+  }
+
+  public getListing(): string {
+    return this._moduleAdapter.getListing()
+  }
+
   get specialRegisters(): string[] {
     return Array.from(this._specialRegisterMap.keys()).sort((a, b) => a.length - b.length || a.localeCompare(b))
   }
@@ -95,6 +105,42 @@ export default class Simulator implements ISimulator {
     return this._moduleAdapter.generalRegisterCount
   }
 
+  getRegisters(type: EnumRegisterType): IRegisterData[] {
+    switch (type) {
+      case EnumRegisterType.GENERAL:
+        return this.allGeneralRegisters()
+      case EnumRegisterType.SPECIAL:
+        return this.allSpecialRegisters()
+    }
+  }
+
+  private allGeneralRegisters(): IRegisterData[] {
+    const result = new Array<IRegisterData>(this._moduleAdapter.generalRegisterCount)
+    for (let i = 0; i < this._moduleAdapter.generalRegisterCount; i++) {
+      const id = `$${String(i)}`
+      const value = this._moduleAdapter.getGeneralRegisterValue(i)
+      result[i] = { id, value }
+    }
+    return result
+  }
+
+  private allSpecialRegisters(): IRegisterData[] {
+    const regKeys = Array.from(this._specialRegisterMap.keys())
+    const result = new Array<IRegisterData>(regKeys.length)
+    for (let i = 0; i < regKeys.length; i++) {
+      const regName = regKeys[i]
+      //get the register value
+      const data = this._specialRegisterMap.get(regName)
+      if (!data) continue
+      const ndx = data.code
+      const description = data.description
+      const id = `$${regName}`
+      const value = this._moduleAdapter.getSpecialRegisterValue(ndx)
+      //    set it in the return array
+      result[i] = { id, value, description }
+    }
+    return result
+  }
   private simulateWithTimeout(timeout: number, instructionsPerInterval: number): string {
     let programOutputs = "";
 
