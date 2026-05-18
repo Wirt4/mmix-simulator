@@ -1,3 +1,24 @@
+export function highlight(source: string): string {
+  return source.split("\n").map(highlightLine).join("\n")
+}
+
+function highlightLine(line: string): string {
+  if (line === "") return ""
+
+  const commentIdx = findCommentStart(line)
+
+  const codePart = commentIdx >= 0 ? line.substring(0, commentIdx) : line
+  const commentPart = commentIdx >= 0 ? line.substring(commentIdx) : ""
+
+  let result = highlightCode(codePart)
+
+  if (commentPart) {
+    result += `<span class="hl-comment">${escapeHtml(commentPart)}</span>`
+  }
+
+  return result
+}
+
 const OPCODES = new Set([
   "TRAP", "FCMP", "FUN", "FEQL", "FADD", "FIX", "FSUB", "FIXU",
   "FLOT", "FLOTU", "SFLOT", "SFLOTU", "FMUL", "FCMPE", "FUNE", "FEQLE",
@@ -26,22 +47,6 @@ function escapeHtml(text: string): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-}
-
-function highlightLine(line: string): string {
-  if (line === "") return ""
-
-  const commentIdx = findCommentStart(line)
-  const codePart = commentIdx >= 0 ? line.substring(0, commentIdx) : line
-  const commentPart = commentIdx >= 0 ? line.substring(commentIdx) : ""
-
-  let result = highlightCode(codePart)
-
-  if (commentPart) {
-    result += `<span class="hl-comment">${escapeHtml(commentPart)}</span>`
-  }
-
-  return result
 }
 
 function findCommentStart(line: string): number {
@@ -93,6 +98,4 @@ function highlightCode(code: string): string {
   return result
 }
 
-export function highlight(source: string): string {
-  return source.split("\n").map(highlightLine).join("\n")
-}
+
