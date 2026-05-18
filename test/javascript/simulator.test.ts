@@ -167,7 +167,7 @@ describe("Simulator tests", () => {
   })
   it("gets a special register value", () => {
     const mockAdapter = createMockAdapter()
-    const expected = "0x00000000000000FC"
+    const expected = "#00000000000000fc"
     vi.spyOn(mockAdapter, 'getSpecialRegisterValue').mockReturnValue(expected)
 
     const simulator = new Simulator(mockAdapter)
@@ -208,11 +208,11 @@ describe("long register list tests", () => {
     expect(actual.length).toEqual(expectedCount)
   })
   it("getRegisters returns results from the adapter", () => {
-    const expected = "0x00000000000000FF"
+    const expected = "#00000000000000ff"
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'getGeneralRegisterValue')
       .mockReturnValueOnce(expected)
-      .mockReturnValue("0x0000000000000000")
+      .mockReturnValue("#0000000000000000")
     const simulator = new Simulator(mockAdapter)
 
     const actual = simulator.getRegisters(EnumRegisterType.GENERAL)
@@ -221,9 +221,9 @@ describe("long register list tests", () => {
   })
   it("getRegisters maps correct values to general", () => {
     const mockAdapter = createMockAdapter()
-    const hexA = "0x0000000000000042"
-    const hexB = "0xFFFFFFFFFFFFFFFF"
-    const hexC = "0x0000000000000003"
+    const hexA = "#0000000000000042"
+    const hexB = "#ffffffffffffffff"
+    const hexC = "#0000000000000003"
     const ndxA = 5
     const ndxB = 100
     const ndxC = 207
@@ -231,7 +231,7 @@ describe("long register list tests", () => {
     const expectedB = "$100"
     const expectedC = "$207"
 
-    const hexZero = "0x0000000000000000"
+    const hexZero = "#0000000000000000"
     vi.spyOn(mockAdapter, 'getGeneralRegisterValue').mockImplementation((reg: number) => {
       switch (reg) {
         case ndxA:
@@ -256,9 +256,9 @@ describe("long register list tests", () => {
   })
   it("getRegisters maps correct values to special", () => {
     const mockAdapter = createMockAdapter()
-    const hexA = "0x0000000000000042"
-    const hexB = "0xFFFFFFFFFFFFFFFF"
-    const hexC = "0x0000000000000003"
+    const hexA = "#0000000000000042"
+    const hexB = "#ffffffffffffffff"
+    const hexC = "#0000000000000003"
     /** note the peculiuar mapping:
     * the special register code (or index as far as the module is concerned) 
     * does not map to the special registers in lexigraphical order 
@@ -274,7 +274,7 @@ describe("long register list tests", () => {
     const expectedB = "$rB"
     const expectedC = "$rZZ"
 
-    const hexZero = "0x0000000000000000"
+    const hexZero = "#0000000000000000"
     vi.spyOn(mockAdapter, 'getSpecialRegisterValue').mockImplementation((reg: number) => {
       switch (reg) {
         case ndxA:
@@ -306,7 +306,7 @@ describe("long register list tests", () => {
     const expectedDescriptionB = "bootstrap register (trip)" //rB
     const expectedDescriptionC = "Z operand (trap)" //rZZ
 
-    const hexZero = "0x0000000000000000"
+    const hexZero = "#0000000000000000"
     vi.spyOn(mockAdapter, 'getSpecialRegisterValue').mockReturnValue(hexZero)
     const simulator = new Simulator(mockAdapter)
 

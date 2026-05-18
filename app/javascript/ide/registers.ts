@@ -25,7 +25,7 @@ export class Registers implements IRegisters {
   render(registers: IRegisterData[]): void {
     const divs: string[] = new Array<string>(registers.length)
     for (let i = 0; i < registers.length; i++) {
-      const zeroRegister = "0x0000000000000000"
+      const zeroRegister = "#0000000000000000"
       const { id, value, description } = registers[i]
       const activeClass = value !== zeroRegister ? " register-row--active" : ""
       const tooltip = description ? ` data-tooltip="${description}"` : ""
