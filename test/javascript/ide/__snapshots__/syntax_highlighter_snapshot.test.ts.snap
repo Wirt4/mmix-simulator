@@ -1,0 +1,56 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`syntax highlighter snapshots > arithmetic operations 1`] = `
+"        <span class="hl-opcode">LOC</span><span class="hl-expr">   #100</span>
+<span class="hl-label">Main</span>    <span class="hl-opcode">SET</span><span class="hl-expr">   $1,42</span>
+        <span class="hl-opcode">SET</span><span class="hl-expr">   $2,8</span>
+        <span class="hl-opcode">ADD</span><span class="hl-expr">   $3,$1,$2</span>
+        <span class="hl-opcode">ADDU</span><span class="hl-expr">  $4,$1,$2</span>
+        <span class="hl-opcode">SUB</span><span class="hl-expr">   $5,$1,$2</span>
+        <span class="hl-opcode">MUL</span><span class="hl-expr">   $6,$1,$2</span>
+        <span class="hl-opcode">DIV</span><span class="hl-expr">   $7,$1,$2</span>
+        <span class="hl-opcode">TRAP</span><span class="hl-expr">  0,Halt,0</span>"
+`;
+
+exports[`syntax highlighter snapshots > branching and jumps 1`] = `
+"        <span class="hl-opcode">LOC</span><span class="hl-expr">   #100</span>
+<span class="hl-label">Main</span>    <span class="hl-opcode">SETL</span><span class="hl-expr">  $1,10</span>
+<span class="hl-label">Loop</span>    <span class="hl-opcode">SUB</span><span class="hl-expr">   $1,$1,1</span>
+        <span class="hl-opcode">BN</span><span class="hl-expr">    $1,Done</span>
+        <span class="hl-opcode">JMP</span><span class="hl-expr">   Loop</span>
+<span class="hl-label">Done</span>    <span class="hl-opcode">TRAP</span><span class="hl-expr">  0,Halt,0</span>"
+`;
+
+exports[`syntax highlighter snapshots > data segment with GREG and OCTA 1`] = `
+"        <span class="hl-opcode">LOC</span><span class="hl-expr">   Data_Segment</span>
+        <span class="hl-opcode">GREG</span><span class="hl-expr">  @</span>
+<span class="hl-label">Fname</span>   <span class="hl-opcode">BYTE</span><span class="hl-expr">  "stress.txt",0</span>
+        <span class="hl-opcode">LOC</span><span class="hl-expr">   (@+7)&amp;-8</span>
+<span class="hl-label">Buf</span>     <span class="hl-opcode">OCTA</span><span class="hl-expr">  Fname,TextRead</span>"
+`;
+
+exports[`syntax highlighter snapshots > empty input 1`] = `""`;
+
+exports[`syntax highlighter snapshots > hello world program 1`] = `
+"        <span class="hl-opcode">LOC</span><span class="hl-expr">   #100                   </span><span class="hl-comment">% Set the address of the program</span>
+                                     <span class="hl-comment">% initially to 0x100.</span>
+
+<span class="hl-label">Main</span>    <span class="hl-opcode">GETA</span><span class="hl-expr">  $255,string            </span><span class="hl-comment">% Put the address of the string</span>
+                                     <span class="hl-comment">% into register 255.</span>
+
+        <span class="hl-opcode">TRAP</span><span class="hl-expr">  0,Fputs,StdOut         </span><span class="hl-comment">% Write the string pointed to by</span>
+                                     <span class="hl-comment">% register 255 to the standard</span>
+                                     <span class="hl-comment">% output file.</span>
+
+        <span class="hl-opcode">TRAP</span><span class="hl-expr">  0,Halt,0               </span><span class="hl-comment">% End process.</span>
+
+<span class="hl-label">string</span>  <span class="hl-opcode">BYTE</span><span class="hl-expr">  "Hello, World!",#a,0   </span><span class="hl-comment">% String to be printed.  #a is</span>
+                                     <span class="hl-comment">% newline, 0 terminates the</span>
+                                     <span class="hl-comment">% string.</span>"
+`;
+
+exports[`syntax highlighter snapshots > line with label, opcode, operands, and comment 1`] = `"<span class="hl-label">Main</span>    <span class="hl-opcode">GETA</span><span class="hl-expr">  $255,string  </span><span class="hl-comment">% load address</span>"`;
+
+exports[`syntax highlighter snapshots > line with only whitespace and opcode 1`] = `"        <span class="hl-opcode">TRAP</span><span class="hl-expr">  0,Halt,0</span>"`;
+
+exports[`syntax highlighter snapshots > single comment-only line 1`] = `"<span class="hl-comment">% just a comment</span>"`;
