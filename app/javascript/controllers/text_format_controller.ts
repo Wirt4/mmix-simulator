@@ -28,7 +28,7 @@ export default class TextFormatController extends Controller {
     if (this.syncing) return
     this.syncing = true
     this.formatter.syncScroll()
-    if (this.hasListingPaneTarget) {
+    if (this.hasListingPanelTarget) {
       this.listingPanelTarget.scrollTop = this.textareaTarget.scrollTop
     }
     this.syncing = false

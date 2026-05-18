@@ -10,7 +10,6 @@ export class Registers implements IRegisters {
   private wrapper: HTMLElement
   private arrow: HTMLElement
   private isOpen: boolean
-  private _tooltipEl: HTMLElement | null
 
   constructor(div: HTMLElement, type: EnumRegisterType) {
     this.isOpen = false
@@ -21,7 +20,6 @@ export class Registers implements IRegisters {
     header.classList.add(label)
     this.wrapper = this.elementSelect(div, "register-subpanel-body")
     this.arrow = this.elementSelect(div, "spin-arrow")
-    this._tooltipEl = null
   }
 
   render(registers: IRegisterData[]): void {
@@ -67,50 +65,9 @@ export class Registers implements IRegisters {
     return child
   }
 
-  private temp(): void {
-    // information hidden: 
-    // - selection of html elements by class
-    // - attaching mouse listeners to selected elements
-    // - generating html elements for tootip style 
-    // inputs: NodeList Object "registerRows"
-    // outputs: none
-    // precondtions: registerRows do not have tooltips attached or mouse events added
-    // postcondtions: registerRows have tooltips attaced and mose events listeners set 
-    this.container.querySelectorAll<HTMLElement>(".register-row[data-tooltip]").forEach((row) => {
-      row.addEventListener("mouseenter", () => {
-        const text = row.dataset.tooltip
-        if (!text) return
-        const toolTip = document.createElement("div")
-        toolTip.className = "register-tooltip"
-        toolTip.textContent = text
-        document.body.appendChild(toolTip)
-        const rect = row.getBoundingClientRect()
-        const toolTipTop = rect.top + rect.height / 2 - toolTip.offsetHeight / 2
-        toolTip.style.top = `${toolTipTop.toString()}px`
-        const toolTipLeft = rect.left - toolTip.offsetWidth - 8
-        toolTip.style.left = `${toolTipLeft.toString()}px`
-        this._tooltipEl = toolTip
-      })
-      row.addEventListener("mouseleave", () => {
-        this._tooltipEl?.remove()
-        this._tooltipEl = null
-      })
-    })
-  }
-  // information hidden: 
-  // - selection of html elements by class
-  // - attaching mouse listeners to selected elements
-  // - generating html elements for tootip style 
-  // inputs: NodeList Object "registerRows"
-  // outputs: none
-  // precondtions: registerRows do not have tooltips attached or mouse events added
-  // postcondtions: registerRows have tooltips attaced and mose events listeners set 
-
   private attachTooltipListeners(registerRows: NodeList): void {
-    // define a temporary elements
     const toolTip = new ToolTip()
 
-    // iterate through registerRows with ForEach loop
     registerRows.forEach(row => {
       if (!(row instanceof HTMLElement)) return
       const txt = row.dataset.tooltip
@@ -125,57 +82,37 @@ class ToolTip {
   private tempDiv: HTMLElement | null = null
 
   addDiv(row: HTMLElement, txt: string): void {
-    // create the document element
     const div = document.createElement("div")
-    // set the contents
     div.textContent = txt
     // set class before appending so styles apply before measuring
     div.className = "register-tooltip"
-    //place it
     document.body.appendChild(div)
-    //size it
     const { top, left } = this.size(div, row)
-    //style it
     div.style.top = `${top.toString()}px`
     div.style.left = `${left.toString()}px`
-    // set tempDiv to refer to it
     this.tempDiv = div
   }
   removeDiv(): void {
-    //remove tempDiv from the parent node
     this.tempDiv?.remove()
-    //nullify tempDiv
     this.tempDiv = null
   }
 
-  // information hidden: how the element is placed in the document, and has it's bounding box sized appropriatley
-  // inputs: an HTMLElement (tooltip div), an HTMLElement (row to position relative to), and a leftMargin
-  // ouputs: {number, number} object containing top and left
-  // preconditions: div is a child of the document
-  // postconditions: none
   private size(div: HTMLElement, row: HTMLElement, leftMargin = 8): { top: number, left: number } {
-    // set result to 0,0
     const result = { top: 0, left: 0 }
-    // if div is not a child of document, return early
     if (!document.contains(div)) return result
-    // get the bounding box of the row to position relative to it
     const rect = row.getBoundingClientRect()
-    // calculate the top coordinate
     result.top = this.calculateTopCoord(div, rect)
     // calculate the left coordinate (with a margin to avoid butt edges)
     result.left = rect.left - div.offsetWidth - leftMargin
-    // return the answer
     return result
   }
 
   private calculateTopCoord(div: HTMLElement, rect: DOMRect): number {
-    // set result to the top edge position of the div
     let result = rect.top
     // shift result down to vertical midpoint
     result += rect.height / 2
     // back it up by half the div's height
     result -= div.offsetHeight / 2
-    // return the adjusted result
     return result
   }
 }
