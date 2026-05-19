@@ -1,22 +1,101 @@
 export function highlight(source: string): string {
-  return source.split("\n").map(highlightLine).join("\n")
+  return source.split('\n').map(highlightLine).join('\n')
 }
 
 function highlightLine(line: string): string {
-  if (line === "") return ""
+  if (line === "") return line
 
   const commentIdx = findCommentStart(line)
 
-  const codePart = commentIdx >= 0 ? line.substring(0, commentIdx) : line
-  const commentPart = commentIdx >= 0 ? line.substring(commentIdx) : ""
+  if (commentIdx < 0) return highlightCode(line)
 
-  let result = highlightCode(codePart)
+  return [highlightCode(line.substring(0, commentIdx)), span(line.substring(commentIdx), "hl-comment")].join("")
+}
 
-  if (commentPart) {
-    result += `<span class="hl-comment">${escapeHtml(commentPart)}</span>`
+function findCommentStart(line: string): number {
+  let inString = false
+
+  for (let ndx = 0; ndx < line.length; ndx++) {
+    const ch = line[ndx]
+
+    if (ch === '"') {
+      inString = !inString
+      continue
+    }
+
+    if (!inString && ch === '%') {
+      return ndx
+    }
+
   }
 
-  return result
+  return -1
+}
+
+function highlightCode(code: string): string {
+  if (code === "") return code
+
+  const m = new MMIXMatch(code)
+
+  if (!m.isValid) return span(code)
+
+  const result = []
+
+  if (m.label) {
+    result.push(span(m.label, "hl-label"))
+  }
+
+  if (m.blankSpace) {
+    result.push(escapeHtml(m.blankSpace))
+  }
+
+  if (m.opCode) {
+    const cssClass = OPCODES.has(m.opCode) ? "hl-opcode" : "hl-expr"
+    result.push(span(m.opCode, cssClass))
+  }
+
+  if (m.remainder) {
+    result.push(span(m.remainder))
+  }
+
+  return result.join("")
+}
+
+class MMIXMatch {
+  public isValid: boolean
+  public label: string | null
+  public blankSpace: string | null
+  public opCode: string | null
+  public remainder: string | null
+
+  constructor(line: string) {
+    const match = /^(\S+)?(\s+)(\S+)?(.*)$/.exec(line)
+    if (!match) {
+      this.isValid = false
+      this.label = null
+      this.blankSpace = null
+      this.opCode = null
+      this.remainder = null
+      return
+    }
+    this.isValid = true
+    const [, label, gap, opcode, remainder] = match
+    this.label = label
+    this.blankSpace = gap
+    this.opCode = opcode
+    this.remainder = remainder
+  }
+}
+
+function span(content: string, cssClass: string = "hl-expr"): string {
+  return `<span class="${cssClass}">${escapeHtml(content)}</span>`
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
 }
 
 const OPCODES = new Set([
@@ -41,61 +120,3 @@ const OPCODES = new Set([
   "SYNC", "SWYM", "GET", "TRIP", "SET", "LDA",
   "LOC", "IS", "GREG", "BYTE", "WYDE", "TETRA", "OCTA", "PREFIX"
 ])
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-}
-
-function findCommentStart(line: string): number {
-  let inString = false
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i]
-    if (ch === '"') {
-      inString = !inString
-    } else if (ch === '%' && !inString) {
-      return i
-    }
-  }
-  return -1
-}
-
-function highlightCode(code: string): string {
-  if (code === "") return ""
-
-  // Match: optional label, optional whitespace, optional opcode, optional operands
-  const match = /^(\S+)?(\s+)(\S+)?(.*)$/.exec(code)
-  if (!match) {
-    // No structure found - treat as expression
-    return `<span class="hl-expr">${escapeHtml(code)}</span>`
-  }
-
-  const [, label, gap1, opcode, rest] = match
-  let result = ""
-
-  if (label) {
-    result += `<span class="hl-label">${escapeHtml(label)}</span>`
-  }
-
-  if (gap1) {
-    result += escapeHtml(gap1)
-  }
-
-  if (opcode) {
-    if (OPCODES.has(opcode)) {
-      result += `<span class="hl-opcode">${escapeHtml(opcode)}</span>`
-    } else {
-      result += `<span class="hl-expr">${escapeHtml(opcode)}</span>`
-    }
-  }
-
-  if (rest) {
-    result += `<span class="hl-expr">${escapeHtml(rest)}</span>`
-  }
-
-  return result
-}
-
-
