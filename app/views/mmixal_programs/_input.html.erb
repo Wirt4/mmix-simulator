@@ -7,21 +7,18 @@
       <span>1</span>
     </div>
     <!--below used actions inherited from "editor" parent -->
-    <div class="editor-input-wrapper">
-      <pre class="editor-highlight" data-text-format-target="highlight" aria-hidden="true"></pre>
-      <%= form.text_area :source,
-        class: "editor-textarea",
-        data: {
-          ide_facade_target: "textarea",
-          text_format_target: "textarea",
-          line_numbers_target: "textarea",
-          action: "input->text-format#updateLineNumbers input->text-format#updateHighlight scroll->text-format#syncScroll keydown->text-format#handleKeydown"
-        },
-        spellcheck: false,
-        autocomplete: "off",
-        autocorrect: "off",
-        autocapitalize: "off"
-      %>
-    </div>
+    <%= form.text_area :source,
+      class: "editor-textarea",
+      data: {
+        ide_facade_target: "textarea",
+        text_format_target: "textarea",
+        line_numbers_target: "textarea",
+        action: "input->text-format#updateLineNumbers scroll->text-format#syncScroll keydown->text-format#handleKeydown"
+      },
+      spellcheck: false,
+      autocomplete: "off",
+      autocorrect: "off",
+      autocapitalize: "off"
+    %>
   </div>
 </div>
