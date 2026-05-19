@@ -58,6 +58,13 @@
   /* ── Inset/panel border ────────────────────────────────── */
   --inset-border:  color-mix(in srgb, var(--charcoal), var(--black) 30%);
 
+  /* ── Syntax highlighting ───────────────────────────────── */
+  --syntax-comment:  var(--grey-mid);
+  --syntax-label:    var(--accent);
+  --syntax-opcode:   var(--green-bright);
+  --syntax-directive: #f14523;
+  --syntax-expr:    #ffdc7b;
+
   /* ── Tokens ────────────────────────────────────────────── */
   --font-mono:     "IBM Plex Mono", "SF Mono", "Cascadia Mono", "Fira Mono", Menlo, Consolas, monospace;
   --font-display:  "IBM Plex Mono", monospace;
