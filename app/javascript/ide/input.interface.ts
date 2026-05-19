@@ -5,5 +5,7 @@ export interface IInput {
   readonly size: number
   lock(): void
   unlock(): void
+  highlight(): void
+  syncHighlightScroll(): void
   edited: boolean
 }

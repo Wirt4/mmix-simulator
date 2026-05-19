@@ -13,19 +13,22 @@
             <span>1</span>
           </div>
           <!--below used actions inherited from "editor" parent -->
-          <%= form.text_area :source,
-            class: "editor-textarea",
-            data: {
-              ide_facade_target: "textarea",
-              text_format_target: "textarea",
-              line_numbers_target: "textarea",
-              action: "input->text-format#updateLineNumbers scroll->text-format#syncScroll keydown->text-format#handleKeydown input->ide-facade#sourceEdited"
-            },
-            spellcheck: false,
-            autocomplete: "off",
-            autocorrect: "off",
-            autocapitalize: "off"
-          %>
+          <div class="editor-input-wrapper">
+            <pre class="editor-highlight" data-text-format-target="highlight" aria-hidden="true"></pre>
+            <%= form.text_area :source,
+              class: "editor-textarea",
+              data: {
+                ide_facade_target: "textarea",
+                text_format_target: "textarea",
+                line_numbers_target: "textarea",
+                action: "input->text-format#updateLineNumbers input->text-format#updateHighlight scroll->text-format#syncScroll keydown->text-format#handleKeydown input->ide-facade#sourceEdited"
+              },
+              spellcheck: false,
+              autocomplete: "off",
+              autocorrect: "off",
+              autocapitalize: "off"
+            %>
+          </div>
           <div class="listing-divider"></div>
           <div class="listing-pane" data-text-format-target="listingPanel" data-action="scroll->text-format#syncFromListing">
             <div data-ide-facade-target="listing" class="listing-content"></div>

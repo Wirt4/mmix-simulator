@@ -1,14 +1,20 @@
 import type { IInput } from "./input.interface"
+import { highlight as highlightSyntax } from "./syntax_highlighter"
 
 export class Input implements IInput {
 
   private _el: HTMLTextAreaElement
+  private _highlightEl: HTMLElement | null
   private readonly _trailingNewLines = /\n{2,}$/
   public edited = true
 
   constructor(textArea: HTMLTextAreaElement) {
     this._el = textArea
     this._el.disabled = true
+    this._highlightEl = this._el.parentElement?.querySelector(".editor-highlight") ?? null
+    if (this._highlightEl) {
+      this._el.classList.add("editor-textarea--highlighted")
+    }
   }
 
   public trim(): void {
@@ -47,6 +53,19 @@ export class Input implements IInput {
 
   unlock(): void {
     this._el.disabled = false
+  }
+
+  highlight(): void {
+    if (this._highlightEl) {
+      this._highlightEl.innerHTML = highlightSyntax(this._el.value) + "\n"
+    }
+  }
+
+  syncHighlightScroll(): void {
+    if (this._highlightEl) {
+      this._highlightEl.scrollTop = this._el.scrollTop
+      this._highlightEl.scrollLeft = this._el.scrollLeft
+    }
   }
 
   private _dispatchInputEvent(): void {
