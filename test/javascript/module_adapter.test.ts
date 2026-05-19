@@ -203,22 +203,22 @@ describe("Module Adapter", () => {
     expect(result).toBe(false)
   })
 
-  it("given _get_register_data returns -1 for high and -100 for low, when getGeneralRegisterValue is called, then it returns  0xFFFFFFFFFFFFFF9C,", () => {
+  it("given _get_register_data returns -1 for high and -100 for low, when getGeneralRegisterValue is called, then it returns ffffffffffffff9c", () => {
     // mock the calls for _get_register_data: high is all Fs, low is 0xFFFFFF9C
     vi.spyOn(mockModule, '_get_register_data').mockImplementation((t, i, p) => {
       return p == 0 ? -1 : -100
     })
-    const expected = "0xFFFFFFFFFFFFFF9C"
+    const expected = "#ffffffffffffff9c"
     const adapter = new ModuleAdapter(mockModule)
     expect(adapter.getGeneralRegisterValue(0)).toEqual(expected)
   })
 
-  it("given _get_register_data returns 0 for high and 100 for low, when getGeneralRegisterValue is called, then it should return 0x64", () => {
+  it("given _get_register_data returns 0 for high and 100 for low, when getGeneralRegisterValue is called, then it should return #64", () => {
     //100 in decimal is 0x64
     vi.spyOn(mockModule, '_get_register_data').mockImplementation((t, i, p) => {
       return p == 0 ? 0 : 100
     })
-    const expected = "0x0000000000000064"
+    const expected = "#0000000000000064"
 
     const adapter = new ModuleAdapter(mockModule)
 
@@ -256,22 +256,21 @@ describe("Module Adapter", () => {
     expect(spy).toHaveBeenCalledWith(expectedType, rbIndex, expect.anything())
   })
 
-  it("given _get_register_data returns -1 for high and -100 for low, when getSpecialRegisterValue is called, then it returns  0xFFFFFFFFFFFFFF9C,", () => {
+  it("given _get_register_data returns -1 for high and -100 for low, when getSpecialRegisterValue is called, then it returns  #ffffffffffffff9c", () => {
     // mock the calls for _get_register_data
     vi.spyOn(mockModule, '_get_register_data').mockImplementation((t, i, p) => {
       return p == 0 ? -1 : -100
     })
-    const expected = "0xFFFFFFFFFFFFFF9C"
+    const expected = "#ffffffffffffff9c"
     const adapter = new ModuleAdapter(mockModule)
     expect(adapter.getSpecialRegisterValue(1)).toEqual(expected)
   })
 
-  it("expect 0x0 for empty registers,", () => {
+  it("expect #0 for empty registers,", () => {
     // mock the calls for _get_register_data
     vi.spyOn(mockModule, '_get_register_data').mockReturnValue(0)
-    const expected = "0x0000000000000000"
+    const expected = "#0000000000000000"
     const adapter = new ModuleAdapter(mockModule)
     expect(adapter.getSpecialRegisterValue(1)).toEqual(expected)
   })
-
 })

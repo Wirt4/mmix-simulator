@@ -113,11 +113,11 @@ export default class ModuleAdapter implements IModuleAdapter {
   }
 
   private formatRegister(high: number, low: number): string {
-    return `0x${this.toHexString(high, 8)}${this.toHexString(low, 8)}`
+    return `#${this.toHexString(high, 8)}${this.toHexString(low, 8)}`
   }
 
   private toHexString(value: number, size: number): string {
-    return value.toString(16).padStart(size, '0').toUpperCase()
+    return value.toString(16).padStart(size, '0')
   }
 
   private getUnsignedRegisterValue(registerType: RegisterType, index: number, partition: Partition): number {
