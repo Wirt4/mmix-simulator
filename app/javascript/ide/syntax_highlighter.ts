@@ -1,6 +1,7 @@
-import { OpCode } from "../simulator/opcodes"
+import { OpCode, AssemblerDirective } from "../simulator/opcodes"
 
 const OPCODES = new Set(Object.values(OpCode))
+const DIRECTIVES = new Set(Object.values(AssemblerDirective))
 
 export function highlight(source: string): string {
   return source.split('\n').map(highlightLine).join('\n')
@@ -54,7 +55,7 @@ function highlightCode(code: string): string {
   }
 
   if (m.opCode) {
-    const cssClass = OPCODES.has(m.opCode) ? "hl-opcode" : "hl-expr"
+    const cssClass = OPCODES.has(m.opCode) ? "hl-opcode" : DIRECTIVES.has(m.opCode) ? "hl-directive" : "hl-expr"
     result.push(span(m.opCode, cssClass))
   }
 

@@ -43,28 +43,28 @@ describe("syntax_highlighter", () => {
       expect(result).toContain('<span class="hl-opcode">TRAP</span>')
     })
 
-    it("highlights LOC as an opcode", () => {
+    it("highlights LOC as a directive", () => {
       const result = highlight("        LOC   #100")
 
-      expect(result).toContain('<span class="hl-opcode">LOC</span>')
+      expect(result).toContain('<span class="hl-directive">LOC</span>')
     })
 
-    it("highlights BYTE as an opcode", () => {
+    it("highlights BYTE as a directive", () => {
       const result = highlight("        BYTE  \"Hello\",0")
 
-      expect(result).toContain('<span class="hl-opcode">BYTE</span>')
+      expect(result).toContain('<span class="hl-directive">BYTE</span>')
     })
 
-    it("highlights GREG as an opcode", () => {
+    it("highlights GREG as a directive", () => {
       const result = highlight("        GREG  @")
 
-      expect(result).toContain('<span class="hl-opcode">GREG</span>')
+      expect(result).toContain('<span class="hl-directive">GREG</span>')
     })
 
-    it("highlights SET as an opcode", () => {
+    it("highlights SET as a directive", () => {
       const result = highlight("        SET   $1,$2")
 
-      expect(result).toContain('<span class="hl-opcode">SET</span>')
+      expect(result).toContain('<span class="hl-directive">SET</span>')
     })
 
     it("does not highlight an unknown word as an opcode", () => {

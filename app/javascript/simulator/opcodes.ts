@@ -180,8 +180,9 @@ export enum OpCode {
   TRIP = "TRIP",
 
   LDA = "LDA",
+}
 
-  // Assembler directives
+export enum AssemblerDirective {
   LOC = "LOC",
   SET = "SET",
   BYTE = "BYTE",
