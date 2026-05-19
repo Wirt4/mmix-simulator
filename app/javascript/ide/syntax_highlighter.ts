@@ -55,7 +55,7 @@ function highlightCode(code: string): string {
   }
 
   if (m.opCode) {
-    const cssClass = OPCODES.has(m.opCode) ? "hl-opcode" : DIRECTIVES.has(m.opCode) ? "hl-directive" : "hl-expr"
+    const cssClass = OPCODES.has(m.opCode as OpCode) ? "hl-opcode" : DIRECTIVES.has(m.opCode as AssemblerDirective) ? "hl-directive" : "hl-expr"
     result.push(span(m.opCode, cssClass))
   }
 
@@ -92,7 +92,7 @@ class MMIXMatch {
   }
 }
 
-function span(content: string, cssClass: string = "hl-expr"): string {
+function span(content: string, cssClass = "hl-expr"): string {
   return `<span class="${cssClass}">${escapeHtml(content)}</span>`
 }
 
