@@ -53,13 +53,13 @@ describe("MMIX WASM Module", () => {
     Module.HEAPU8[ptr + encoded.length] = 0
     Module._assemble_mmixal(encoded.length)
 
-    Module._mmix_initialize_simulator()
+    Module._mmix_initialize_simulator(0)
     Module._mmix_perform_instructions(10)
     const stderrSize: number = Module._get_stderr_size()
     const stderrPtr: number = Module._get_stderr_pointer()
     Module._mmix_finalize_simulator()
 
-    const bytes = (Module.HEAPU8 as Uint8Array).slice(stderrPtr, stderrPtr + stderrSize)
+    const bytes = Module.HEAPU8.slice(stderrPtr, stderrPtr + stderrSize)
     const stderrOutput: string = new TextDecoder().decode(bytes)
 
     expect(stderrOutput).toBe(expected)
@@ -138,7 +138,7 @@ describe("MMIX WASM Module", () => {
     const assembled: number = Module._assemble_mmixal(encoded.length)
     expect(assembled).toBe(0)
 
-    Module._mmix_initialize_simulator()
+    Module._mmix_initialize_simulator(0)
     Module._mmix_perform_instructions(50)
     Module._mmix_finalize_simulator()
 
@@ -163,7 +163,7 @@ describe("MMIX WASM Module", () => {
     const assembled: number = Module._assemble_mmixal(encoded.length)
     expect(assembled).toBe(0)
 
-    Module._mmix_initialize_simulator()
+    Module._mmix_initialize_simulator(0)
     Module._mmix_perform_instructions(50)
     Module._mmix_finalize_simulator()
 

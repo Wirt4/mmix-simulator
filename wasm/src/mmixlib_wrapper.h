@@ -138,4 +138,10 @@ unsigned int get_global_register_data(int index, int partition);
  * preconditions: simulator is initialized
  */
 int get_local_ring_mask(void);
+
+/**
+ * passes commandline arguments to MMIX
+ * inputs: argc: the number of arguments, argv, an array strings, the commandline arguments themselves
+*/
+void mmix_commandline_w(int argc, char *argv[]);
 #endif

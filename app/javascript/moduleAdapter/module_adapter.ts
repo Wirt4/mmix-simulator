@@ -13,8 +13,9 @@ enum Partition {
 
 export default class ModuleAdapter implements IModuleAdapter {
   private _module: MainModule
+
   private get heapU8(): Uint8Array {
-    return this._module.HEAPU8 as Uint8Array
+    return this._module.HEAPU8
   }
 
   constructor(module: MainModule) {
@@ -70,7 +71,7 @@ export default class ModuleAdapter implements IModuleAdapter {
   }
 
   public initializeMMIX(): void {
-    const initialized = this._module._mmix_initialize_simulator();
+    const initialized = this._module._mmix_initialize_simulator(0);
 
     if (initialized !== 0) {
       console.error("did not initialize simulator");

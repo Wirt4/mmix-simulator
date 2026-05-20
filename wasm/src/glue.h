@@ -65,12 +65,13 @@ WASM_EXPORT unsigned char* get_stderr_pointer(void);
 /**
  * Executes a compiled .mmo binary.
  *
- * @pre  assemble_mmixal() has been called successfully.
+ * @params number of arguments from command line, a vector containing those args
+ * @pre  assemble_mmixal() has been called successfully, if there are more than 0 args, then they have been set on the heap
  * @post get_stdout_pointer()/get_stdout_size() return the program's stdout;
  *       get_stderr_pointer()/get_stderr_size() return the program's stderr.
  * @return 0 on success, non-zero on failure.
  */
-WASM_EXPORT int mmix_initialize_simulator(void);
+WASM_EXPORT int mmix_initialize_simulator(int arg_count);
 
 /**Performs a specified amount of mmix instructions and redirects the console outputs of those instructions to buffer
  *
@@ -116,5 +117,14 @@ WASM_EXPORT int general_register_count(void);
  */
 WASM_EXPORT int special_register_count(void);
 
-WASM_EXPORT int is_halted(void);
+/**
+ * Returns pointer to the start of args array
+ */
+WASM_EXPORT unsigned char* get_args_pointer(void);
+
+/*
+ * Returns the maximum allowable length of an argument string
+*/
+WASM_EXPORT int arg_size(void);
+
 #endif /*GLUE_H */
