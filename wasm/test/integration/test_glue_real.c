@@ -28,6 +28,31 @@ void tearDown(void) {
     }
 }
 
+static const char *commandline_program_source =
+    "argv\tIS\t$1\n"
+    "\tLOC\t#100\n"
+    "Main\tLDOU\t$255,argv,0\n"
+    "\tTRAP\t0,Fputs,StdOut\n"
+    "\tGETA\t$255,Comma\n"
+    "\tTRAP\t0,Fputs,StdOut\n"
+    "\tLDOU\t$255,argv,8\n"
+    "\tTRAP\t0,Fputs,StdOut\n"
+    "\tGETA\t$255,Newline\n"
+    "\tTRAP\t0,Fputs,StdOut\n"
+    "\tTRAP\t0,Halt,0\n"
+    "Comma\tBYTE\t\", \",0,0\n"
+    "Newline\tBYTE\t#a,0";
+
+static const char *one_arg_program_source =
+    "argv\tIS\t$1\n"
+    "\tLOC\t#100\n"
+    "Main\tLDOU\t$255,argv,0\n"
+    "\tTRAP\t0,Fputs,StdOut\n"
+    "\tGETA\t$255,Newline\n"
+    "\tTRAP\t0,Fputs,StdOut\n"
+    "\tTRAP\t0,Halt,0\n"
+    "Newline\tBYTE\t#a,0";
+
 static const char *stderr_program_source =
     "\tLOC\tData_Segment\n"
     "\tGREG\t@\n"
@@ -133,7 +158,6 @@ static void test_assemble_mmixal_is_non_null(void){
     TEST_ASSERT_EQUAL(0, result);
 }
 
-
 static void test_assemble_mmixal_listing(void){
     int len =(int)strlen(add_two_numbers_source);
     char unsigned *buf = get_source_code_pointer();
@@ -157,7 +181,7 @@ static void test_simulation_error(void) {
     TEST_ASSERT_EQUAL_INT(0, assembled);
 
     //TODO replace with the set of three
-    mmix_initialize_simulator();
+    mmix_initialize_simulator(0);
     mmix_perform_instructions(10);
     mmix_finalize_simulator();
 
@@ -174,7 +198,7 @@ static void test_mmix_simulate_hello_world_std_out(void) {
     int assembled = assemble_mmixal(len);
     TEST_ASSERT_EQUAL_INT(0, assembled);
 
-    mmix_initialize_simulator();
+    mmix_initialize_simulator(0);
     mmix_perform_instructions(50);
     mmix_finalize_simulator();
 
@@ -196,7 +220,7 @@ static void test_perform_instructions_terminates_on_infinite_loop(void) {
     int assembled = assemble_mmixal(len);
     TEST_ASSERT_EQUAL_INT(0, assembled);
 
-    mmix_initialize_simulator();
+    mmix_initialize_simulator(0);
     mmix_perform_instructions(100);
     mmix_finalize_simulator();
 
@@ -212,7 +236,7 @@ static void test_add_two_numbers_register_value(void) {
     int assembled = assemble_mmixal(len);
     TEST_ASSERT_EQUAL_INT(0, assembled);
 
-    mmix_initialize_simulator();
+    mmix_initialize_simulator(0);
     mmix_perform_instructions(50);
     mmix_finalize_simulator();
 
@@ -230,7 +254,7 @@ static void test_set_and_negate_register_value(void) {
     int assembled = assemble_mmixal(len);
     TEST_ASSERT_EQUAL_INT(0, assembled);
 
-    mmix_initialize_simulator();
+    mmix_initialize_simulator(0);
     mmix_perform_instructions(50);
     mmix_finalize_simulator();
 
@@ -243,6 +267,78 @@ static void test_set_and_negate_register_value(void) {
     unsigned int r1_low = get_register_data(0, 1, 1);
     TEST_ASSERT_EQUAL_HEX32(0xFFFFFFFF, r1_high);
     TEST_ASSERT_EQUAL_HEX32(0xFFFFFF9C, r1_low);
+}
+
+static void test_commandline_args(void){
+    char* expected = "Hello, Clarice\n";
+    int len = (int)strlen(commandline_program_source);
+    //use length and source code pointer to write the source to memory
+    memcpy(get_source_code_pointer(), commandline_program_source, len + 1);
+    assemble_mmixal(len);
+
+    const char *argv[] = {"Hello", "Clarice"};
+    unsigned char *pointer = get_args_pointer();
+
+    for (int i = 0; i< 2; i++){
+        memcpy(pointer, argv[i], (int)strlen(argv[i]) + 1);
+        pointer += arg_size();
+    }
+
+    mmix_initialize_simulator(2);
+    mmix_perform_instructions(50);
+    mmix_finalize_simulator();
+
+    const unsigned char *stdout_out = get_stdout_pointer();
+    char result[get_stdout_size()];
+    strcpy(result, (char*)stdout_out);
+
+    TEST_ASSERT_EQUAL_STRING(expected, result);
+}
+
+static void test_commandline_one_arg(void){
+    char* expected = "World\n";
+    int len = (int)strlen(one_arg_program_source);
+    memcpy(get_source_code_pointer(), one_arg_program_source, len + 1);
+    assemble_mmixal(len);
+
+    const char *argv[] = {"World"};
+    unsigned char *pointer = get_args_pointer();
+    memcpy(pointer, argv[0], (int)strlen(argv[0]) + 1);
+
+    mmix_initialize_simulator(1);
+    mmix_perform_instructions(15);
+    mmix_finalize_simulator();
+
+    const unsigned char *stdout_out = get_stdout_pointer();
+    char result[get_stdout_size()];
+    strcpy(result, (char*)stdout_out);
+
+    TEST_ASSERT_EQUAL_STRING(expected, result);
+}
+
+static void test_commandline_args_different_data(void){
+    char* expected = "Foo, Bar\n";
+    int len = (int)strlen(commandline_program_source);
+    memcpy(get_source_code_pointer(), commandline_program_source, len + 1);
+    assemble_mmixal(len);
+
+    const char *argv[] = {"Foo", "Bar"};
+    unsigned char *pointer = get_args_pointer();
+
+    for (int i = 0; i< 2; i++){
+        memcpy(pointer, argv[i], (int)strlen(argv[i]) + 1);
+        pointer += arg_size();
+    }
+
+    mmix_initialize_simulator(2);
+    mmix_perform_instructions(15);
+    mmix_finalize_simulator();
+
+    const unsigned char *stdout_out = get_stdout_pointer();
+    char result[get_stdout_size()];
+    strcpy(result, (char*)stdout_out);
+
+    TEST_ASSERT_EQUAL_STRING(expected, result);
 }
 
 int main(void) {
@@ -259,5 +355,8 @@ int main(void) {
     RUN_TEST(test_perform_instructions_terminates_on_infinite_loop);
     RUN_TEST(test_add_two_numbers_register_value);
     RUN_TEST(test_set_and_negate_register_value);
+    RUN_TEST(test_commandline_args);
+    RUN_TEST(test_commandline_one_arg);
+    RUN_TEST(test_commandline_args_different_data);
     return UNITY_END();
 }

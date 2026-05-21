@@ -65,6 +65,7 @@ static struct Redirect redirect_stream(struct Redirect redirect, FILE* stream, i
 	redirect.exit_code = 0;
 	return redirect;
 }
+
 static struct Redirect init_redirect(char*logname){
 	ASSERT(logname != NULL);
 	ASSERT(strlen(logname) < FILE_NAME_SIZE);
@@ -214,4 +215,18 @@ size_t read_to_heap(const char* filename, unsigned char* heap_pointer, size_t bu
 	return size;
 }
 
+void parse_arg_array(char *arg_vector[], const unsigned char* heap_pointer, size_t arg_count){
+	if (!(arg_vector && heap_pointer && arg_count)){
+		return;
+	}
+	ASSERT(heap_pointer);
+	for (size_t i =0; i < arg_count; i++){
+		size_t offset = i * ARG_SIZE;
+		// borrow the space from the stderr heap
+		arg_vector[i] = (char*)&g_stderr_pointer[offset];
+		// copy from stdin heap pointer to arg_vector
+		const char * arg = (char*)&heap_pointer[offset];
+		strcopy_and_trim(arg_vector[i], arg, (int)strlen(arg));
+	}
+}
 

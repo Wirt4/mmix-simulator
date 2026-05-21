@@ -33,7 +33,7 @@ static int setup_assembly(size_t src_len){
 static int teardown_assembly(void){
 	if (ASSERT(file_exists(MMS))){
 		int removed = remove_file(MMS);
-		ASSERT(removed ==0 );
+		ASSERT(removed == 0 );
 		return removed;
 	}
 	return 0;

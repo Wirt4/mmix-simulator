@@ -69,8 +69,18 @@ int mmix_perform_instructions(unsigned int instructions){
 	return 0;
 }
 
-int mmix_initialize_simulator(void){
-	int init = initialize_simulator(mmo);
+int mmix_initialize_simulator(int arg_count){
+	if (!ASSERT(arg_count >= 0)){
+		return -1;
+	}
+
+	char *arg_vector[arg_count];
+
+	if (arg_count > 0){
+		parse_arg_array(arg_vector, get_source_code_pointer(), arg_count);
+	}
+
+	int init = initialize_simulator(mmo, arg_count, arg_count > 0 ? arg_vector : NULL);
 	ASSERT(init == 0);
 	initialized = !init;
 	return init;
@@ -83,9 +93,10 @@ int mmix_finalize_simulator(void){
 	return fin;
 }
 
-unsigned int get_register_data(int is_special_register, int index, int partition){
+unsigned int get_register_data(int register_type, int index, int partition){
+        // register_type 0 for general register, else is special register
 	ASSERT(index >= 0);
-	if (is_special_register){
+	if (register_type){
 		return get_special_register_data(index, partition);
 	}
 	return get_general_register_data(index, partition);
@@ -129,3 +140,10 @@ int is_halted(void){
 	return sim_halted();
 }
 
+unsigned char* get_args_pointer(void){
+	 return get_source_code_pointer();
+}
+
+int arg_size(void){
+	return ARG_SIZE;
+}

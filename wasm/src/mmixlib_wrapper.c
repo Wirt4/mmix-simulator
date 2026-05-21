@@ -86,3 +86,8 @@ unsigned int get_global_register_data(int index, int partition){
 int get_local_ring_mask(void){
 	return lring_mask;
 }
+
+void mmix_commandline_w(int argc, char *argv[]){
+	mmix_commandline(argc, argv);
+}
+

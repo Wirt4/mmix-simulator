@@ -23,24 +23,30 @@ static int ends_with_mmo(char*filename){
 	return 0;
 }
 //PUBLIC
-int initialize_simulator(char* mmo){
+int initialize_simulator(char* mmo, int arg_count, char *arg_vector[]){
 	if (g_simulator_initialized){
 		return 0;
 	}
-	if (!ASSERT(mmo !=NULL) || !ASSERT(strlen(mmo) < FILE_NAME_SIZE)){
+	if (!(ASSERT(mmo !=NULL) && ASSERT(strlen(mmo) < FILE_NAME_SIZE))){
 		return -1;
 	}
-	if (!ASSERT(ends_with_mmo(mmo))){
-		return -1;
+	if (!(ASSERT(ends_with_mmo(mmo)) && ASSERT(file_exists(mmo)))){
+		return -2;
 	}
-	if (!file_exists(mmo)){
-		return -1;
+	if (!ASSERT(arg_count >= 0)){
+		return -3;
+	}
+	if (arg_count > 0 && !ASSERT(arg_vector)){
+		return -3;
 	}
 	strcopy_and_trim(g_current_mmo, mmo, FILE_NAME_SIZE - 1);
 	mmix_lib_initialize_w();
 	mmix_initialize_w();
 	mmix_boot_w();
 	mmix_load_file_w(mmo);
+	if (arg_count > 0){
+		mmix_commandline_w(arg_count, arg_vector);
+	}
 	g_simulator_initialized = 1;
 	return 0;
 }

@@ -3,17 +3,17 @@ declare namespace RuntimeExports {
     /**
      * @param {string|null=} returnType
      * @param {Array=} argTypes
-     * @param {Arguments|Array=} args
+     * @param {Array=} args
      * @param {Object=} opts
      */
-    function ccall(ident: any, returnType?: (string | null) | undefined, argTypes?: any[] | undefined, args?: (Arguments | any[]) | undefined, opts?: any | undefined): any;
+    function ccall(ident: any, returnType?: (string | null) | undefined, argTypes?: any[] | undefined, args?: any[] | undefined, opts?: any | undefined): any;
     /**
      * @param {string=} returnType
      * @param {Array=} argTypes
      * @param {Object=} opts
      */
     function cwrap(ident: any, returnType?: string | undefined, argTypes?: any[] | undefined, opts?: any | undefined): (...args: any[]) => any;
-    let HEAPU8: any;
+    let HEAPU8: Uint8Array;
 }
 interface WasmModule {
   _get_stderr_size(): number;
@@ -22,15 +22,17 @@ interface WasmModule {
   _assemble_mmixal(_0: number): number;
   _get_stdout_size(): number;
   _mmix_perform_instructions(_0: number): number;
-  _mmix_initialize_simulator(): number;
+  _mmix_initialize_simulator(_0: number): number;
+  _get_source_code_pointer(): number;
   _mmix_finalize_simulator(): number;
   _get_register_data(_0: number, _1: number, _2: number): number;
   _general_register_count(): number;
   _special_register_count(): number;
-  _get_source_code_pointer(): number;
   _get_listing_pointer(): number;
   _get_listing_size(): number;
   _is_halted(): number;
+  _get_args_pointer(): number;
+  _arg_size(): number;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports;

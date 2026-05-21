@@ -97,4 +97,9 @@ size_t read_to_heap(const char* filename, unsigned char* heap_pointer, size_t bu
  * copies src to dest and adds null char at len
  */
 void strcopy_and_trim(char* dest, const char*src, int len);
+
+/**
+ * copies the delimited args from the source heap to arg_vector
+*/
+void parse_arg_array(char *arg_vector[], const unsigned char* heap_pointer, size_t arg_count);
 #endif

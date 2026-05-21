@@ -3,12 +3,12 @@
 
 /**
  * Initializes the mmix simulator using mmixware and library tools
- * inputs: name of the mmo file to run
+ * inputs: name of the mmo file to run, number of arg counts and an array of command-line arguments
  * outputs: 0 on succes, -1 on failure
  * preconditions: the simulator is not initialized, the named mmo file exists
  * postconditions: the simulator is initialized
 */
-int initialize_simulator(char* mmo);
+int initialize_simulator(char* mmo, int arg_count, char *arg_vector[]);
 
 /**
  * Executes N number of instructions in mmix.
