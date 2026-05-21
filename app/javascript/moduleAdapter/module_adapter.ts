@@ -71,6 +71,7 @@ export default class ModuleAdapter implements IModuleAdapter {
   }
 
   public initializeMMIX(): void {
+    //TODO: add a string array argument to intitializeMMIX and heap writes
     const initialized = this._module._mmix_initialize_simulator(0);
 
     if (initialized !== 0) {

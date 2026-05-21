@@ -271,7 +271,6 @@ static void test_set_and_negate_register_value(void) {
 
 static void test_commandline_args(void){
     char* expected = "Hello, Clarice\n";
-    //get length of hello world code
     int len = (int)strlen(commandline_program_source);
     //use length and source code pointer to write the source to memory
     memcpy(get_source_code_pointer(), commandline_program_source, len + 1);
