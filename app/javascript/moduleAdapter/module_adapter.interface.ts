@@ -7,7 +7,7 @@ export interface IModuleAdapter {
   /** Returns the contents of the simulator's stderr buffer. */
   getStdErr(): string
   /** Initializes the MMIX simulator state. */
-  initializeMMIX(): void
+  initializeMMIX(argv: string[]): void
   /** Tears down the MMIX simulator and releases resources. */
   finalizeMMIX(): void
   /** Returns true if the simulator has halted execution. */
