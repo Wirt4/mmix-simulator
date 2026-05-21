@@ -44,7 +44,7 @@ describe("Simulator tests", () => {
     vi.spyOn(mockAdapter, 'assembleMMIXAL')
     const simulator = new Simulator(mockAdapter)
 
-    simulator.runUserProgram()
+    simulator.runUserProgram([])
 
     expect(mockAdapter.assembleMMIXAL).not.toHaveBeenCalled()
   })
@@ -54,17 +54,29 @@ describe("Simulator tests", () => {
     const simulator = new Simulator(mockAdapter)
 
     simulator.assemble("USER CODE")
-    simulator.runUserProgram()
+    simulator.runUserProgram([])
 
     expect(mockAdapter.initializeMMIX).toHaveBeenCalledTimes(1)
   })
+  it("on successful assembly, runUserProgram calls initializeMMIX with command line arguments", () => {
+    const mockAdapter = createMockAdapter()
+    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
+    const simulator = new Simulator(mockAdapter)
+
+    simulator.assemble("USER CODE")
+    const expected = ["Jim", "Bones", "Pointy"]
+    simulator.runUserProgram(expected)
+
+    expect(mockAdapter.initializeMMIX).toHaveBeenCalledWith(expect.arrayContaining(expected))
+  })
+
   it("if assembly isn't successful, runUserProgram does not call initializeMMIX", () => {
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(false)
     const simulator = new Simulator(mockAdapter)
 
     simulator.assemble("USER CODE")
-    simulator.runUserProgram()
+    simulator.runUserProgram([])
 
     expect(mockAdapter.initializeMMIX).not.toHaveBeenCalled()
 
@@ -75,7 +87,7 @@ describe("Simulator tests", () => {
     const simulator = new Simulator(mockAdapter)
 
     simulator.assemble("USER CODE")
-    simulator.runUserProgram()
+    simulator.runUserProgram([])
 
     expect(mockAdapter.finalizeMMIX).toHaveBeenCalledTimes(1)
   })
@@ -85,7 +97,7 @@ describe("Simulator tests", () => {
     const simulator = new Simulator(mockAdapter)
 
     simulator.assemble("USER CODE")
-    simulator.runUserProgram()
+    simulator.runUserProgram([])
 
     expect(mockAdapter.isHalted).toHaveBeenCalled()
   })
@@ -96,7 +108,7 @@ describe("Simulator tests", () => {
     const simulator = new Simulator(mockAdapter)
 
     simulator.assemble("TRAP 0")
-    simulator.runUserProgram()
+    simulator.runUserProgram([])
 
     expect(mockAdapter.performInstructions).toHaveBeenCalled()
   })
@@ -106,7 +118,7 @@ describe("Simulator tests", () => {
     const simulator = new Simulator(mockAdapter)
     const userCode = "TRAP 0"
     simulator.assemble(userCode)
-    simulator.runUserProgram()
+    simulator.runUserProgram([])
 
     expect(mockAdapter.assembleMMIXAL).toHaveBeenCalledWith(userCode)
   })
@@ -130,7 +142,7 @@ describe("Simulator tests", () => {
 
     const simulator = new Simulator(mockAdapter)
     simulator.assemble("TRAP 0")
-    simulator.runUserProgram()
+    simulator.runUserProgram([])
 
     expect(simulator.getStdOut()).toEqual(expect.stringContaining(expected))
   })

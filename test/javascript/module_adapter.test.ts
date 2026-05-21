@@ -326,7 +326,7 @@ describe("Module Adapter", () => {
     vi.spyOn(mockModule, '_arg_size').mockReturnValue(4)
     const adapter = new ModuleAdapter(mockModule)
 
-    expect(() => adapter.initializeMMIX(["hello"])).toThrowError()
+    expect(() => { adapter.initializeMMIX(["hello"]) }).toThrow()
   })
 
   it("given a command line argument array of size 0, when initialize_simulator is called then the heap not set and _initialize is called with 0", () => {
