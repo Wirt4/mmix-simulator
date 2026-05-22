@@ -66,8 +66,7 @@ describe("Simulator tests", () => {
     simulator.assemble("USER CODE")
     const expected = ["Jim", "Bones", "Pointy"]
     simulator.runUserProgram(expected)
-
-    expect(mockAdapter.initializeMMIX).toHaveBeenCalledWith(expect.arrayContaining(expected))
+    expect(mockAdapter.initializeMMIX).toHaveBeenCalledWith(expected)
   })
 
   it("if assembly isn't successful, runUserProgram does not call initializeMMIX", () => {

@@ -129,6 +129,7 @@ export default class IDEFacadeController extends Controller {
   }
 
   runUserProgram(): void {
+    //TODO: pass arguments from frontend to here
     this.simulator.runUserProgram([])
     this.outputPanel.setValue(this.simulator.getStdOut())
     this.registers.render(this.simulator.getRegisters(EnumRegisterType.SPECIAL), this.simulator.getRegisters(EnumRegisterType.GENERAL))

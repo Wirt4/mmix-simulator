@@ -310,7 +310,7 @@ describe("Module Adapter", () => {
     const arg3 = "Starling"
 
     adapter.initializeMMIX([arg1, arg2, arg3])
-
+    expect(heapSpy.mock.calls.length).toEqual(3)
     expect(heapSpy.mock.calls).toEqual(
       expect.arrayContaining(
         [
