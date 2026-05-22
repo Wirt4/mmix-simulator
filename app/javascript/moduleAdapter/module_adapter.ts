@@ -70,11 +70,19 @@ export default class ModuleAdapter implements IModuleAdapter {
     return this._decode_and_return(this._module._get_listing_pointer(), this._module._get_listing_size())
   }
 
-  public initializeMMIX(): void {
-    //TODO: add a string array argument to intitializeMMIX and heap writes
-    const initialized = this._module._mmix_initialize_simulator(0);
+  public initializeMMIX(argv: string[]): void {
+    let i: number
 
-    if (initialized !== 0) {
+    for (i = 0; i < argv.length; i++) {
+      const p = this._module._get_args_pointer()
+      const siz = this._module._arg_size()
+      if (argv[i].length >= siz) {
+        throw new Error("overflow error")
+      }
+      this.heapU8.set(new TextEncoder().encode(argv[i]), p + i * siz)
+    }
+
+    if (this._module._mmix_initialize_simulator(i) !== 0) {
       console.error("did not initialize simulator");
     }
   }

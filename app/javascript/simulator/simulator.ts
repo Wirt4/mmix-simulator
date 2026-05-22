@@ -56,11 +56,11 @@ export default class Simulator implements ISimulator {
     return this._out
   }
 
-  public runUserProgram(): void {
+  public runUserProgram(argv: string[]): void {
     if (this._successfulAssembly) {
       const timeout = 800;
       const instructionBatch = 1000;
-      this._out = this.simulateWithTimeout(timeout, instructionBatch)
+      this._out = this.simulateWithTimeout(timeout, instructionBatch, argv)
     }
   }
 
@@ -141,30 +141,30 @@ export default class Simulator implements ISimulator {
     }
     return result
   }
-  private simulateWithTimeout(timeout: number, instructionsPerInterval: number): string {
-    let programOutputs = "";
 
+  private simulateWithTimeout(timeout: number, instructionsPerInterval: number, argv: string[]): string {
     if (!this.areActionableInputs(timeout, instructionsPerInterval)) {
-
       if (!this.areValidInputs(timeout, instructionsPerInterval)) {
-        console.error("arguments to simulateWithTimeout must be non-negative integers")
-        console.error(`timeout ${timeout.toString()}`)
-        console.error(`instructionts per interval ${instructionsPerInterval.toString()}`)
+        this.logTimeInstructionErrors(timeout, instructionsPerInterval)
       }
+      return ""
+    }
 
-      return programOutputs
+    try {
+      this._moduleAdapter.initializeMMIX(argv)
+    } catch (err) {
+      console.error(err)
     }
 
     let cur: number = Date.now()
     const deadline = cur + timeout
-    this._moduleAdapter.initializeMMIX()
     let hasTimedOut = false
+    const programOutputs = new Outputs()
 
     while (cur < deadline && !this._moduleAdapter.isHalted()) {
       cur = Date.now()
       this._moduleAdapter.performInstructions(instructionsPerInterval)
-      programOutputs += this._moduleAdapter.getStdErr()
-      programOutputs += this._moduleAdapter.getStdOut();
+      programOutputs.append(this._moduleAdapter.getStdErr(), this._moduleAdapter.getStdOut())
       hasTimedOut = cur >= deadline
     }
 
@@ -174,7 +174,7 @@ export default class Simulator implements ISimulator {
       return `ERROR: simulator timeout. Programs may not exceed ${timeout.toString()} ms of clock time\n`
     }
 
-    return programOutputs;
+    return programOutputs.toString();
   }
 
   private areActionableInputs(timeout: number, instructionsPerInterval: number): boolean {
@@ -183,5 +183,24 @@ export default class Simulator implements ISimulator {
 
   private areValidInputs(timeout: number, instructionsPerInterval: number): boolean {
     return (timeout >= 0 && instructionsPerInterval >= 0 && Number.isInteger(timeout) && Number.isInteger(instructionsPerInterval))
+  }
+
+  private logTimeInstructionErrors(timeout: number, instructionsPerInterval: number): void {
+    console.error("arguments to simulateWithTimeout must be non-negative integers")
+    console.error(`timeout ${timeout.toString()}`)
+    console.error(`instructionts per interval ${instructionsPerInterval.toString()}`)
+
+  }
+}
+
+class Outputs {
+  private log: string[] = []
+  public append(stderr: string, stdout: string): void {
+    this.log.push(stderr)
+    this.log.push(stdout)
+  }
+
+  public toString(): string {
+    return this.log.join("")
   }
 }

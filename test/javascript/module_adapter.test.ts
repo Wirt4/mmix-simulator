@@ -7,6 +7,7 @@ describe("Module Adapter", () => {
   let heap: Uint8Array
   let mockModule: MainModule
   let helloWorldSource: string
+
   beforeEach(() => {
     helloWorldSource =
       "\tLOC\tData_Segment\n" +
@@ -136,7 +137,7 @@ describe("Module Adapter", () => {
     const initSpy = vi.spyOn(mockModule, '_mmix_initialize_simulator').mockReturnValue(0)
 
     const adapter = new ModuleAdapter(mockModule)
-    adapter.initializeMMIX()
+    adapter.initializeMMIX([])
 
     expect(initSpy).toHaveBeenCalledOnce()
   })
@@ -146,7 +147,7 @@ describe("Module Adapter", () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
     const adapter = new ModuleAdapter(mockModule)
-    adapter.initializeMMIX()
+    adapter.initializeMMIX([])
 
     expect(errorSpy).toHaveBeenCalledWith("did not initialize simulator")
   })
@@ -246,6 +247,7 @@ describe("Module Adapter", () => {
 
     expect(spy).toHaveBeenCalledWith(expect.anything(), index, expect.anything())
   })
+
   it("when getSpecialRegisterValue is called with a register enum, then it should call _get_register_data with the correct regsiter type and index", () => {
     const spy = vi.spyOn(mockModule, '_get_register_data').mockReturnValue(0)
     const adapter = new ModuleAdapter(mockModule)
@@ -274,5 +276,69 @@ describe("Module Adapter", () => {
     const expected = "#0000000000000000"
     const adapter = new ModuleAdapter(mockModule)
     expect(adapter.getSpecialRegisterValue(1)).toEqual(expected)
+  })
+
+  it("given a command line argument array of size 1, when initialize_simulator is called then the heap is set with the commandline and _initialize is called with 1", () => {
+    const heapSpy = vi.spyOn(mockModule.HEAPU8, "set")
+    const initSpy = vi.spyOn(mockModule, "_mmix_initialize_simulator")
+    const mockPointer = 5
+    vi.spyOn(mockModule, '_get_args_pointer').mockReturnValue(mockPointer)
+    vi.spyOn(mockModule, "_arg_size").mockReturnValue(20)
+    const adapter = new ModuleAdapter(mockModule)
+    const arg = "hello"
+
+    adapter.initializeMMIX([arg])
+
+    // assert heap has "hello" written to it
+    expect(heapSpy.mock.calls.length).toEqual(1)
+    expect(heapSpy.mock.calls).toEqual(expect.arrayContaining([[new TextEncoder().encode(arg)
+      , mockPointer]]))
+    //assert the module has been called
+    expect(initSpy).toHaveBeenCalledWith(1)
+  })
+
+  it("given a command line argument array of size 3, when initialize_simulator is called then the heap is set with the args one argSize apart", () => {
+    const heapSpy = vi.spyOn(mockModule.HEAPU8, "set")
+    vi.spyOn(mockModule, "_mmix_initialize_simulator")
+    const mockPointer = 5
+    const mockArgLen = 25
+    vi.spyOn(mockModule, '_arg_size').mockReturnValue(mockArgLen)
+    vi.spyOn(mockModule, '_get_args_pointer').mockReturnValue(mockPointer)
+    const adapter = new ModuleAdapter(mockModule)
+    const arg1 = "hello"
+    const arg2 = "Clarice"
+    const arg3 = "Starling"
+
+    adapter.initializeMMIX([arg1, arg2, arg3])
+    expect(heapSpy.mock.calls.length).toEqual(3)
+    expect(heapSpy.mock.calls).toEqual(
+      expect.arrayContaining(
+        [
+          [new TextEncoder().encode(arg1), mockPointer],
+          [new TextEncoder().encode(arg2), mockPointer + mockArgLen],
+          [new TextEncoder().encode(arg3), mockPointer + (2 * mockArgLen)]
+        ]
+      ))
+  })
+
+  it("initializeMMIX throws an error if an argument is larger than the arg size", () => {
+    vi.spyOn(mockModule, '_get_args_pointer').mockReturnValue(5)
+    vi.spyOn(mockModule, '_arg_size').mockReturnValue(4)
+    const adapter = new ModuleAdapter(mockModule)
+
+    expect(() => { adapter.initializeMMIX(["hello"]) }).toThrow()
+  })
+
+  it("given a command line argument array of size 0, when initialize_simulator is called then the heap not set and _initialize is called with 0", () => {
+    const heapSpy = vi.spyOn(mockModule.HEAPU8, "set")
+    const initSpy = vi.spyOn(mockModule, "_mmix_initialize_simulator")
+    const adapter = new ModuleAdapter(mockModule)
+
+    adapter.initializeMMIX([])
+
+    // assert heap has "hello" written to it
+    expect(heapSpy.mock.calls.length).toEqual(0)
+    //assert the module has been called
+    expect(initSpy).toHaveBeenCalledWith(0)
   })
 })

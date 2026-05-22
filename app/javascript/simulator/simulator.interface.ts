@@ -4,7 +4,7 @@ export interface ISimulator {
   /** Assembles the user's MMIXAL program*/
   assemble(mmixal: string): boolean
   /** Executes the user's MMIXAL program, writing output to the output area. */
-  runUserProgram(): void
+  runUserProgram(argv: string[]): void
   /** returns contents of both stdOut and stdErr*/
   getStdOut(): string
   /** Returns the assembly listing for the most recent successful assembly. */
