@@ -1,9 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
-import Simulator from "../simulator/simulator"
 import { ISimulator } from "../simulator/simulator.interface"
+import Simulator from "../simulator/simulator"
 import moduleAdapterFactory from "../moduleAdapter/factory"
-import OutputPanel from "../ide/output_panel"
 import { IOutputPanel } from "../ide/output_panel.interface"
+import OutputPanel from "../ide/output_panel"
 import { IInput } from "../ide/input.interface"
 import { Input } from "../ide/input"
 import { IListing } from "../ide/listing.interface"
@@ -13,6 +13,8 @@ import { IRegistersPanel } from "../ide/registers_panel.interface"
 import { RegistersPanel } from "../ide/registers_panel"
 import { Registers } from "../ide/registers"
 import { TabbedRegisters } from "../ide/tabbed_registers"
+import { IArguments } from '../ide/arguments.interface'
+import { Arguments } from '../ide/arguments'
 
 export default class IDEFacadeController extends Controller {
   static targets = [
@@ -42,13 +44,14 @@ export default class IDEFacadeController extends Controller {
   private inputFrame!: IInput
   private listingFrame!: IListing
   private registers!: IRegistersPanel
+  private arguments!: IArguments
   private suppressSourceEdited = false
 
   connect(): void {
     this.outputPanel = new OutputPanel(this.outputTarget)
     this.inputFrame = new Input(this.textareaTarget)
     this.listingFrame = new Listing(this.listingTarget, this.listingToggleTarget, this.panelTarget)
-    this.runButtonTarget.disabled = true
+    this.arguments = new Arguments()
 
     moduleAdapterFactory().then((adapter) => {
       if (adapter === null) {
@@ -71,6 +74,7 @@ export default class IDEFacadeController extends Controller {
     }).catch((err: unknown) => {
       console.error("could not initialize simulator", err)
     })
+    this.resetDisplay()
   }
 
   assembleUserProgram(): void {
@@ -83,6 +87,7 @@ export default class IDEFacadeController extends Controller {
       //extend input frame to be same height as listing
       this.inputFrame.pad(this.listingFrame.size - this.inputFrame.size)
       this.runButtonTarget.disabled = false
+      this.arguments.show()
       // unlock listing
       this.listingFrame.unlock()
       this.listingFrame.toggle()
@@ -105,22 +110,28 @@ export default class IDEFacadeController extends Controller {
 
   sourceEdited(): void {
     if (this.suppressSourceEdited) return
-    // clear the output
-    this.outputPanel.clear()
-    // check if listing panel is open
+
+    this.resetDisplay()
+
     if (this.listingFrame.isOpen) {
-      //pad the input with the difference in sizes
       this.inputFrame.pad(this.listingFrame.size - this.inputFrame.size)
     }
-    // set listing back to default
-    this.listingFrame.default()
+
     if (!this.inputFrame.edited) {
       this.listingFrame.unlock()
       this.inputFrame.edited = true
     }
-    // lock the run button 
-    this.runButtonTarget.disabled = true
   }
+
+  private resetDisplay(): void {
+    this.listingFrame.default()
+    this.outputPanel.clear()
+    this.outputPanel.show()
+    this.runButtonTarget.disabled = true
+    this.arguments.clear()
+    this.arguments.hide()
+  }
+
 
   beforeSave(): void {
     this.suppressSourceEdited = true
@@ -129,9 +140,9 @@ export default class IDEFacadeController extends Controller {
   }
 
   runUserProgram(): void {
-    //TODO: pass arguments from frontend to here
-    this.simulator.runUserProgram([])
+    this.simulator.runUserProgram(this.arguments.getContents())
     this.outputPanel.setValue(this.simulator.getStdOut())
+    this.outputPanel.show()
     this.registers.render(this.simulator.getRegisters(EnumRegisterType.SPECIAL), this.simulator.getRegisters(EnumRegisterType.GENERAL))
     this.registers.openAll()
   }

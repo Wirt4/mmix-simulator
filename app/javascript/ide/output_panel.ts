@@ -10,4 +10,10 @@ export default class OutputPanel implements IOutputPanel {
   setValue(text: string): void {
     this.outputEl.value = text
   }
+
+  hide(): void {
+    this.outputEl.hidden = true
+  }
+
+  show(): void { }
 }

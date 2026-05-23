@@ -41,4 +41,14 @@ describe("OutputPanel", () => {
     panel.clear()
     expect(el.value).toBe("")
   })
+
+  it("hide hides the output panel", () => {
+    const el = makeTextarea()
+    el.hidden = false
+    const panel = new OutputPanel(el)
+
+    panel.hide()
+
+    expect(el.hidden).toEqual(true)
+  })
 })
