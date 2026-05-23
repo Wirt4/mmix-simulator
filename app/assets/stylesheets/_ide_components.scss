@@ -26,11 +26,11 @@
   grid-row: 4;
 }
 
-.ide-arguments {
+.editor-actions .ide-arguments {
   grid-column:1;
   grid-row: 4;
-  color: var(--accent);
-
+  color: var(--gold);
+  border: none
 }
 
 /* ── Editor & output containers ────────────────────────── */

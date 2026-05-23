@@ -3,4 +3,5 @@ export interface IArguments {
   hide(): void
   show(): void
   clear(): void
+  toggle(): void
 }
