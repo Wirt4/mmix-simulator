@@ -23,6 +23,7 @@ interface WasmModule {
   _get_stdout_size(): number;
   _mmix_perform_instructions(_0: number): number;
   _mmix_initialize_simulator(_0: number): number;
+  _get_args_pointer(): number;
   _mmix_finalize_simulator(): number;
   _get_register_data(_0: number, _1: number, _2: number): number;
   _general_register_count(): number;
@@ -31,7 +32,6 @@ interface WasmModule {
   _get_listing_pointer(): number;
   _get_listing_size(): number;
   _is_halted(): number;
-  _get_args_pointer(): number;
   _arg_size(): number;
 }
 

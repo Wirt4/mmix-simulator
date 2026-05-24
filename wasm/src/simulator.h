@@ -2,6 +2,12 @@
 #define SIMULATOR_H
 
 /**
+* Returns a pointer to preallocated block of memory of size (HEAP_SIZE)
+ * A compiled wasm object can't take strings as function arguments
+ * */
+unsigned char * arguments_buffer(void);
+
+/**
  * Initializes the mmix simulator using mmixware and library tools
  * inputs: name of the mmo file to run, number of arg counts and an array of command-line arguments
  * outputs: 0 on succes, -1 on failure

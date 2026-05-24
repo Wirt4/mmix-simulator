@@ -215,18 +215,27 @@ size_t read_to_heap(const char* filename, unsigned char* heap_pointer, size_t bu
 	return size;
 }
 
-void parse_arg_array(char *arg_vector[], const unsigned char* heap_pointer, size_t arg_count){
-	if (!(arg_vector && heap_pointer && arg_count)){
-		return;
+int copy_array_from_heap(
+	unsigned char* heap_pointer, 
+	size_t num_items, 
+	size_t max_item_size,
+	char* target_vector[]
+	){
+	if (!ASSERT(heap_pointer != NULL && max_item_size > 0)){
+		return -1;
 	}
-	ASSERT(heap_pointer);
-	for (size_t i =0; i < arg_count; i++){
-		size_t offset = i * ARG_SIZE;
-		// borrow the space from the stderr heap
-		arg_vector[i] = (char*)&g_stderr_pointer[offset];
-		// copy from stdin heap pointer to arg_vector
-		const char * arg = (char*)&heap_pointer[offset];
-		strcopy_and_trim(arg_vector[i], arg, (int)strlen(arg));
+	for (int i=0; i < (int)num_items; i++){
+	const size_t offset = i * max_item_size;
+	//parse the string stored on the heap
+	const char*item = (char*)&heap_pointer[offset];
+	size_t siz = strlen(item);
+	if (siz > max_item_size){
+		return -1;
 	}
+	// borrow memory from the stderr pointer and allocate to the target_vector
+	target_vector[i] = (char*)&g_stderr_pointer[offset];
+	strcopy_and_trim(target_vector[i], item, (int)siz);
+	}
+	return 0;
 }
 
