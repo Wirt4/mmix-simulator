@@ -32,7 +32,7 @@ export default class IDEFacadeController extends Controller {
   ]
 
   declare textareaTarget: HTMLTextAreaElement
-  declare outputTarget: HTMLTextAreaElement
+  declare outputTarget: HTMLElement
   declare runButtonTarget: HTMLButtonElement
   declare specialContainerTarget: HTMLElement
   declare generalContainerTarget: HTMLElement
@@ -130,7 +130,7 @@ export default class IDEFacadeController extends Controller {
   private resetDisplay(): void {
     this.listingFrame.default()
     this.outputPanel.clear()
-    this.outputPanel.show()
+    this.outputPanel.hide()
     this.runButtonTarget.disabled = true
     this.arguments.clear()
     this.arguments.hide()

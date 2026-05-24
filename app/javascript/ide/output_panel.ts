@@ -1,19 +1,33 @@
 import { IOutputPanel } from './output_panel.interface'
 
 export default class OutputPanel implements IOutputPanel {
-  constructor(private outputEl: HTMLTextAreaElement) {
-    this.outputEl.value = ""
+  private textarea: HTMLTextAreaElement
+
+  constructor(private container: HTMLElement) {
+    const ta = container.querySelector<HTMLTextAreaElement>("textarea")
+    if (!ta) throw new Error("OutputPanel: no textarea found in container")
+    this.textarea = ta
+    this.textarea.value = ""
+    this.hide()
   }
   clear(): void {
-    this.outputEl.value = ""
+    this.textarea.value = ""
+    this.hide()
   }
   setValue(text: string): void {
-    this.outputEl.value = text
+    this.textarea.value = text
+    if (text) {
+      this.show()
+    } else {
+      this.hide()
+    }
   }
 
   hide(): void {
-    this.outputEl.hidden = true
+    this.container.hidden = true
   }
 
-  show(): void { }
+  show(): void {
+    this.container.hidden = false
+  }
 }

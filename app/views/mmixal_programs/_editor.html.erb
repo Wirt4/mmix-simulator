@@ -45,7 +45,7 @@
         <input type="text" data-ide-facade-target="arguments" class="ide-arguments">
     <%= form.submit "Save", class: "btn--tactile", style: "margin-left: auto;", data: { action: "click->ide-facade#beforeSave" } %>
   </div>
-  <div class="ide-layout-output">
+  <div class="ide-layout-output" data-ide-facade-target="output">
     <%= render "output" %>
   </div>
 </div>
