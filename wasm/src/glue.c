@@ -9,6 +9,7 @@
 static struct HeapRef stderr_ref;
 static struct HeapRef stdout_ref;
 static char mmo[FILE_NAME_SIZE];
+static unsigned char g_args_buffer[MAX_ARG_COUNT * ARG_SIZE];
 static int initialized = 0;
 
 size_t get_stderr_size(void){
@@ -77,7 +78,7 @@ int mmix_initialize_simulator(int arg_count){
 	char *arg_vector[arg_count];
 
 	if (arg_count > 0){
-		parse_arg_array(arg_vector, get_source_code_pointer(), arg_count);
+		parse_arg_array(arg_vector, g_args_buffer, arg_count);
 	}
 
 	int init = initialize_simulator(mmo, arg_count, arg_count > 0 ? arg_vector : NULL);
@@ -141,7 +142,7 @@ int is_halted(void){
 }
 
 unsigned char* get_args_pointer(void){
-	 return get_source_code_pointer();
+	 return g_args_buffer;
 }
 
 int arg_size(void){

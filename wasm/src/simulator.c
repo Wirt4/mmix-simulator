@@ -83,7 +83,7 @@ int finalize_simulator(void){
 	mmix_finalize_w();
 	mmix_lib_finalize_w();
 	g_simulator_initialized = 0;
-	return remove(g_current_mmo);
+	return 0;
 }
 
 unsigned int get_general_register_data(int index, int partition){

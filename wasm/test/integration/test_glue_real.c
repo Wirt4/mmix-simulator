@@ -341,6 +341,40 @@ static void test_commandline_args_different_data(void){
     TEST_ASSERT_EQUAL_STRING(expected, result);
 }
 
+static void test_run_twice_without_reassembling(void){
+    // Assemble once
+    int len = (int)strlen(one_arg_program_source);
+    memcpy(get_source_code_pointer(), one_arg_program_source, len + 1);
+    int assembled = assemble_mmixal(len);
+    TEST_ASSERT_EQUAL_INT(0, assembled);
+
+    // First run
+    unsigned char *pointer = get_args_pointer();
+    memcpy(pointer, "First", 6);
+
+    int init1 = mmix_initialize_simulator(1);
+    TEST_ASSERT_EQUAL_INT(0, init1);
+    mmix_perform_instructions(15);
+    mmix_finalize_simulator();
+
+    // Second run without reassembling — this fails because
+    // finalize_simulator deletes the .mmo file
+    pointer = get_args_pointer();
+    memcpy(pointer, "Second", 7);
+
+    int init2 = mmix_initialize_simulator(1);
+    TEST_ASSERT_EQUAL_INT_MESSAGE(0, init2,
+        "second run failed: .mmo was deleted by finalize_simulator");
+    mmix_perform_instructions(15);
+    mmix_finalize_simulator();
+
+    const unsigned char *stdout_out = get_stdout_pointer();
+    char result[get_stdout_size()];
+    strcpy(result, (char*)stdout_out);
+
+    TEST_ASSERT_EQUAL_STRING("Second\n", result);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_source_code_pointer_is_non_null);
@@ -358,5 +392,6 @@ int main(void) {
     RUN_TEST(test_commandline_args);
     RUN_TEST(test_commandline_one_arg);
     RUN_TEST(test_commandline_args_different_data);
+    RUN_TEST(test_run_twice_without_reassembling);
     return UNITY_END();
 }
