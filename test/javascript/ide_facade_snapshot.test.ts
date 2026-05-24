@@ -181,7 +181,12 @@ describe("IDE facade UI snapshots", () => {
 
     assembleBtn.click()
 
-    const outputTextarea = getTarget(root, "output").querySelector("textarea") as HTMLTextAreaElement
+    const outputTextarea = getTarget(root, "output").querySelector("textarea")
+    if (outputTextarea === null) {
+      //expectation will throw, but this satisfies linting
+      expect(outputTextarea).not.toBeNull()
+      return
+    }
     const runBtn = getTarget(root, "runButton") as HTMLButtonElement
     const listingToggle = getTarget(root, "listingToggle") as HTMLButtonElement
     const panel = getTarget(root, "panel")
@@ -247,7 +252,11 @@ describe("IDE facade UI snapshots", () => {
 
     runBtn.click()
 
-    const outputTextarea = getTarget(root, "output").querySelector("textarea") as HTMLTextAreaElement
+    const outputTextarea = getTarget(root, "output").querySelector("textarea")
+    if (outputTextarea === null) {
+      expect(outputTextarea).not.toBeNull()
+      return
+    }
     const specialContainer = getTarget(root, "specialContainer")
     const generalContainer = getTarget(root, "generalContainer")
     expect(outputTextarea.value).toMatchSnapshot()
