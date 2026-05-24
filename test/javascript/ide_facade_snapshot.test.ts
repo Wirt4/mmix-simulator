@@ -50,8 +50,8 @@ function buildIDEDOM(): HTMLElement {
             </div>
           </div>
         </div>
-        <div class="output-panel">
-          <textarea class="output-textarea" readonly data-ide-facade-target="output"></textarea>
+        <div class="output-panel" data-ide-facade-target="output">
+          <textarea class="output-textarea" readonly></textarea>
         </div>
       </div>
       <div class="register-panel">
@@ -84,6 +84,8 @@ function buildIDEDOM(): HTMLElement {
     <div class="editor-actions ide-layout-actions">
       <button type="button" class="btn--tactile" data-ide-facade-target="assembleButton" data-action="click->ide-facade#assembleUserProgram">Assemble</button>
       <button type="button" class="btn--tactile btn--tactile--alert" data-ide-facade-target="runButton" data-action="click->ide-facade#runUserProgram">Run</button>
+      <input type="text" data-ide-facade-target="arguments">
+      <button type="button" data-ide-facade-target="argumentsButton">Args</button>
       <input type="submit" class="btn--tactile" value="Save" data-action="click->ide-facade#beforeSave">
     </div>
   `
@@ -179,11 +181,11 @@ describe("IDE facade UI snapshots", () => {
 
     assembleBtn.click()
 
-    const output = getTarget(root, "output") as HTMLTextAreaElement
+    const outputTextarea = getTarget(root, "output").querySelector("textarea") as HTMLTextAreaElement
     const runBtn = getTarget(root, "runButton") as HTMLButtonElement
     const listingToggle = getTarget(root, "listingToggle") as HTMLButtonElement
     const panel = getTarget(root, "panel")
-    expect(output.value).toMatchSnapshot()
+    expect(outputTextarea.value).toMatchSnapshot()
     expect(runBtn.disabled).toBe(true)
     expect(listingToggle.disabled).toBe(true)
     expect(panel.outerHTML).toMatchSnapshot()
@@ -245,10 +247,10 @@ describe("IDE facade UI snapshots", () => {
 
     runBtn.click()
 
-    const output = getTarget(root, "output") as HTMLTextAreaElement
+    const outputTextarea = getTarget(root, "output").querySelector("textarea") as HTMLTextAreaElement
     const specialContainer = getTarget(root, "specialContainer")
     const generalContainer = getTarget(root, "generalContainer")
-    expect(output.value).toMatchSnapshot()
+    expect(outputTextarea.value).toMatchSnapshot()
     expect(specialContainer.innerHTML).toMatchSnapshot()
     expect(generalContainer.innerHTML).toMatchSnapshot()
     const subpanelBodies = root.querySelectorAll(".register-subpanel-body")
