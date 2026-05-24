@@ -4,9 +4,9 @@ export default class OutputPanel implements IOutputPanel {
   private textarea: HTMLTextAreaElement
 
   constructor(private container: HTMLElement) {
-    const ta = container.querySelector<HTMLTextAreaElement>("textarea")
-    if (!ta) throw new Error("OutputPanel: no textarea found in container")
-    this.textarea = ta
+    const parsedTextarea = container.querySelector<HTMLTextAreaElement>("textarea")
+    if (!parsedTextarea) throw new Error("OutputPanel: no textarea found in container")
+    this.textarea = parsedTextarea
     this.textarea.value = ""
     this.hide()
   }

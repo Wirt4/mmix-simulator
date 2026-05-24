@@ -114,7 +114,7 @@ export default class IDEFacadeController extends Controller {
 
   sourceEdited(): void {
     if (this.suppressSourceEdited) return
-
+    //clear the output
     this.resetDisplay()
 
     if (this.listingFrame.isOpen) {
