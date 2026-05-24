@@ -1,12 +1,10 @@
 <%= form_with model: mmixal_program do |form|%>
 <div class="ide-layout" data-controller="ide-facade">
   <%= form.hidden_field :title %>
-  <!-- a strategy: break up partials by ide-facade-target -->
   <div class="ide-content">
     <%= render "input", form: form %>
     <%= render "registers" %>
   </div>
-  <!-- encapsulate editor-actions-->
   <div class="editor-actions ide-layout-actions">
     <%= render "controls", form: form %>
   </div>
