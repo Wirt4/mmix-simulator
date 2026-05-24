@@ -92,28 +92,6 @@ function buildIDEDOM(): HTMLElement {
   return root
 }
 
-let _lastApp: Application | null = null
-
-async function connectController(adapter: IModuleAdapter): Promise<{ root: HTMLElement; app: Application }> {
-  mockedFactory.mockResolvedValue(adapter)
-
-  const root = buildIDEDOM()
-  document.body.innerHTML = ""
-  document.body.appendChild(root)
-
-  const app = Application.start()
-  app.register("ide-facade", IDEFacadeController)
-  //odd global var here for such an involved method
-  _lastApp = app
-
-  await vi.waitFor(() => {
-    const container = root.querySelector("[data-ide-facade-target='specialContainer']")
-    if (container?.innerHTML === "") throw new Error("registers not rendered yet")
-  })
-
-  return { root, app }
-}
-
 class DOMTargets {
   constructor(private root: HTMLElement) { }
   get(name: string): HTMLElement {
@@ -122,7 +100,7 @@ class DOMTargets {
     return element
   }
 }
-//ADT mockAppInstance
+
 class MockAppInstance {
   public stimulusApp: Application | null
   public root: HTMLElement
@@ -151,7 +129,7 @@ class MockAppInstance {
     //wait for the app elements to load
     await vi.waitFor(() => {
       const container = this.getTargetElement('specialContainer')
-      if (container?.innerHTML === "") throw new Error("registers not rendered yet")
+      if (container.innerHTML === "") throw new Error("registers not rendered yet")
     })
 
   }
@@ -163,6 +141,7 @@ class MockAppInstance {
   reset(): void {
     document.body.innerHTML = ""
     if (this.stimulusApp === null) return
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     this.stimulusApp?.stop()
     this.stimulusApp = null
   }
@@ -181,152 +160,184 @@ describe("IDE facade UI snapshots", () => {
   })
 
   afterEach(() => {
-    appInstance.reset()
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    appInstance?.reset()
   })
 
   it("initial state after connect", async () => {
-    //    const adapter = createMockAdapter()
     await appInstance.init(createMockAdapter())
-    // const { root } = await connectController(adapter)
-
     expect(appInstance.root.innerHTML).toMatchSnapshot()
   })
 
-  // it("special registers after connect", async () => {
-  //   const adapter = createMockAdapter()
-  //   const { root } = await connectController(adapter)
-  //   const target = new DOMTargets(root)
-  //   const specialContainer = target.get("specialContainer")
-  //
-  //   expect(specialContainer.innerHTML).toMatchSnapshot()
-  // })
-  //
-  // it("general registers and dropdown after connect", async () => {
-  //   const adapter = createMockAdapter()
-  //   const { root } = await connectController(adapter)
-  //   const targets = new DOMTargets(root)
-  //   const generalContainer = targets.get("generalContainer")
-  //   const groupSelect = targets.get("groupSelect")
-  //
-  //   expect(groupSelect.innerHTML).toMatchSnapshot()
-  //   expect(generalContainer.innerHTML).toMatchSnapshot()
-  // })
-  //
-  // it("listing panel collapsed on connect", async () => {
-  //   const adapter = createMockAdapter()
-  //   const { root } = await connectController(adapter)
-  //   const target = new DOMTargets(root)
-  //
-  //   const panel = target.get("panel")
-  //
-  //   expect(panel.outerHTML).toMatchSnapshot()
-  // })
-  //
-  // it("assembling bad code", async () => {
-  //   const adapter = createMockAdapter({
-  //     assembleMMIXAL: vi.fn().mockReturnValue(false),
-  //     getStdErr: vi.fn().mockReturnValue("Error at line 1: unknown opcode 'BAD'"),
-  //   })
-  //   const { root } = await connectController(adapter)
-  //   const targets = new DOMTargets(root)
-  //   // Type bad source and assemble
-  //   const textarea = targets.get("textarea") as HTMLTextAreaElement
-  //   textarea.value = "BAD CODE"
-  //   const assembleBtn = targets.get("assembleButton") as HTMLButtonElement
-  //
-  //   assembleBtn.click()
-  //
-  //   const outputTextarea = targets.get("output").querySelector("textarea")
-  //   if (outputTextarea === null) {
-  //     expect(outputTextarea).not.toBeNull()
-  //     return
-  //   }
-  //   const runBtn = targets.get("runButton") as HTMLButtonElement
-  //   const listingToggle = targets.get("listingToggle") as HTMLButtonElement
-  //   const panel = targets.get("panel")
-  //
-  //   expect(outputTextarea.value).toMatchSnapshot()
-  //   expect(runBtn.disabled).toBe(true)
-  //   expect(listingToggle.disabled).toBe(true)
-  //   expect(panel.outerHTML).toMatchSnapshot()
-  // })
-  //
-  // it("assembling good code", async () => {
-  //   const listing = "001: e3ff0001  SETL $255,1\n002: 00000000  TRAP 0,Halt,0\n"
-  //   const adapter = createMockAdapter({
-  //     assembleMMIXAL: vi.fn().mockReturnValue(true),
-  //     getListing: vi.fn().mockReturnValue(listing),
-  //   })
-  //   const { root } = await connectController(adapter)
-  //   const targets = new DOMTargets(root)
-  //   const textarea = targets.get("textarea") as HTMLTextAreaElement
-  //   textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n"
-  //   const assembleBtn = targets.get("assembleButton") as HTMLButtonElement
-  //
-  //   assembleBtn.click()
-  //
-  //   const listingEl = targets.get("listing")
-  //   const runBtn = targets.get("runButton") as HTMLButtonElement
-  //   const listingToggle = targets.get("listingToggle") as HTMLButtonElement
-  //   const panel = targets.get("panel")
-  //   expect(listingEl.textContent).toMatchSnapshot()
-  //   expect(runBtn.disabled).toBe(false)
-  //   expect(listingToggle.disabled).toBe(false)
-  //   expect(panel.outerHTML).toMatchSnapshot()
-  // })
-  //
-  // it("saving code trims trailing newlines", async () => {
-  //   const adapter = createMockAdapter()
-  //   const { root, app } = await connectController(adapter)
-  //   const targets = new DOMTargets(root)
-  //   const textarea = targets.get("textarea") as HTMLTextAreaElement
-  //   textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n\n\n\n"
-  //   const ctrl = app.getControllerForElementAndIdentifier(root, "ide-facade") as IDEFacadeController
-  //
-  //   ctrl.beforeSave()
-  //
-  //   expect(textarea.value).toMatchSnapshot()
-  // })
-  //
-  // it("assembling and running good code", async () => {
-  //   const listing = "001: e3ff0001  SETL $255,1\n002: 00000000  TRAP 0,Halt,0\n"
-  //   const adapter = createMockAdapter({
-  //     assembleMMIXAL: vi.fn().mockReturnValue(true),
-  //     getListing: vi.fn().mockReturnValue(listing),
-  //     getStdOut: vi.fn().mockReturnValue("Hello, MMIX!\n"),
-  //     isHalted: vi.fn().mockReturnValueOnce(false).mockReturnValue(true),
-  //     getSpecialRegisterValue: vi.fn().mockReturnValue("0x00000000000000FC"),
-  //     getGeneralRegisterValue: vi.fn().mockImplementation((i: number) =>
-  //       i === 255 ? "0x0000000000000001" : "0x0000000000000000"
-  //     ),
-  //   })
-  //   const { root } = await connectController(adapter)
-  //   const targets = new DOMTargets(root)
-  //   const textarea = targets.get("textarea") as HTMLTextAreaElement
-  //   textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n"
-  //   const assembleBtn = targets.get("assembleButton") as HTMLButtonElement
-  //   assembleBtn.click()
-  //   const runBtn = targets.get("runButton") as HTMLButtonElement
-  //
-  //   runBtn.click()
-  //
-  //   const outputTextarea = targets.get("output").querySelector("textarea")
-  //   if (outputTextarea === null) {
-  //     expect(outputTextarea).not.toBeNull()
-  //     return
-  //   }
-  //   const specialContainer = targets.get("specialContainer")
-  //   const generalContainer = targets.get("generalContainer")
-  //   expect(outputTextarea.value).toMatchSnapshot()
-  //   expect(specialContainer.innerHTML).toMatchSnapshot()
-  //   expect(generalContainer.innerHTML).toMatchSnapshot()
-  //   const subpanelBodies = root.querySelectorAll(".register-subpanel-body")
-  //   const arrows = root.querySelectorAll(".spin-arrow")
-  //   expect(
-  //     Array.from(subpanelBodies).map(el => el.classList.contains("register-subpanel-body--collapsed"))
-  //   ).toMatchSnapshot()
-  //   expect(
-  //     Array.from(arrows).map(el => el.classList.contains("spin-arrow--open"))
-  //   ).toMatchSnapshot()
-  // })
+  it("special registers after connect", async () => {
+    await appInstance.init(createMockAdapter())
+    const specialContainer = appInstance.getTargetElement("specialContainer")
+    expect(specialContainer.innerHTML).toMatchSnapshot()
+  })
+
+  it("general registers and dropdown after connect", async () => {
+    await appInstance.init(createMockAdapter())
+    const generalContainer = appInstance.getTargetElement("generalContainer")
+    const groupSelect = appInstance.getTargetElement("groupSelect")
+    expect(groupSelect.innerHTML).toMatchSnapshot()
+    expect(generalContainer.innerHTML).toMatchSnapshot()
+  })
+
+  it("listing panel collapsed on connect", async () => {
+    await appInstance.init(createMockAdapter())
+    const panel = appInstance.getTargetElement("panel")
+    expect(panel.outerHTML).toMatchSnapshot()
+  })
+
+  it("assembling bad code", async () => {
+    const adapter = createMockAdapter({
+      assembleMMIXAL: vi.fn().mockReturnValue(false),
+      getStdErr: vi.fn().mockReturnValue("Error at line 1: unknown opcode 'BAD'"),
+    })
+    await appInstance.init(adapter)
+    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
+    textarea.value = "BAD CODE"
+    const assembleBtn = appInstance.getTargetElement("assembleButton") as HTMLButtonElement
+
+    assembleBtn.click()
+
+    const output = appInstance.getTargetElement("output")
+    const outputTextarea = output.querySelector("textarea")
+    const runBtn = appInstance.getTargetElement("runButton") as HTMLButtonElement
+    const listingToggle = appInstance.getTargetElement("listingToggle") as HTMLButtonElement
+    const panel = appInstance.getTargetElement("panel")
+    if (outputTextarea === null) {
+      expect(outputTextarea).not.toBeNull()
+      return
+    }
+    expect(outputTextarea.value).toMatchSnapshot()
+    expect(runBtn.disabled).toBe(true)
+    expect(listingToggle.disabled).toBe(true)
+    expect(panel.outerHTML).toMatchSnapshot()
+  })
+
+  it("assembling good code", async () => {
+    const listing = "001: e3ff0001  SETL $255,1\n002: 00000000  TRAP 0,Halt,0\n"
+    const adapter = createMockAdapter({
+      assembleMMIXAL: vi.fn().mockReturnValue(true),
+      getListing: vi.fn().mockReturnValue(listing),
+    })
+    await appInstance.init(adapter)
+    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
+    textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n"
+    const assembleBtn = appInstance.getTargetElement("assembleButton") as HTMLButtonElement
+
+    assembleBtn.click()
+
+    const listingEl = appInstance.getTargetElement("listing")
+    const runBtn = appInstance.getTargetElement("runButton") as HTMLButtonElement
+    const listingToggle = appInstance.getTargetElement("listingToggle") as HTMLButtonElement
+    const panel = appInstance.getTargetElement("panel")
+    expect(listingEl.textContent).toMatchSnapshot()
+    expect(runBtn.disabled).toBe(false)
+    expect(listingToggle.disabled).toBe(false)
+    expect(panel.outerHTML).toMatchSnapshot()
+  })
+
+  it("saving code trims trailing newlines", async () => {
+    await appInstance.init(createMockAdapter())
+    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
+    textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n\n\n\n"
+    const ctrl = appInstance.stimulusApp?.getControllerForElementAndIdentifier(appInstance.root, "ide-facade") as IDEFacadeController
+
+    ctrl.beforeSave()
+
+    expect(textarea.value).toMatchSnapshot()
+  })
+
+  it("good code output matches snapshot", async () => {
+    const listing = "001: e3ff0001  SETL $255,1\n002: 00000000  TRAP 0,Halt,0\n"
+
+    const adapter = createMockAdapter({
+      assembleMMIXAL: vi.fn().mockReturnValue(true),
+      getListing: vi.fn().mockReturnValue(listing),
+      getStdOut: vi.fn().mockReturnValue("Hello, MMIX!\n"),
+      isHalted: vi.fn().mockReturnValueOnce(false).mockReturnValue(true),
+      getSpecialRegisterValue: vi.fn().mockReturnValue("0x00000000000000FC"),
+      getGeneralRegisterValue: vi.fn().mockImplementation((i: number) =>
+        i === 255 ? "0x0000000000000001" : "0x0000000000000000"
+      ),
+    })
+    await appInstance.init(adapter)
+    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
+    textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n"
+    const assembleBtn = appInstance.getTargetElement("assembleButton") as HTMLButtonElement
+    assembleBtn.click()
+    const runBtn = appInstance.getTargetElement("runButton") as HTMLButtonElement
+
+    runBtn.click()
+
+    const outputTextarea = appInstance.getTargetElement("output").querySelector("textarea")
+    if (outputTextarea === null) {
+      expect(outputTextarea).not.toBeNull()
+      return
+    }
+    expect(outputTextarea.value).toMatchSnapshot()
+  })
+
+  it("good code special and general register containers outputs match snapshot", async () => {
+    const listing = "001: e3ff0001  SETL $255,1\n002: 00000000  TRAP 0,Halt,0\n"
+
+    const adapter = createMockAdapter({
+      assembleMMIXAL: vi.fn().mockReturnValue(true),
+      getListing: vi.fn().mockReturnValue(listing),
+      getStdOut: vi.fn().mockReturnValue("Hello, MMIX!\n"),
+      isHalted: vi.fn().mockReturnValueOnce(false).mockReturnValue(true),
+      getSpecialRegisterValue: vi.fn().mockReturnValue("0x00000000000000FC"),
+      getGeneralRegisterValue: vi.fn().mockImplementation((i: number) =>
+        i === 255 ? "0x0000000000000001" : "0x0000000000000000"
+      ),
+    })
+    await appInstance.init(adapter)
+    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
+    textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n"
+    const assembleBtn = appInstance.getTargetElement("assembleButton") as HTMLButtonElement
+    assembleBtn.click()
+    const runBtn = appInstance.getTargetElement("runButton") as HTMLButtonElement
+
+    runBtn.click()
+
+    const specialContainer = appInstance.getTargetElement("specialContainer")
+    const generalContainer = appInstance.getTargetElement("generalContainer")
+    expect(specialContainer.innerHTML).toMatchSnapshot()
+    expect(generalContainer.innerHTML).toMatchSnapshot()
+  })
+
+  it("good code run affects spinner arrow", async () => {
+    const listing = "001: e3ff0001  SETL $255,1\n002: 00000000  TRAP 0,Halt,0\n"
+
+    const adapter = createMockAdapter({
+      assembleMMIXAL: vi.fn().mockReturnValue(true),
+      getListing: vi.fn().mockReturnValue(listing),
+      getStdOut: vi.fn().mockReturnValue("Hello, MMIX!\n"),
+      isHalted: vi.fn().mockReturnValueOnce(false).mockReturnValue(true),
+      getSpecialRegisterValue: vi.fn().mockReturnValue("0x00000000000000FC"),
+      getGeneralRegisterValue: vi.fn().mockImplementation((i: number) =>
+        i === 255 ? "0x0000000000000001" : "0x0000000000000000"
+      ),
+    })
+    await appInstance.init(adapter)
+    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
+    textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n"
+    const assembleBtn = appInstance.getTargetElement("assembleButton") as HTMLButtonElement
+    assembleBtn.click()
+    const runBtn = appInstance.getTargetElement("runButton") as HTMLButtonElement
+
+    runBtn.click()
+
+    const { root } = appInstance
+    const subpanelBodies = root.querySelectorAll(".register-subpanel-body")
+    const arrows = root.querySelectorAll(".spin-arrow")
+    expect(
+      Array.from(subpanelBodies).map(el => el.classList.contains("register-subpanel-body--collapsed"))
+    ).toMatchSnapshot()
+    expect(
+      Array.from(arrows).map(el => el.classList.contains("spin-arrow--open"))
+    ).toMatchSnapshot()
+  })
 })
