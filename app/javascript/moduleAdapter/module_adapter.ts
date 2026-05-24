@@ -80,8 +80,9 @@ export default class ModuleAdapter implements IModuleAdapter {
         throw new Error("overflow error")
       }
       const encoded = new TextEncoder().encode(argv[i])
-      this.heapU8.set(encoded, p + i * siz)
-      this.heapU8[p + i * siz + encoded.length] = 0
+      const offset = p + i * siz
+      this.heapU8.set(encoded, offset)
+      this.heapU8[offset + encoded.length] = 0
     }
 
     if (this._module._mmix_initialize_simulator(i) !== 0) {
