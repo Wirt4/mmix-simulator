@@ -41,7 +41,7 @@
   <div class="editor-actions ide-layout-actions">
         <%= button_tag "Assemble", type: "button", class: "btn--tactile", data: {ide_facade_target:"assembleButton", action: "click->ide-facade#assembleUserProgram"} %>
         <%= button_tag "Run", type: "button", class: "btn--tactile btn--tactile--alert", data: {ide_facade_target:"runButton", action: "click->ide-facade#runUserProgram"}%>
-        <button type="button" class="listing-toggle">arguments</button>
+        <button type="button" class="listing-toggle" data-ide-facade-target = "argumentsButton" data-action="click->ide-facade#toggleArguments">arguments</button>
         <input type="text" data-ide-facade-target="arguments" class="ide-arguments">
     <%= form.submit "Save", class: "btn--tactile", style: "margin-left: auto;", data: { action: "click->ide-facade#beforeSave" } %>
   </div>

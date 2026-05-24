@@ -27,7 +27,8 @@ export default class IDEFacadeController extends Controller {
     "listing",
     "listingToggle",
     "panel",
-    "arguments"
+    "arguments",
+    "argumentsButton"
   ]
 
   declare textareaTarget: HTMLTextAreaElement
@@ -40,6 +41,7 @@ export default class IDEFacadeController extends Controller {
   declare listingToggleTarget: HTMLButtonElement
   declare panelTarget: HTMLElement
   declare argumentsTarget: HTMLInputElement
+  declare argumentsButtonTarget: HTMLButtonElement
 
   private simulator!: ISimulator
   private outputPanel!: IOutputPanel
@@ -53,7 +55,7 @@ export default class IDEFacadeController extends Controller {
     this.outputPanel = new OutputPanel(this.outputTarget)
     this.inputFrame = new Input(this.textareaTarget)
     this.listingFrame = new Listing(this.listingTarget, this.listingToggleTarget, this.panelTarget)
-    this.arguments = new Arguments(this.argumentsTarget)
+    this.arguments = new Arguments(this.argumentsTarget, this.argumentsButtonTarget)
 
     moduleAdapterFactory().then((adapter) => {
       if (adapter === null) {
@@ -155,5 +157,9 @@ export default class IDEFacadeController extends Controller {
 
   switchRegisterTab(): void {
     this.registers.switchTab()
+  }
+
+  toggleArguments(): void {
+    this.arguments.toggle()
   }
 }
