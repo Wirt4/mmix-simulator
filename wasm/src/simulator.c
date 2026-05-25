@@ -9,6 +9,7 @@
 //PRIVATE
 static int g_simulator_initialized = 0;
 static char g_current_mmo[FILE_NAME_SIZE];
+static unsigned char g_arguments_pointer[MAX_SRC_SIZE];
 
 static int ends_with_mmo(char*filename){
 	if (filename == NULL || strlen(filename) >= FILE_NAME_SIZE){
@@ -83,7 +84,7 @@ int finalize_simulator(void){
 	mmix_finalize_w();
 	mmix_lib_finalize_w();
 	g_simulator_initialized = 0;
-	return remove(g_current_mmo);
+	return 0;
 }
 
 unsigned int get_general_register_data(int index, int partition){
@@ -110,4 +111,9 @@ int special_registers(void){
 
 int general_registers(void){
 	return GENERAL_REGISTER_COUNT;
+}
+
+unsigned char * arguments_buffer(void){
+	ASSERT(g_arguments_pointer != NULL);
+	return g_arguments_pointer;
 }

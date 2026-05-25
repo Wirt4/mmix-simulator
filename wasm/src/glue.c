@@ -8,6 +8,7 @@
 
 static struct HeapRef stderr_ref;
 static struct HeapRef stdout_ref;
+// the mmo name is is top-level since it's used by both the assembler and the simulator
 static char mmo[FILE_NAME_SIZE];
 static int initialized = 0;
 
@@ -77,7 +78,7 @@ int mmix_initialize_simulator(int arg_count){
 	char *arg_vector[arg_count];
 
 	if (arg_count > 0){
-		parse_arg_array(arg_vector, get_source_code_pointer(), arg_count);
+		copy_array_from_heap(get_args_pointer(), arg_count, ARG_SIZE, arg_vector);
 	}
 
 	int init = initialize_simulator(mmo, arg_count, arg_count > 0 ? arg_vector : NULL);
@@ -141,7 +142,9 @@ int is_halted(void){
 }
 
 unsigned char* get_args_pointer(void){
-	 return get_source_code_pointer();
+	unsigned char* buf = arguments_buffer();
+	ASSERT(buf != NULL);
+	return buf;
 }
 
 int arg_size(void){

@@ -99,7 +99,15 @@ size_t read_to_heap(const char* filename, unsigned char* heap_pointer, size_t bu
 void strcopy_and_trim(char* dest, const char*src, int len);
 
 /**
- * copies the delimited args from the source heap to arg_vector
+ * information hidden: The process of copying blocked-out string data from the heap to the target vector
+ * inputs: 
+ *	    heap_pointer - reference to the heap to read from
+ *	    num_items - the number of items in the array
+ *	    max_item_size - the max string length of an array member
+ *	    target_vector - reference to the array to copy to
+ * outputs: 0 on success, -1 on failure
+ * preconditions: max_item_size > 0, num_items x max_item_size < allocated heap
+ * postconditions: data is written from the heap to the target vector
 */
-void parse_arg_array(char *arg_vector[], const unsigned char* heap_pointer, size_t arg_count);
+int copy_array_from_heap(unsigned char* heap_pointer, size_t num_items, size_t max_item_size, char* target_vector[]);
 #endif

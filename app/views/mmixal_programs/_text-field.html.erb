@@ -1,0 +1,24 @@
+<div class="editor-input-wrapper">
+  <pre class="editor-highlight" data-text-format-target="highlight" aria-hidden="true"></pre>
+  <!-- This is the primary point of user input so there are several actions triggered -->
+  <!-- To manage complexity, will consider these as events emitted -->
+
+  <!-- sourceEdited: necessary for updating other display elements and restricting user process -->
+  <!-- handleKeydown: to keep tab button from escaping out of the window -->
+  <!-- syncScroll: when the source is displayed side-by-side with the assembled listing, they should both scroll as one -->
+  <!-- updateLineNumbers: like it sounds, get those pretty line numbers to the lefthand sidebar -->
+  <!-- updateHighlight: triggers syntax highlighting so it looks nice -->
+  <%= form.text_area :source,
+      class: "editor-textarea",
+      data: {
+        ide_facade_target: "textarea",
+        text_format_target: "textarea",
+        line_numbers_target: "textarea",
+        action: "input->ide-facade#sourceEdited keydown->text-format#handleKeydown scroll->text-format#syncScroll input->text-format#updateLineNumbers input->text-format#updateHighlight" 
+        },
+    spellcheck: false,
+    autocomplete: "off",
+    autocorrect: "off",
+    autocapitalize: "off"
+  %>
+</div>

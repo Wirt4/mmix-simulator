@@ -52,6 +52,9 @@ int assemble_source(size_t length){
 	if (!(ASSERT(length > 0) && ASSERT (length != (size_t)-1))){
 		return -1;
 	}
+	if (file_exists(MMO)){
+		remove(MMO);
+	}
 	int assembly_setup =  setup_assembly(length);
 	if (!ASSERT (assembly_setup == 0)){
 		return -1;

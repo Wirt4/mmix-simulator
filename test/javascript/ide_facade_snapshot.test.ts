@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from "vitest"
 import { Application } from "@hotwired/stimulus"
 import IDEFacadeController from "../../app/javascript/controllers/ide_facade_controller"
 import { IModuleAdapter } from "../../app/javascript/moduleAdapter/module_adapter.interface"
@@ -50,8 +50,8 @@ function buildIDEDOM(): HTMLElement {
             </div>
           </div>
         </div>
-        <div class="output-panel">
-          <textarea class="output-textarea" readonly data-ide-facade-target="output"></textarea>
+        <div class="output-panel" data-ide-facade-target="output">
+          <textarea class="output-textarea" readonly></textarea>
         </div>
       </div>
       <div class="register-panel">
@@ -84,85 +84,108 @@ function buildIDEDOM(): HTMLElement {
     <div class="editor-actions ide-layout-actions">
       <button type="button" class="btn--tactile" data-ide-facade-target="assembleButton" data-action="click->ide-facade#assembleUserProgram">Assemble</button>
       <button type="button" class="btn--tactile btn--tactile--alert" data-ide-facade-target="runButton" data-action="click->ide-facade#runUserProgram">Run</button>
+      <input type="text" data-ide-facade-target="arguments">
+      <button type="button" data-ide-facade-target="argumentsButton">Args</button>
       <input type="submit" class="btn--tactile" value="Save" data-action="click->ide-facade#beforeSave">
     </div>
   `
   return root
 }
 
-let _lastApp: Application | null = null
-
-async function connectController(adapter: IModuleAdapter): Promise<{ root: HTMLElement; app: Application }> {
-  mockedFactory.mockResolvedValue(adapter)
-
-  const root = buildIDEDOM()
-  document.body.innerHTML = ""
-  document.body.appendChild(root)
-
-  const app = Application.start()
-  app.register("ide-facade", IDEFacadeController)
-  _lastApp = app
-
-  // Wait for the async connect (moduleAdapterFactory promise)
-  await vi.waitFor(() => {
-    const container = root.querySelector("[data-ide-facade-target='specialContainer']")
-    if (container?.innerHTML === "") throw new Error("registers not rendered yet")
-  })
-
-  return { root, app }
+class DOMTargets {
+  constructor(private root: HTMLElement) { }
+  get(name: string): HTMLElement {
+    const element: HTMLElement | null = this.root.querySelector(`[data-ide-facade-target="${name}"]`)
+    if (element === null) throw new Error(`could not retrieve target ${name}`)
+    return element
+  }
 }
 
-function getTarget(root: HTMLElement, name: string): HTMLElement {
-  const el: HTMLElement | null = root.querySelector(`[data-ide-facade-target="${name}"]`)
-  if (el === null) throw new Error(`could not retrieve target ${name}`)
-  return el
+class MockAppInstance {
+  public stimulusApp: Application | null
+  public root: HTMLElement
+  private targets: DOMTargets
+
+  //sets up the DOM
+  constructor() {
+    if (document.body.innerHTML !== "") {
+      throw new Error("innerHtml should be empty")
+    }
+    //wipe previous state
+    this.reset()
+    this.root = buildIDEDOM()
+    this.targets = new DOMTargets(this.root)
+    document.body.appendChild(this.root)
+    // set app to null
+    this.stimulusApp = null
+  }
+
+  //implements the connect() logic from stimulus: getting the app up and running
+  async init(adapter: IModuleAdapter): Promise<void> {
+    mockedFactory.mockResolvedValue(adapter)
+    //start and register the app
+    this.stimulusApp = Application.start()
+    this.stimulusApp.register("ide-facade", IDEFacadeController)
+    //wait for the app elements to load
+    await vi.waitFor(() => {
+      const container = this.getTargetElement('specialContainer')
+      if (container.innerHTML === "") throw new Error("registers not rendered yet")
+    })
+
+  }
+
+  getTargetElement(name: string): HTMLElement {
+    return this.targets.get(name)
+  }
+
+  reset(): void {
+    document.body.innerHTML = ""
+    if (this.stimulusApp === null) return
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    this.stimulusApp?.stop()
+    this.stimulusApp = null
+  }
 }
 
 describe("IDE facade UI snapshots", () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
+  let appInstance: MockAppInstance
+
+  beforeAll(() => {
     document.body.innerHTML = ""
   })
 
+  beforeEach(() => {
+    vi.clearAllMocks()
+    appInstance = new MockAppInstance()
+  })
+
   afterEach(() => {
-    _lastApp?.stop()
-    _lastApp = null
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    appInstance?.reset()
   })
 
   it("initial state after connect", async () => {
-    const adapter = createMockAdapter()
-
-    const { root } = await connectController(adapter)
-
-    expect(root.innerHTML).toMatchSnapshot()
+    await appInstance.init(createMockAdapter())
+    expect(appInstance.root.innerHTML).toMatchSnapshot()
   })
 
   it("special registers after connect", async () => {
-    const adapter = createMockAdapter()
-    const { root } = await connectController(adapter)
-
-    const specialContainer = getTarget(root, "specialContainer")
-
+    await appInstance.init(createMockAdapter())
+    const specialContainer = appInstance.getTargetElement("specialContainer")
     expect(specialContainer.innerHTML).toMatchSnapshot()
   })
 
   it("general registers and dropdown after connect", async () => {
-    const adapter = createMockAdapter()
-    const { root } = await connectController(adapter)
-
-    const generalContainer = getTarget(root, "generalContainer")
-    const groupSelect = getTarget(root, "groupSelect")
-
+    await appInstance.init(createMockAdapter())
+    const generalContainer = appInstance.getTargetElement("generalContainer")
+    const groupSelect = appInstance.getTargetElement("groupSelect")
     expect(groupSelect.innerHTML).toMatchSnapshot()
     expect(generalContainer.innerHTML).toMatchSnapshot()
   })
 
   it("listing panel collapsed on connect", async () => {
-    const adapter = createMockAdapter()
-    const { root } = await connectController(adapter)
-
-    const panel = getTarget(root, "panel")
-
+    await appInstance.init(createMockAdapter())
+    const panel = appInstance.getTargetElement("panel")
     expect(panel.outerHTML).toMatchSnapshot()
   })
 
@@ -171,19 +194,23 @@ describe("IDE facade UI snapshots", () => {
       assembleMMIXAL: vi.fn().mockReturnValue(false),
       getStdErr: vi.fn().mockReturnValue("Error at line 1: unknown opcode 'BAD'"),
     })
-    const { root } = await connectController(adapter)
-    // Type bad source and assemble
-    const textarea = getTarget(root, "textarea") as HTMLTextAreaElement
+    await appInstance.init(adapter)
+    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
     textarea.value = "BAD CODE"
-    const assembleBtn = getTarget(root, "assembleButton") as HTMLButtonElement
+    const assembleBtn = appInstance.getTargetElement("assembleButton") as HTMLButtonElement
 
     assembleBtn.click()
 
-    const output = getTarget(root, "output") as HTMLTextAreaElement
-    const runBtn = getTarget(root, "runButton") as HTMLButtonElement
-    const listingToggle = getTarget(root, "listingToggle") as HTMLButtonElement
-    const panel = getTarget(root, "panel")
-    expect(output.value).toMatchSnapshot()
+    const output = appInstance.getTargetElement("output")
+    const outputTextarea = output.querySelector("textarea")
+    const runBtn = appInstance.getTargetElement("runButton") as HTMLButtonElement
+    const listingToggle = appInstance.getTargetElement("listingToggle") as HTMLButtonElement
+    const panel = appInstance.getTargetElement("panel")
+    if (outputTextarea === null) {
+      expect(outputTextarea).not.toBeNull()
+      return
+    }
+    expect(outputTextarea.value).toMatchSnapshot()
     expect(runBtn.disabled).toBe(true)
     expect(listingToggle.disabled).toBe(true)
     expect(panel.outerHTML).toMatchSnapshot()
@@ -195,17 +222,17 @@ describe("IDE facade UI snapshots", () => {
       assembleMMIXAL: vi.fn().mockReturnValue(true),
       getListing: vi.fn().mockReturnValue(listing),
     })
-    const { root } = await connectController(adapter)
-    const textarea = getTarget(root, "textarea") as HTMLTextAreaElement
+    await appInstance.init(adapter)
+    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
     textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n"
-    const assembleBtn = getTarget(root, "assembleButton") as HTMLButtonElement
+    const assembleBtn = appInstance.getTargetElement("assembleButton") as HTMLButtonElement
 
     assembleBtn.click()
 
-    const listingEl = getTarget(root, "listing")
-    const runBtn = getTarget(root, "runButton") as HTMLButtonElement
-    const listingToggle = getTarget(root, "listingToggle") as HTMLButtonElement
-    const panel = getTarget(root, "panel")
+    const listingEl = appInstance.getTargetElement("listing")
+    const runBtn = appInstance.getTargetElement("runButton") as HTMLButtonElement
+    const listingToggle = appInstance.getTargetElement("listingToggle") as HTMLButtonElement
+    const panel = appInstance.getTargetElement("panel")
     expect(listingEl.textContent).toMatchSnapshot()
     expect(runBtn.disabled).toBe(false)
     expect(listingToggle.disabled).toBe(false)
@@ -213,19 +240,19 @@ describe("IDE facade UI snapshots", () => {
   })
 
   it("saving code trims trailing newlines", async () => {
-    const adapter = createMockAdapter()
-    const { root, app } = await connectController(adapter)
-    const textarea = getTarget(root, "textarea") as HTMLTextAreaElement
+    await appInstance.init(createMockAdapter())
+    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
     textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n\n\n\n"
-    const ctrl = app.getControllerForElementAndIdentifier(root, "ide-facade") as IDEFacadeController
+    const ctrl = appInstance.stimulusApp?.getControllerForElementAndIdentifier(appInstance.root, "ide-facade") as IDEFacadeController
 
     ctrl.beforeSave()
 
     expect(textarea.value).toMatchSnapshot()
   })
 
-  it("assembling and running good code", async () => {
+  it("good code output matches snapshot", async () => {
     const listing = "001: e3ff0001  SETL $255,1\n002: 00000000  TRAP 0,Halt,0\n"
+
     const adapter = createMockAdapter({
       assembleMMIXAL: vi.fn().mockReturnValue(true),
       getListing: vi.fn().mockReturnValue(listing),
@@ -236,21 +263,74 @@ describe("IDE facade UI snapshots", () => {
         i === 255 ? "0x0000000000000001" : "0x0000000000000000"
       ),
     })
-    const { root } = await connectController(adapter)
-    const textarea = getTarget(root, "textarea") as HTMLTextAreaElement
+    await appInstance.init(adapter)
+    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
     textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n"
-    const assembleBtn = getTarget(root, "assembleButton") as HTMLButtonElement
+    const assembleBtn = appInstance.getTargetElement("assembleButton") as HTMLButtonElement
     assembleBtn.click()
-    const runBtn = getTarget(root, "runButton") as HTMLButtonElement
+    const runBtn = appInstance.getTargetElement("runButton") as HTMLButtonElement
 
     runBtn.click()
 
-    const output = getTarget(root, "output") as HTMLTextAreaElement
-    const specialContainer = getTarget(root, "specialContainer")
-    const generalContainer = getTarget(root, "generalContainer")
-    expect(output.value).toMatchSnapshot()
+    const outputTextarea = appInstance.getTargetElement("output").querySelector("textarea")
+    if (outputTextarea === null) {
+      expect(outputTextarea).not.toBeNull()
+      return
+    }
+    expect(outputTextarea.value).toMatchSnapshot()
+  })
+
+  it("good code special and general register containers outputs match snapshot", async () => {
+    const listing = "001: e3ff0001  SETL $255,1\n002: 00000000  TRAP 0,Halt,0\n"
+
+    const adapter = createMockAdapter({
+      assembleMMIXAL: vi.fn().mockReturnValue(true),
+      getListing: vi.fn().mockReturnValue(listing),
+      getStdOut: vi.fn().mockReturnValue("Hello, MMIX!\n"),
+      isHalted: vi.fn().mockReturnValueOnce(false).mockReturnValue(true),
+      getSpecialRegisterValue: vi.fn().mockReturnValue("0x00000000000000FC"),
+      getGeneralRegisterValue: vi.fn().mockImplementation((i: number) =>
+        i === 255 ? "0x0000000000000001" : "0x0000000000000000"
+      ),
+    })
+    await appInstance.init(adapter)
+    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
+    textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n"
+    const assembleBtn = appInstance.getTargetElement("assembleButton") as HTMLButtonElement
+    assembleBtn.click()
+    const runBtn = appInstance.getTargetElement("runButton") as HTMLButtonElement
+
+    runBtn.click()
+
+    const specialContainer = appInstance.getTargetElement("specialContainer")
+    const generalContainer = appInstance.getTargetElement("generalContainer")
     expect(specialContainer.innerHTML).toMatchSnapshot()
     expect(generalContainer.innerHTML).toMatchSnapshot()
+  })
+
+  it("good code run affects spinner arrow", async () => {
+    const listing = "001: e3ff0001  SETL $255,1\n002: 00000000  TRAP 0,Halt,0\n"
+
+    const adapter = createMockAdapter({
+      assembleMMIXAL: vi.fn().mockReturnValue(true),
+      getListing: vi.fn().mockReturnValue(listing),
+      getStdOut: vi.fn().mockReturnValue("Hello, MMIX!\n"),
+      isHalted: vi.fn().mockReturnValueOnce(false).mockReturnValue(true),
+      getSpecialRegisterValue: vi.fn().mockReturnValue("0x00000000000000FC"),
+      getGeneralRegisterValue: vi.fn().mockImplementation((i: number) =>
+        i === 255 ? "0x0000000000000001" : "0x0000000000000000"
+      ),
+    })
+    await appInstance.init(adapter)
+    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
+    textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n"
+    const assembleBtn = appInstance.getTargetElement("assembleButton") as HTMLButtonElement
+    assembleBtn.click()
+    const runBtn = appInstance.getTargetElement("runButton") as HTMLButtonElement
+
+    runBtn.click()
+
+    const { root } = appInstance
     const subpanelBodies = root.querySelectorAll(".register-subpanel-body")
     const arrows = root.querySelectorAll(".spin-arrow")
     expect(

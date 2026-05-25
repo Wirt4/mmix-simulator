@@ -1,8 +1,8 @@
 /* ── IDE grid layout ───────────────────────────────────── */
 .ide-layout {
   display: grid;
-  grid-template-columns: 1fr 280px;
-  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto auto;
 }
 
 .ide-content {
@@ -13,12 +13,24 @@
 }
 
 .ide-main {
-  margin-right: 296px;
+  margin-right: 253px;
 }
 
 .ide-layout-actions {
-  grid-column: 1 / -1;
+  grid-column: 1;
   grid-row: 3;
+}
+
+.ide-layout-output {
+  grid-column: 1;
+  grid-row: 4;
+}
+
+.editor-actions .ide-arguments {
+  grid-column:1;
+  grid-row: 4;
+  color: var(--gold);
+  border: none
 }
 
 /* ── Editor & output containers ────────────────────────── */
@@ -245,13 +257,13 @@
 .register-panel {
   position: absolute;
   top: 0;
-  right: 8px;
-  width: 280px;
-  height: 100%;
-  max-height: 100%;
+  right: 0;
+  bottom: 0;
+  width: 245px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: var(--bg-panel);
   border-radius: 4px;
   box-shadow:
