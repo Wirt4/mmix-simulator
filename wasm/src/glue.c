@@ -150,3 +150,8 @@ unsigned char* get_args_pointer(void){
 int arg_size(void){
 	return ARG_SIZE;
 }
+
+unsigned int get_program_counter(int partition){
+	return get_instruction_pointer(partition);
+}
+

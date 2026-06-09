@@ -33,6 +33,7 @@ interface WasmModule {
   _get_listing_size(): number;
   _is_halted(): number;
   _arg_size(): number;
+  _get_program_counter(_0: number): number;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports;

@@ -71,4 +71,13 @@ int special_registers(void);
  * Returns the number of general registers in the MMIX architecture.
  */
 int general_registers(void);
+
+/**
+ * Gets 32 bits of the instruction pointer (address of the next instruction).
+ * inputs: int partition: which 32-bit partition of the 64-bit pointer (0 = high, 1 = low)
+ * outputs: the 32-bit value of the specified partition
+ * preconditions: the simulator is initialized, partition is 0 or 1
+ * postconditions: none
+ */
+unsigned int get_instruction_pointer(int partition);
 #endif

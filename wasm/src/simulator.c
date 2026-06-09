@@ -117,3 +117,10 @@ unsigned char * arguments_buffer(void){
 	ASSERT(g_arguments_pointer != NULL);
 	return g_arguments_pointer;
 }
+
+unsigned int get_instruction_pointer(int partition){
+	if (!ASSERT(g_simulator_initialized)){
+		return 0;
+	}
+	return get_inst_ptr(partition);
+}
