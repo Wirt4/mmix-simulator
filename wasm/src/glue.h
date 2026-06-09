@@ -103,7 +103,7 @@ WASM_EXPORT int is_halted(void);
  * @param register_type: 0 for general register, 1 for special register
  * @param index: value 0 through 255 for general or 0 through 31 for special 
  * @param partition: 0 to access higher tetra, 1 to access lower tetra
- * @return unisigned int containing 32 bits of data, 0 on failure
+ * @return unsigned int containing 32 bits of data, 0 on failure
  * */
 WASM_EXPORT unsigned int get_register_data(int register_type, int index, int partition);
 
@@ -127,4 +127,10 @@ WASM_EXPORT unsigned char* get_args_pointer(void);
 */
 WASM_EXPORT int arg_size(void);
 
+/*
+ * Returns the address of the next instruction
+ * @param partition: 0 to access higher tetra, 1 to access lower tetra
+ * @return unsigned int containing 32 bits of data, 0 on failure
+ */
+WASM_EXPORT unsigned int get_program_counter(int partition);
 #endif /*GLUE_H */
