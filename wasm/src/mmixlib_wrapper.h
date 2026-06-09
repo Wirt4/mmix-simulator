@@ -144,4 +144,13 @@ int get_local_ring_mask(void);
  * inputs: argc: the number of arguments, argv, an array strings, the commandline arguments themselves
 */
 void mmix_commandline_w(int argc, char *argv[]);
+
+/**
+ * Returns one 32-bit half of the instruction pointer (address of the next
+ * instruction to be fetched).
+ * inputs: partition: 0 for the high 32 bits, 1 for the low 32 bits
+ * preconditions: simulator is initialized with a valid program loaded
+ */
+unsigned int get_inst_ptr(int partition);
+
 #endif

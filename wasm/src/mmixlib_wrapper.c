@@ -91,3 +91,7 @@ void mmix_commandline_w(int argc, char *argv[]){
 	mmix_commandline(argc, argv);
 }
 
+unsigned int get_inst_ptr(int partition){
+	// return get_tetra of the inst_ptr octa
+	return get_tetra(inst_ptr, partition);
+}
