@@ -133,4 +133,37 @@ WASM_EXPORT int arg_size(void);
  * @return unsigned int containing 32 bits of data, 0 on failure
  */
 WASM_EXPORT unsigned int get_program_counter(int partition);
+
+/*
+ * Returns a partition of the address stored at breakpoints[ndx]
+ * @param ndx: stored breakpoint to access
+ * @param partition: 0 to access higher tetra, 1 to access lower tetra
+ * @pre ndx is non-negative
+ * @pre ndx is less than breakpoint count
+ * @return unsigned int containing 32 bits of data, 0 on failure
+ */
+WASM_EXPORT unsigned int get_breakpoint(int ndx, int partition);
+
+/*
+ * Updates state of breakpoint buffer
+ * @param count: the new size of of the breakpoint buffer
+ * @pre count is non-negative
+ * @pre count <= maximum allowable breakpoints (C config)
+ * @post size of allocated breakpoints is adjusted
+ * @return 0 on success, -1 on failure
+ */
+WASM_EXPORT int update_breakpoint_count(int count);
+
+/*
+ * Stores an octa in the breakpoint buffer
+ * @param ndx: the position on the buffer to write to
+ * @param high: the upper tetra to write
+ * @param low: the lower tetra to write
+ * @return 0 on success: -1 on failure
+ * @pre: ndx is non-negative
+ * @pre: ndx is less than current breakpoint count
+ * @post the full octa is written to the breakpoint buffer
+ * */
+WASM_EXPORT int set_breakpoint(int ndx, unsigned int high, unsigned int low);
+
 #endif /*GLUE_H */
