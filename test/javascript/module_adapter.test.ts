@@ -41,7 +41,8 @@ describe("Module Adapter", () => {
       _get_listing_pointer: vi.fn(),
       _get_listing_size: vi.fn(),
       _get_args_pointer: vi.fn(),
-      _arg_size: vi.fn()
+      _arg_size: vi.fn(),
+      _get_program_counter: vi.fn()
     }
   })
 
