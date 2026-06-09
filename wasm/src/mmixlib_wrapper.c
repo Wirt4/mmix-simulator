@@ -1,13 +1,9 @@
 #include "mmixlib_wrapper.h"
 #include "mmixlib.h"
+#include "type_utils.h"
 extern mmix_opcode op;
 extern bool halted;
 extern bool resuming;
-
-static tetra get_tetra(octa payload, int partition){
-	// partition is 0 for higher bits, 1 for lower: reflects big endian architecture
-	return partition ? payload.l : payload.h; 
-}
 
 int mmixal_w(char *mms_name, char *mmo_name, char *mml_name){
 	return mmixal(mms_name, mmo_name, mml_name);
