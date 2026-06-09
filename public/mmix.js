@@ -4572,6 +4572,7 @@ var _get_listing_pointer = Module['_get_listing_pointer'] = makeInvalidEarlyAcce
 var _get_listing_size = Module['_get_listing_size'] = makeInvalidEarlyAccess('_get_listing_size');
 var _is_halted = Module['_is_halted'] = makeInvalidEarlyAccess('_is_halted');
 var _arg_size = Module['_arg_size'] = makeInvalidEarlyAccess('_arg_size');
+var _get_program_counter = Module['_get_program_counter'] = makeInvalidEarlyAccess('_get_program_counter');
 var _fflush = makeInvalidEarlyAccess('_fflush');
 var _emscripten_stack_get_end = makeInvalidEarlyAccess('_emscripten_stack_get_end');
 var _emscripten_stack_get_base = makeInvalidEarlyAccess('_emscripten_stack_get_base');
@@ -4605,6 +4606,7 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['get_listing_size'] != 'undefined', 'missing Wasm export: get_listing_size');
   assert(typeof wasmExports['is_halted'] != 'undefined', 'missing Wasm export: is_halted');
   assert(typeof wasmExports['arg_size'] != 'undefined', 'missing Wasm export: arg_size');
+  assert(typeof wasmExports['get_program_counter'] != 'undefined', 'missing Wasm export: get_program_counter');
   assert(typeof wasmExports['fflush'] != 'undefined', 'missing Wasm export: fflush');
   assert(typeof wasmExports['emscripten_stack_get_end'] != 'undefined', 'missing Wasm export: emscripten_stack_get_end');
   assert(typeof wasmExports['emscripten_stack_get_base'] != 'undefined', 'missing Wasm export: emscripten_stack_get_base');
@@ -4634,6 +4636,7 @@ function assignWasmExports(wasmExports) {
   _get_listing_size = Module['_get_listing_size'] = createExportWrapper('get_listing_size', 0);
   _is_halted = Module['_is_halted'] = createExportWrapper('is_halted', 0);
   _arg_size = Module['_arg_size'] = createExportWrapper('arg_size', 0);
+  _get_program_counter = Module['_get_program_counter'] = createExportWrapper('get_program_counter', 1);
   _fflush = createExportWrapper('fflush', 1);
   _emscripten_stack_get_end = wasmExports['emscripten_stack_get_end'];
   _emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'];
