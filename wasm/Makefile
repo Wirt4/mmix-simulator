@@ -31,7 +31,7 @@ UNITY_SRC = $(UNITY_DIR)/unity.c
 UNITY_INC = -I$(UNITY_DIR)
 
 # Glue code object
-SRC_OBJS = src/glue.o src/assembler.o src/simulator.o src/assert.o src/io_utils.o src/mmixlib_wrapper.o
+SRC_OBJS = src/glue.o src/assembler.o src/simulator.o src/assert.o src/io_utils.o src/mmixlib_wrapper.o src/type_utils.o
 
 # mmixlib generated sources (from ctangle mmix-sim.w + mmixlib.ch)
 LIBSIM = libboot.c     libfinal.c     libload.c     libprint.c       libstats.c \
@@ -147,6 +147,9 @@ src/io_utils.o: src/io_utils.c src/io_utils.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 src/mmixlib_wrapper.o: src/mmixlib_wrapper.c src/mmixlib_wrapper.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+src/type_utils.o: src/type_utils.c src/type_utils.h $(MMIXLIB_BUILD)/mmixlib.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # --- Tests ---

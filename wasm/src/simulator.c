@@ -5,11 +5,14 @@
 #include "constants.h"
 #include "mmixlib_wrapper.h"
 #include "io_utils.h"
+#include "type_utils.h"
 
 //PRIVATE
 static int g_simulator_initialized = 0;
 static char g_current_mmo[FILE_NAME_SIZE];
 static unsigned char g_arguments_pointer[MAX_SRC_SIZE];
+static octa g_breakpoints[MAX_BREAKPOINT_COUNT];
+static int g_current_breakpoint_count = 0;
 
 static int ends_with_mmo(char*filename){
 	if (filename == NULL || strlen(filename) >= FILE_NAME_SIZE){
@@ -124,3 +127,55 @@ unsigned int get_instruction_pointer(int partition){
 	}
 	return get_inst_ptr(partition);
 }
+
+/**
+ * Returns 32 bits of breakpoint data stored at (ndx)
+* inputs: index of breakpoint data to access, partition: which 32-bit partition of the 64-bit value(0 = high, 1 = low) to return
+* outputs: the 32-bit value of the specified partition of the breakpoint data stored at (ndx)
+* precondition: the simulator is initialized
+* postconditions: none
+*/
+unsigned int get_breakpoint_data(int ndx, int partition){
+	//assert ndx is non-negative and less than current breakpoint count
+	if (!ASSERT(0 <= ndx && ndx < g_current_breakpoint_count)){
+		return 0;
+	}
+	//get the octa at breakpoint_buffer[ndx] and return the partition
+	return get_tetra(g_breakpoints[ndx], partition);
+}
+
+/*
+ * Sets the count (inner array size) of breakpoints allocated
+ * inputs: count, the number of breakpoints to store
+ * outputs: 0 on success, -1 on failure
+ * preconditions: count is >=0 and <= maximum allowable breakpoints
+ * postconditions: inner state of count is updated
+*/
+int set_breakpoint_count(int count){
+	//assert count is non-negative and less than or equal to max allowable breakpoints
+	if (!ASSERT(0 <= count && count <= MAX_BREAKPOINT_COUNT)){
+		return -1;
+	}
+	// update private information
+	g_current_breakpoint_count = count;
+	//return clean
+	return 0;
+}
+
+/*
+ * Stores an octa of breakpoint data at given index
+ * inputs: ndx - index at which to store the data, high- upper tetra of data, low - lower tetra of data
+ * outputs: 0 on success -1 on failure
+ * preconditions: ndx >=0 , ndx < current breakpoint count
+ * postcondtions: breakpoint data is stored
+*/
+int set_breakpoint_data(int ndx, unsigned int high, unsigned int low){
+	// assert ndx is non-negative and less than the current number of breakpoints
+	if (!ASSERT(0 <= ndx && ndx < g_current_breakpoint_count)){
+		return -1;
+	}
+	// set the octa on the buffer 
+	write_octa(&g_breakpoints[ndx], high, low);
+	return 0;
+}
+

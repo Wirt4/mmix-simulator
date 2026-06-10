@@ -80,4 +80,31 @@ int general_registers(void);
  * postconditions: none
  */
 unsigned int get_instruction_pointer(int partition);
+
+/**
+ * Returns 32 bits of breakpoint data stored at (ndx)
+* inputs: index of breakpoint data to access, partition: which 32-bit partition of the 64-bit value(0 = high, 1 = low) to return
+* outputs: the 32-bit value of the specified partition of the breakpoint data stored at (ndx)
+* precondition: the simulator is initialized
+* postconditions: none
+*/
+unsigned int get_breakpoint_data(int ndx, int partition);
+
+/*
+ * Sets the count (inner array size) of breakpoints allocated
+ * inputs: count, the number of breakpoints to store
+ * outputs: 0 on success, -1 on failure
+ * preconditions: count is >=0 and <= maximum allowable breakpoints
+ * postconditions: inner state of count is updated
+*/
+int set_breakpoint_count(int count);
+
+/*
+ * Stores an octa of breakpoint data at given index
+ * inputs: ndx - index at which to store the data, high- upper tetra of data, low - lower tetra of data
+ * outputs: 0 on success -1 on failure
+ * preconditions: ndx >=0 , ndx < current breakpoint count
+ * postcondtions: breakpoint data is stored
+*/
+int set_breakpoint_data(int ndx, unsigned int high, unsigned int low);
 #endif
