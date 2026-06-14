@@ -77,4 +77,21 @@ test "PATCH from index redirects back to index" do
   assert_equal "renamed", program.reload.title
   assert_redirected_to mmixal_programs_url
 end
+
+# The CodeMirror editor renders inside `editorContainer`; the source textarea is
+# hidden and acts only as a form-submit shim, so it should carry no visible styling.
+test "show: hidden source textarea has no editor-textarea class" do
+  sign_in_as(@user)
+  program = mmixal_programs(:one)
+
+  get mmixal_program_url(program)
+
+  assert_response :success
+  assert_select "textarea[data-ide-facade-target=textarea]" do |textareas|
+    assert_equal 1, textareas.size, "expected exactly one source textarea"
+    classes = textareas.first["class"].to_s.split
+    assert_not_includes classes, "editor-textarea",
+      "hidden source textarea should not carry the editor-textarea class"
+  end
+end
 end

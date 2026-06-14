@@ -347,4 +347,21 @@ describe("IDE facade UI snapshots", () => {
       Array.from(arrows).map(el => el.classList.contains("spin-arrow--open"))
     ).toMatchSnapshot()
   })
+
+  it("mounts a CodeMirror editor view inside the editorContainer target", async () => {
+    await appInstance.init(createMockAdapter())
+    const editorContainer = appInstance.getTargetElement("editorContainer")
+    expect(editorContainer.querySelector(".cm-editor")).not.toBeNull()
+    expect(editorContainer.querySelector(".cm-content")).not.toBeNull()
+  })
+
+  it("seeds the CodeMirror document from the hidden textarea value", async () => {
+    const initial = " SETL $255,1\n TRAP 0,Halt,0\n"
+    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
+    textarea.value = initial
+    await appInstance.init(createMockAdapter())
+    const editorContainer = appInstance.getTargetElement("editorContainer")
+    const cmContent = editorContainer.querySelector(".cm-content")
+    expect(cmContent?.textContent).toEqual(initial.replace(/\n/g, ""))
+  })
 })

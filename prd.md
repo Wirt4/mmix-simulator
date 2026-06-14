@@ -20,10 +20,10 @@ The listing panel uses a plain `<div>` with `textContent`. The output panel uses
 A task is only "done" when **all tests pass inside the dev Docker container** — not on the host. Use `script/run_test.sh` (fresh container, recreates the test DB, runs the full suite) or, from inside `script/dev_env.sh`, run `bin/rake test` (Ruby + `npm run typecheck`) plus `npm test`. Host-side `npm test` does not count.
 
 ## Tasks
-- [ ] Wire `CodeMirrorInput` into the view and the controller.
-- [ ] In `_text-field.html.erb`: add a `<div data-ide-facade-target="editorContainer">` directly above the existing `<textarea>`
+- [x] Wire `CodeMirrorInput` into the view and the controller.
+- [x] In `_text-field.html.erb`: add a `<div data-ide-facade-target="editorContainer">` directly above the existing `<textarea>`
 - [ ] In `_text-field.html.erb`: mark <textarea name="source">`  `hidden` 
-- [ ] In `_text-field.html.erb`: remove and `<texarea name="source>`'s visible styling 
+- [x] In `_text-field.html.erb`: remove and `<texarea name="source>`'s visible styling 
 - [ ] remove the Stimulus action bindings `syncScroll`, `updateLineNumbers`, and `updateHighlight`. 
 - [ ] In `ide_facade_controller.ts`: add `editorContainer` to `static targets`; in `connect()`,
 - [x] In `_text-field.html.erb`, remove the line-numbers gutter element

@@ -1,21 +1,9 @@
 #!/bin/bash
-set -e
+set -eo pipefail
 
 if [ -z "$1" ]; then
   echo "Usage: $0 <iterations>"
   exit 1
-fi
-
-if [ -z "$RALPH_IN_SANDBOX" ]; then
-  exec docker run --rm -it \
-    -v "$PWD:/work" \
-    -v "$HOME/.claude:/home/node/.claude" \
-    -v "$HOME/.claude.json:/home/node/.claude.json:ro" \
-    -v "$HOME/.gitconfig:/home/node/.gitconfig:ro" \
-    -w /work \
-    -e RALPH_IN_SANDBOX=1 \
-    node:22 \
-    bash -c "npm i -g @anthropic-ai/claude-code >/dev/null && su node -s /bin/bash -c 'export HOME=/home/node RALPH_IN_SANDBOX=1 PATH=\$PATH; bash /work/ralph.sh $1'"
 fi
 
 iterations="$1"
@@ -26,26 +14,27 @@ for ((i=1; i<=iterations; i++)); do
   echo "Iteration $i of $iterations"
   echo "****************************************"
 
-  result=$(claude --dangerously-skip-permissions -p "@CLAUDE.md @PRD.md @progress.txt \
+  log_file=$(mktemp)
+  claude --dangerously-skip-permissions -p "@CLAUDE.md @prd.md @progress.txt \
 1. Read progress.txt to see what has been completed. \
-2. Find the highest-priority incomplete task from PRD.md. \
+2. Find the highest-priority incomplete task from prd.md. \
 3. Write failing unit tests for that task. \
 4. Implement that single task. \
 5. Write unit tests for any code with logic. \
 6. Verify: npm run typecheck && npm test. \
 7. If tests pass, git add and commit with a conventional commit message (feat:, fix:, test:, refactor:). \
-8. Mark the task complete in PRD.md (change [ ] to [x]). \
+8. Mark the task complete in prd.md (change [ ] to [x]). \
 9. Append your progress to progress.txt with what you completed. \
-10. If ALL tasks in PRD.md are complete, output <promise>COMPLETE</promise>. \
-ONLY WORK ON ONE TASK PER ITERATION.")
+10. If ALL tasks in prd.md are complete, output <promise>COMPLETE</promise>. \
+ONLY WORK ON ONE TASK PER ITERATION." | tee "$log_file"
 
-  echo "$result"
-
-  if [[ "$result" == *"<promise>COMPLETE</promise>"* ]]; then
+  if grep -q "<promise>COMPLETE</promise>" "$log_file"; then
+    rm -f "$log_file"
     echo ""
     echo "✅ PRD complete after $i iterations!"
     exit 0
   fi
+  rm -f "$log_file"
 done
 
 echo ""

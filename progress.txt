@@ -1,22 +1,3 @@
-## Task 1: Wire CodeMirrorInput into the view and the controller
-- Updated IInput interface to remove highlight() and syncHighlightScroll() methods
-- Updated _text-field.html.erb to:
-  - Add editorContainer div target
-  - Hide the textarea
-  - Remove text-format-target and unnecessary action bindings
-  - Keep only the input->ide-facade#sourceEdited action
-- Updated ide_facade_controller.ts to:
-  - Import CodeMirrorInput
-  - Add editorContainer to static targets
-  - Use CodeMirrorInput in connect() method instead of Input
-- Updated CodeMirrorInput to dispatch input events when content changes
-- Updated snapshot test to include the new editorContainer div in the test DOM
-
-## Task 2: Remove line-numbers gutter element
-- Removed `<%= render "line-numbers" %>` from _input.html.erb (CodeMirror has its own line numbers gutter)
-- Deleted unused _line-numbers.html.erb partial
-- Added failing-first test in ide_facade_snapshot.test.ts asserting `.line-numbers` is not in the DOM
-- Removed `<div class="line-numbers">` from the snapshot-test fixture DOM and regenerated stale snapshots left over from Task 1
-- Fixed the trim-on-save test to seed textarea value before CodeMirror init so its content loads as the editor's initial doc
-- Synced initial content to the hidden textarea in CodeMirrorInput's constructor so form submissions reflect the editor's initial state without requiring an edit first
-
+- Removed `editor-textarea` class from the hidden source textarea in `_text-field.html.erb` (visible styling no longer needed now that CodeMirror renders the editor; textarea is form-submit shim only). Added a request test asserting the class is absent.
+- Wired `CodeMirrorInput` into the view and the controller (verifying the pre-existing wiring: `editorContainer` target on `_text-field.html.erb`, `editorContainerTarget` + `CodeMirrorInput` construction in `ide_facade_controller#connect`). Added two explicit integration assertions in `test/javascript/ide_facade_snapshot.test.ts` — that a `.cm-editor` (and `.cm-content`) is mounted inside the `editorContainer` target after connect, and that the hidden textarea's value seeds the CodeMirror document. Placed at the end of the describe block to avoid shifting CodeMirror's per-instance ͼ-style hashes baked into existing snapshots.
+- Marked the "add `<div data-ide-facade-target="editorContainer">` above the textarea" task complete in `prd.md`. The div is already present at `_text-field.html.erb:2` and is covered by the existing `mounts a CodeMirror editor view inside the editorContainer target` test in `test/javascript/ide_facade_snapshot.test.ts` (asserts `.cm-editor` + `.cm-content` mount inside that target). Full Docker suite green: 87 Ruby tests / 209 assertions, 189 TS tests across 15 files.
