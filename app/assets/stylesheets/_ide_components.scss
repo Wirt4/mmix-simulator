@@ -194,15 +194,8 @@
 }
 
 .listing-toggle {
-  background: none;
-  border: none;
-  color: var(--text-on-surface);
-  font-size: 12px;
-  padding: 0 4px;
-  cursor: pointer;
   transition: transform 0.15s;
   min-width: auto;
-  line-height: 1;
 }
 .listing-toggle:disabled {
   display: none;

@@ -6,6 +6,9 @@ describe("CodeMirrorOutputPanel", () => {
 
   beforeEach(() => {
     container = document.createElement("div")
+    const body = document.createElement("div")
+    body.className = "output-body"
+    container.appendChild(body)
     document.body.appendChild(container)
   })
 

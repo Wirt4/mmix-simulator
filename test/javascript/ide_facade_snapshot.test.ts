@@ -36,7 +36,7 @@ function buildIDEDOM(): HTMLElement {
       <div class="ide-main">
         <div class="panel-header">
           <span class="panel-header-label">Source</span>
-          <button type="button" class="listing-toggle" disabled data-ide-facade-target="listingToggle">listing</button>
+          <button type="button" class="btn--tactile listing-toggle" disabled data-ide-facade-target="listingToggle">listing</button>
         </div>
         <div class="editor-container" data-ide-facade-target="panel">
           <div class="editor-body">
@@ -53,6 +53,7 @@ function buildIDEDOM(): HTMLElement {
           </div>
         </div>
         <div class="output-panel" data-ide-facade-target="output">
+          <div class="output-body"></div>
         </div>
       </div>
       <div class="register-panel">
@@ -163,6 +164,12 @@ describe("IDE facade UI snapshots", () => {
   afterEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     appInstance?.reset()
+  })
+
+  it("listing toggle button has btn--tactile class", async () => {
+    await appInstance.init(createMockAdapter())
+    const listingToggle = appInstance.getTargetElement("listingToggle")
+    expect(listingToggle.classList.contains("btn--tactile")).toBe(true)
   })
 
   it("initial state after connect", async () => {
