@@ -1,12 +1,13 @@
 #!/bin/bash
 set -eo pipefail
 
-if [ -z "$1" ]; then
-  echo "Usage: $0 <iterations>"
+if [ -z "$1" ] || [ -z "$2" ]; then
+  echo "Usage: $0 <llm-command-and-flags> <iterations>"
   exit 1
 fi
 
-iterations="$1"
+llm_cmd="$1"
+iterations="$2"
 
 for ((i=1; i<=iterations; i++)); do
   echo ""
@@ -15,8 +16,7 @@ for ((i=1; i<=iterations; i++)); do
   echo "****************************************"
 
   log_file=$(mktemp)
-  claude --dangerously-skip-permissions -p "@CLAUDE.md @prd.md @progress.txt \
-1. Read progress.txt to see what has been completed. \
+  $llm_cmd "1. Read progress.txt to see what has been completed. \
 2. Find the highest-priority incomplete task from prd.md. \
 3. Write failing unit tests for that task. \
 4. Implement that single task. \

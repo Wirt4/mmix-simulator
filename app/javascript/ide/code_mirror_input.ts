@@ -1,5 +1,5 @@
 import { EditorState, Compartment } from "@codemirror/state"
-import { EditorView, keymap } from "@codemirror/view"
+import { EditorView, keymap, lineNumbers } from "@codemirror/view"
 import { defaultKeymap, indentWithTab } from "@codemirror/commands"
 import { syntaxHighlighting, HighlightStyle } from "@codemirror/language"
 import { mmixal, mmixalHighlightStyle } from "./mmixal_language"
@@ -27,6 +27,7 @@ export class CodeMirrorInput implements IInput {
       state: EditorState.create({
         doc: initialContent,
         extensions: [
+          lineNumbers(),
           keymap.of([...defaultKeymap, indentWithTab]),
           editableComp.of(EditorView.editable.of(false)),
           mmixal,
@@ -45,6 +46,13 @@ export class CodeMirrorInput implements IInput {
               "font-size": "var(--font-size-sm)"
             },
             ".cm-content": { color: "var(--tan)" },
+            ".cm-gutters": {
+              background: "var(--gutter-bg)",
+              border: "none",
+            },
+            ".cm-lineNumbers .cm-gutterElement": {
+              color: "var(--syntax-comment)",
+            },
           }),
         ],
       }),
