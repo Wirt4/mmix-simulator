@@ -39,7 +39,12 @@ export class CodeMirrorInput implements IInput {
           }),
           EditorView.theme({
             "&": { height: "100%" },
-            ".cm-scroller": { overflow: "auto" },
+            ".cm-scroller": {
+              overflow: "auto",
+              "line-height": "1.2",
+              "font-size": "var(--font-size-sm)"
+            },
+            ".cm-content": { color: "var(--tan)" },
           }),
         ],
       }),
