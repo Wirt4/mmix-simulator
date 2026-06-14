@@ -22,10 +22,10 @@ A task is only "done" when **all tests pass inside the dev Docker container** â€
 ## Tasks
 - [x] Wire `CodeMirrorInput` into the view and the controller.
 - [x] In `_text-field.html.erb`: add a `<div data-ide-facade-target="editorContainer">` directly above the existing `<textarea>`
-- [ ] In `_text-field.html.erb`: mark <textarea name="source">`  `hidden` 
+- [x] In `_text-field.html.erb`: mark <textarea name="source">`  `hidden` 
 - [x] In `_text-field.html.erb`: remove and `<texarea name="source>`'s visible styling 
-- [ ] remove the Stimulus action bindings `syncScroll`, `updateLineNumbers`, and `updateHighlight`. 
-- [ ] In `ide_facade_controller.ts`: add `editorContainer` to `static targets`; in `connect()`,
+- [x] remove the Stimulus action bindings `syncScroll`, `updateLineNumbers`, and `updateHighlight`. 
+- [x] In `ide_facade_controller.ts`: add `editorContainer` to `static targets`; in `connect()`,
 - [x] In `_text-field.html.erb`, remove the line-numbers gutter element
 - [ ] In `TextFormatController`, remove the highlight and line-numbers targets
 - [ ] Migrate the listing panel to read-only CodeMirror 
