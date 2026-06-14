@@ -6,35 +6,29 @@ exports[`IDE facade UI snapshots > assembling bad code 2`] = `
 "<div class="editor-container listing-panel--collapsed" data-ide-facade-target="panel">
           <div class="editor-body">
             <div class="editor-input-wrapper">
-              <div data-ide-facade-target="editorContainer"><div class="cm-editor ͼ1 ͼ2 ͼt"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="true" class="cm-content" role="textbox" aria-multiline="true" data-language="mmixal"><div class="cm-line"><br></div></div></div></div></div>
+              <div data-ide-facade-target="editorContainer"><div class="cm-editor ͼ1 ͼ2 ͼy"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="true" class="cm-content" role="textbox" aria-multiline="true" data-language="mmixal"><div class="cm-line"><br></div></div></div></div></div>
               <textarea class="editor-textarea" data-ide-facade-target="textarea" spellcheck="false" hidden=""></textarea>
             </div>
             <div class="listing-divider"></div>
             <div class="listing-pane">
-              <div data-ide-facade-target="listing" class="listing-content"></div>
+              <div data-ide-facade-target="listing" class="listing-content"><div class="cm-editor ͼ1 ͼ2 ͼz"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="false" class="cm-content" role="textbox" aria-multiline="true"><div class="cm-line"><br></div></div></div></div></div>
             </div>
           </div>
         </div>"
 `;
 
-exports[`IDE facade UI snapshots > assembling good code 1`] = `
-"001: e3ff0001  SETL $255,1
-002: 00000000  TRAP 0,Halt,0
-"
-`;
+exports[`IDE facade UI snapshots > assembling good code 1`] = `"001: e3ff0001  SETL $255,1002: 00000000  TRAP 0,Halt,0"`;
 
 exports[`IDE facade UI snapshots > assembling good code 2`] = `
 "<div class="editor-container" data-ide-facade-target="panel">
           <div class="editor-body">
             <div class="editor-input-wrapper">
-              <div data-ide-facade-target="editorContainer"><div class="cm-editor ͼ1 ͼ2 ͼu"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="true" class="cm-content" role="textbox" aria-multiline="true" data-language="mmixal"><div class="cm-line"><br></div><div class="cm-line"><br></div></div></div></div></div>
+              <div data-ide-facade-target="editorContainer"><div class="cm-editor ͼ1 ͼ2 ͼ10"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="true" class="cm-content" role="textbox" aria-multiline="true" data-language="mmixal"><div class="cm-line"><br></div><div class="cm-line"><br></div></div></div></div></div>
               <textarea class="editor-textarea" data-ide-facade-target="textarea" spellcheck="false" hidden=""></textarea>
             </div>
             <div class="listing-divider"></div>
             <div class="listing-pane">
-              <div data-ide-facade-target="listing" class="listing-content">001: e3ff0001  SETL $255,1
-002: 00000000  TRAP 0,Halt,0
-</div>
+              <div data-ide-facade-target="listing" class="listing-content"><div class="cm-editor ͼ1 ͼ2 ͼ11"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="false" class="cm-content" role="textbox" aria-multiline="true"><div class="cm-line">001: e3ff0001  SETL $255,1</div><div class="cm-line">002: 00000000  TRAP 0,Halt,0</div><div class="cm-line"><br></div></div></div></div></div>
             </div>
           </div>
         </div>"
@@ -83,7 +77,7 @@ exports[`IDE facade UI snapshots > initial state after connect 1`] = `
             </div>
             <div class="listing-divider"></div>
             <div class="listing-pane">
-              <div data-ide-facade-target="listing" class="listing-content"></div>
+              <div data-ide-facade-target="listing" class="listing-content"><div class="cm-editor ͼ1 ͼ2 ͼp"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="false" class="cm-content" role="textbox" aria-multiline="true"><div class="cm-line"><br></div></div></div></div></div>
             </div>
           </div>
         </div>
@@ -132,12 +126,12 @@ exports[`IDE facade UI snapshots > listing panel collapsed on connect 1`] = `
 "<div class="editor-container listing-panel--collapsed" data-ide-facade-target="panel">
           <div class="editor-body">
             <div class="editor-input-wrapper">
-              <div data-ide-facade-target="editorContainer"><div class="cm-editor ͼ1 ͼ2 ͼs"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="true" class="cm-content" role="textbox" aria-multiline="true" data-language="mmixal"><div class="cm-line"><br></div></div></div></div></div>
+              <div data-ide-facade-target="editorContainer"><div class="cm-editor ͼ1 ͼ2 ͼw"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="true" class="cm-content" role="textbox" aria-multiline="true" data-language="mmixal"><div class="cm-line"><br></div></div></div></div></div>
               <textarea class="editor-textarea" data-ide-facade-target="textarea" spellcheck="false" hidden=""></textarea>
             </div>
             <div class="listing-divider"></div>
             <div class="listing-pane">
-              <div data-ide-facade-target="listing" class="listing-content"></div>
+              <div data-ide-facade-target="listing" class="listing-content"><div class="cm-editor ͼ1 ͼ2 ͼx"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="false" class="cm-content" role="textbox" aria-multiline="true"><div class="cm-line"><br></div></div></div></div></div>
             </div>
           </div>
         </div>"
