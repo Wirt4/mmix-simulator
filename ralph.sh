@@ -9,12 +9,13 @@ fi
 if [ -z "$RALPH_IN_SANDBOX" ]; then
   exec docker run --rm -it \
     -v "$PWD:/work" \
-    -v "$HOME/.claude:/root/.claude" \
-    -v "$HOME/.gitconfig:/root/.gitconfig:ro" \
+    -v "$HOME/.claude:/home/node/.claude" \
+    -v "$HOME/.claude.json:/home/node/.claude.json:ro" \
+    -v "$HOME/.gitconfig:/home/node/.gitconfig:ro" \
     -w /work \
     -e RALPH_IN_SANDBOX=1 \
     node:22 \
-    bash -c "npm i -g @anthropic-ai/claude-code >/dev/null && bash ralph.sh $1"
+    bash -c "npm i -g @anthropic-ai/claude-code >/dev/null && su node -s /bin/bash -c 'export HOME=/home/node RALPH_IN_SANDBOX=1 PATH=\$PATH; bash /work/ralph.sh $1'"
 fi
 
 iterations="$1"
