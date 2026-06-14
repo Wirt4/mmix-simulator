@@ -6,6 +6,8 @@ export class CodeMirrorOutputPanel implements IOutputPanel {
   private readonly view: EditorView
 
   constructor(private readonly container: HTMLElement) {
+    const body = container.querySelector<HTMLElement>(".output-body")
+    if (!body) throw new Error("CodeMirrorOutputPanel: no .output-body found in container")
     this.view = new EditorView({
       state: EditorState.create({
         doc: "",
@@ -13,11 +15,16 @@ export class CodeMirrorOutputPanel implements IOutputPanel {
           EditorView.editable.of(false),
           EditorView.theme({
             "&": { height: "100%" },
-            ".cm-scroller": { overflow: "auto" },
+            ".cm-scroller": {
+              overflow: "auto",
+              "line-height": "1.2",
+              "font-size": "var(--font-size-sm)"
+            },
+            ".cm-content": { color: "var(--tan)" },
           }),
         ],
       }),
-      parent: container,
+      parent: body,
     })
     this.hide()
   }
