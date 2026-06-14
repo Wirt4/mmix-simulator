@@ -94,4 +94,15 @@ test "show: hidden source textarea has no editor-textarea class" do
       "hidden source textarea should not carry the editor-textarea class"
   end
 end
+
+test "show: source textarea has hidden attribute" do
+  sign_in_as(@user)
+  program = mmixal_programs(:one)
+
+  get mmixal_program_url(program)
+
+  assert_response :success
+  assert_select "textarea[data-ide-facade-target=textarea][hidden]", 1,
+    "source textarea must carry the hidden attribute so CodeMirror is the visible editor"
+end
 end
