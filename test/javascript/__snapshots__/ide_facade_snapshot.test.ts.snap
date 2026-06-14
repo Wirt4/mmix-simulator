@@ -6,12 +6,12 @@ exports[`IDE facade UI snapshots > assembling bad code 2`] = `
 "<div class="editor-container listing-panel--collapsed" data-ide-facade-target="panel">
           <div class="editor-body">
             <div class="editor-input-wrapper">
-              <div data-ide-facade-target="editorContainer"><div class="cm-editor ͼ1 ͼ2 ͼy"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="true" class="cm-content" role="textbox" aria-multiline="true" data-language="mmixal"><div class="cm-line"><br></div></div></div></div></div>
+              <div data-ide-facade-target="editorContainer"><div class="cm-editor ͼ1 ͼ2 ͼ14"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="true" class="cm-content" role="textbox" aria-multiline="true" data-language="mmixal"><div class="cm-line"><br></div></div></div></div></div>
               <textarea class="editor-textarea" data-ide-facade-target="textarea" spellcheck="false" hidden=""></textarea>
             </div>
             <div class="listing-divider"></div>
             <div class="listing-pane">
-              <div data-ide-facade-target="listing" class="listing-content"><div class="cm-editor ͼ1 ͼ2 ͼz"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="false" class="cm-content" role="textbox" aria-multiline="true"><div class="cm-line"><br></div></div></div></div></div>
+              <div data-ide-facade-target="listing" class="listing-content"><div class="cm-editor ͼ1 ͼ2 ͼ15"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="false" class="cm-content" role="textbox" aria-multiline="true"><div class="cm-line"><br></div></div></div></div></div>
             </div>
           </div>
         </div>"
@@ -23,12 +23,12 @@ exports[`IDE facade UI snapshots > assembling good code 2`] = `
 "<div class="editor-container" data-ide-facade-target="panel">
           <div class="editor-body">
             <div class="editor-input-wrapper">
-              <div data-ide-facade-target="editorContainer"><div class="cm-editor ͼ1 ͼ2 ͼ10"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="true" class="cm-content" role="textbox" aria-multiline="true" data-language="mmixal"><div class="cm-line"><br></div><div class="cm-line"><br></div></div></div></div></div>
+              <div data-ide-facade-target="editorContainer"><div class="cm-editor ͼ1 ͼ2 ͼ17"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="true" class="cm-content" role="textbox" aria-multiline="true" data-language="mmixal"><div class="cm-line"><br></div><div class="cm-line"><br></div></div></div></div></div>
               <textarea class="editor-textarea" data-ide-facade-target="textarea" spellcheck="false" hidden=""></textarea>
             </div>
             <div class="listing-divider"></div>
             <div class="listing-pane">
-              <div data-ide-facade-target="listing" class="listing-content"><div class="cm-editor ͼ1 ͼ2 ͼ11"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="false" class="cm-content" role="textbox" aria-multiline="true"><div class="cm-line">001: e3ff0001  SETL $255,1</div><div class="cm-line">002: 00000000  TRAP 0,Halt,0</div><div class="cm-line"><br></div></div></div></div></div>
+              <div data-ide-facade-target="listing" class="listing-content"><div class="cm-editor ͼ1 ͼ2 ͼ18"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="false" class="cm-content" role="textbox" aria-multiline="true"><div class="cm-line">001: e3ff0001  SETL $255,1</div><div class="cm-line">002: 00000000  TRAP 0,Halt,0</div><div class="cm-line"><br></div></div></div></div></div>
             </div>
           </div>
         </div>"
@@ -38,10 +38,7 @@ exports[`IDE facade UI snapshots > general registers and dropdown after connect 
 
 exports[`IDE facade UI snapshots > general registers and dropdown after connect 2`] = `"<div class="register-row register-row--active"><span class="register-name">$0</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$1</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$2</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$3</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$4</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$5</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$6</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$7</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$8</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$9</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$10</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$11</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$12</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$13</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$14</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$15</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$16</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$17</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$18</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$19</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$20</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$21</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$22</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$23</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$24</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$25</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$26</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$27</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$28</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$29</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$30</span><span class="register-hex">0x0000000000000000</span></div><div class="register-row register-row--active"><span class="register-name">$31</span><span class="register-hex">0x0000000000000000</span></div>"`;
 
-exports[`IDE facade UI snapshots > good code output matches snapshot 1`] = `
-"Hello, MMIX!
-"
-`;
+exports[`IDE facade UI snapshots > good code output matches snapshot 1`] = `"Hello, MMIX!"`;
 
 exports[`IDE facade UI snapshots > good code run affects spinner arrow 1`] = `
 [
@@ -72,18 +69,17 @@ exports[`IDE facade UI snapshots > initial state after connect 1`] = `
         <div class="editor-container listing-panel--collapsed" data-ide-facade-target="panel">
           <div class="editor-body">
             <div class="editor-input-wrapper">
-              <div data-ide-facade-target="editorContainer"><div class="cm-editor ͼ1 ͼ2 ͼo"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="true" class="cm-content" role="textbox" aria-multiline="true" data-language="mmixal"><div class="cm-line"><br></div></div></div></div></div>
+              <div data-ide-facade-target="editorContainer"><div class="cm-editor ͼ1 ͼ2 ͼp"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="true" class="cm-content" role="textbox" aria-multiline="true" data-language="mmixal"><div class="cm-line"><br></div></div></div></div></div>
               <textarea class="editor-textarea" data-ide-facade-target="textarea" spellcheck="false" hidden=""></textarea>
             </div>
             <div class="listing-divider"></div>
             <div class="listing-pane">
-              <div data-ide-facade-target="listing" class="listing-content"><div class="cm-editor ͼ1 ͼ2 ͼp"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="false" class="cm-content" role="textbox" aria-multiline="true"><div class="cm-line"><br></div></div></div></div></div>
+              <div data-ide-facade-target="listing" class="listing-content"><div class="cm-editor ͼ1 ͼ2 ͼq"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="false" class="cm-content" role="textbox" aria-multiline="true"><div class="cm-line"><br></div></div></div></div></div>
             </div>
           </div>
         </div>
         <div class="output-panel" data-ide-facade-target="output" hidden="">
-          <textarea class="output-textarea" readonly=""></textarea>
-        </div>
+        <div class="cm-editor ͼ1 ͼ2 ͼo"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="false" class="cm-content" role="textbox" aria-multiline="true"><div class="cm-line"><br></div></div></div></div></div>
       </div>
       <div class="register-panel">
         <div class="register-header">Registers</div>
@@ -126,12 +122,12 @@ exports[`IDE facade UI snapshots > listing panel collapsed on connect 1`] = `
 "<div class="editor-container listing-panel--collapsed" data-ide-facade-target="panel">
           <div class="editor-body">
             <div class="editor-input-wrapper">
-              <div data-ide-facade-target="editorContainer"><div class="cm-editor ͼ1 ͼ2 ͼw"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="true" class="cm-content" role="textbox" aria-multiline="true" data-language="mmixal"><div class="cm-line"><br></div></div></div></div></div>
+              <div data-ide-facade-target="editorContainer"><div class="cm-editor ͼ1 ͼ2 ͼ11"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="true" class="cm-content" role="textbox" aria-multiline="true" data-language="mmixal"><div class="cm-line"><br></div></div></div></div></div>
               <textarea class="editor-textarea" data-ide-facade-target="textarea" spellcheck="false" hidden=""></textarea>
             </div>
             <div class="listing-divider"></div>
             <div class="listing-pane">
-              <div data-ide-facade-target="listing" class="listing-content"><div class="cm-editor ͼ1 ͼ2 ͼx"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="false" class="cm-content" role="textbox" aria-multiline="true"><div class="cm-line"><br></div></div></div></div></div>
+              <div data-ide-facade-target="listing" class="listing-content"><div class="cm-editor ͼ1 ͼ2 ͼ12"><div class="cm-announced" aria-live="polite"></div><div tabindex="-1" class="cm-scroller"><div style="tab-size: 4;" spellcheck="false" autocorrect="off" autocapitalize="off" writingsuggestions="false" translate="no" contenteditable="false" class="cm-content" role="textbox" aria-multiline="true"><div class="cm-line"><br></div></div></div></div></div>
             </div>
           </div>
         </div>"

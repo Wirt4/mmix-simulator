@@ -53,7 +53,6 @@ function buildIDEDOM(): HTMLElement {
           </div>
         </div>
         <div class="output-panel" data-ide-facade-target="output">
-          <textarea class="output-textarea" readonly></textarea>
         </div>
       </div>
       <div class="register-panel">
@@ -209,15 +208,12 @@ describe("IDE facade UI snapshots", () => {
     assembleBtn.click()
 
     const output = appInstance.getTargetElement("output")
-    const outputTextarea = output.querySelector("textarea")
+    const cmContent = output.querySelector(".cm-content")
     const runBtn = appInstance.getTargetElement("runButton") as HTMLButtonElement
     const listingToggle = appInstance.getTargetElement("listingToggle") as HTMLButtonElement
     const panel = appInstance.getTargetElement("panel")
-    if (outputTextarea === null) {
-      expect(outputTextarea).not.toBeNull()
-      return
-    }
-    expect(outputTextarea.value).toMatchSnapshot()
+    expect(cmContent).not.toBeNull()
+    expect(cmContent?.textContent).toMatchSnapshot()
     expect(runBtn.disabled).toBe(true)
     expect(listingToggle.disabled).toBe(true)
     expect(panel.outerHTML).toMatchSnapshot()
@@ -279,12 +275,10 @@ describe("IDE facade UI snapshots", () => {
 
     runBtn.click()
 
-    const outputTextarea = appInstance.getTargetElement("output").querySelector("textarea")
-    if (outputTextarea === null) {
-      expect(outputTextarea).not.toBeNull()
-      return
-    }
-    expect(outputTextarea.value).toMatchSnapshot()
+    const outputEl = appInstance.getTargetElement("output")
+    const cmContent = outputEl.querySelector(".cm-content")
+    expect(cmContent).not.toBeNull()
+    expect(cmContent?.textContent).toMatchSnapshot()
   })
 
   it("good code special and general register containers outputs match snapshot", async () => {

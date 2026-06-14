@@ -3,7 +3,7 @@ import { ISimulator } from "../simulator/simulator.interface"
 import Simulator from "../simulator/simulator"
 import moduleAdapterFactory from "../moduleAdapter/factory"
 import { IOutputPanel } from "../ide/output_panel.interface"
-import OutputPanel from "../ide/output_panel"
+import { CodeMirrorOutputPanel } from "../ide/code_mirror_output_panel"
 import { IInput } from "../ide/input.interface"
 import { CodeMirrorInput } from "../ide/code_mirror_input"
 import { IListing } from "../ide/listing.interface"
@@ -54,7 +54,7 @@ export default class IDEFacadeController extends Controller {
   private suppressSourceEdited = false
 
   connect(): void {
-    this.outputPanel = new OutputPanel(this.outputTarget)
+    this.outputPanel = new CodeMirrorOutputPanel(this.outputTarget)
     this.inputFrame = new CodeMirrorInput(
       this.editorContainerTarget,
       this.textareaTarget.value,

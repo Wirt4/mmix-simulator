@@ -29,5 +29,5 @@ A task is only "done" when **all tests pass inside the dev Docker container** â€
 - [x] In `_text-field.html.erb`, remove the line-numbers gutter element
 - [x] In `TextFormatController`, remove the highlight and line-numbers targets
 - [x] Migrate the listing panel to read-only CodeMirror 
-- [ ] Migrate the output panel to read-only CodeMirror && Update `setValue()` and `clear()` accordingly. Keep the `IOutputPanel` interface unchanged.
+- [x] Migrate the output panel to read-only CodeMirror && Update `setValue()` and `clear()` accordingly. Keep the `IOutputPanel` interface unchanged.
 
