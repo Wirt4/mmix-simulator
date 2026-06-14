@@ -5,7 +5,7 @@ import moduleAdapterFactory from "../moduleAdapter/factory"
 import { IOutputPanel } from "../ide/output_panel.interface"
 import OutputPanel from "../ide/output_panel"
 import { IInput } from "../ide/input.interface"
-import { Input } from "../ide/input"
+import { CodeMirrorInput } from "../ide/code_mirror_input"
 import { IListing } from "../ide/listing.interface"
 import { Listing } from "../ide/listing"
 import { EnumRegisterType } from "../ide/registers.interface"
@@ -18,6 +18,7 @@ import { Arguments } from '../ide/arguments'
 
 export default class IDEFacadeController extends Controller {
   static targets = [
+    "editorContainer",
     "textarea",
     "output",
     "runButton",
@@ -31,6 +32,7 @@ export default class IDEFacadeController extends Controller {
     "argumentsButton"
   ]
 
+  declare editorContainerTarget: HTMLElement
   declare textareaTarget: HTMLTextAreaElement
   declare outputTarget: HTMLElement
   declare runButtonTarget: HTMLButtonElement
@@ -53,7 +55,11 @@ export default class IDEFacadeController extends Controller {
 
   connect(): void {
     this.outputPanel = new OutputPanel(this.outputTarget)
-    this.inputFrame = new Input(this.textareaTarget)
+    this.inputFrame = new CodeMirrorInput(
+      this.editorContainerTarget,
+      this.textareaTarget.value,
+      this.textareaTarget
+    )
     this.listingFrame = new Listing(this.listingTarget, this.listingToggleTarget, this.panelTarget)
     this.arguments = new Arguments(this.argumentsTarget, this.argumentsButtonTarget)
 

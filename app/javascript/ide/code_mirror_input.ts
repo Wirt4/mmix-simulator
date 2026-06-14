@@ -19,6 +19,9 @@ export class CodeMirrorInput implements IInput {
     hiddenInput: HTMLInputElement | HTMLTextAreaElement | null = null,
   ) {
     this.hiddenInput = hiddenInput
+    if (this.hiddenInput) {
+      this.hiddenInput.value = initialContent
+    }
 
     this.view = new EditorView({
       state: EditorState.create({
@@ -31,6 +34,7 @@ export class CodeMirrorInput implements IInput {
           EditorView.updateListener.of((update) => {
             if (update.docChanged && this.hiddenInput) {
               this.hiddenInput.value = this.view.state.doc.toString()
+              this.hiddenInput.dispatchEvent(new Event("input", { bubbles: true }))
             }
           }),
           EditorView.theme({
@@ -52,6 +56,9 @@ export class CodeMirrorInput implements IInput {
       const padding = "\n".repeat(Math.floor(lines))
       const end = this.view.state.doc.length
       this.view.dispatch({ changes: { from: end, insert: padding } })
+      if (this.hiddenInput) {
+        this.hiddenInput.dispatchEvent(new Event("input", { bubbles: true }))
+      }
     }
   }
 
@@ -62,6 +69,9 @@ export class CodeMirrorInput implements IInput {
       this.view.dispatch({
         changes: { from: 0, to: this.view.state.doc.length, insert: trimmed },
       })
+      if (this.hiddenInput) {
+        this.hiddenInput.dispatchEvent(new Event("input", { bubbles: true }))
+      }
     }
   }
 

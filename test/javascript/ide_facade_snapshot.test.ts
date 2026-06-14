@@ -40,10 +40,12 @@ function buildIDEDOM(): HTMLElement {
         </div>
         <div class="editor-container" data-ide-facade-target="panel">
           <div class="editor-body">
-            <div class="line-numbers"><span>1</span></div>
-            <textarea class="editor-textarea"
-              data-ide-facade-target="textarea"
-              spellcheck="false"></textarea>
+            <div class="editor-input-wrapper">
+              <div data-ide-facade-target="editorContainer"></div>
+              <textarea class="editor-textarea"
+                data-ide-facade-target="textarea"
+                spellcheck="false" hidden></textarea>
+            </div>
             <div class="listing-divider"></div>
             <div class="listing-pane">
               <div data-ide-facade-target="listing" class="listing-content"></div>
@@ -169,6 +171,11 @@ describe("IDE facade UI snapshots", () => {
     expect(appInstance.root.innerHTML).toMatchSnapshot()
   })
 
+  it("does not render the deprecated line-numbers gutter element", async () => {
+    await appInstance.init(createMockAdapter())
+    expect(appInstance.root.querySelector(".line-numbers")).toBeNull()
+  })
+
   it("special registers after connect", async () => {
     await appInstance.init(createMockAdapter())
     const specialContainer = appInstance.getTargetElement("specialContainer")
@@ -240,9 +247,9 @@ describe("IDE facade UI snapshots", () => {
   })
 
   it("saving code trims trailing newlines", async () => {
-    await appInstance.init(createMockAdapter())
     const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
     textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n\n\n\n"
+    await appInstance.init(createMockAdapter())
     const ctrl = appInstance.stimulusApp?.getControllerForElementAndIdentifier(appInstance.root, "ide-facade") as IDEFacadeController
 
     ctrl.beforeSave()

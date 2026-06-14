@@ -1,0 +1,22 @@
+## Task 1: Wire CodeMirrorInput into the view and the controller
+- Updated IInput interface to remove highlight() and syncHighlightScroll() methods
+- Updated _text-field.html.erb to:
+  - Add editorContainer div target
+  - Hide the textarea
+  - Remove text-format-target and unnecessary action bindings
+  - Keep only the input->ide-facade#sourceEdited action
+- Updated ide_facade_controller.ts to:
+  - Import CodeMirrorInput
+  - Add editorContainer to static targets
+  - Use CodeMirrorInput in connect() method instead of Input
+- Updated CodeMirrorInput to dispatch input events when content changes
+- Updated snapshot test to include the new editorContainer div in the test DOM
+
+## Task 2: Remove line-numbers gutter element
+- Removed `<%= render "line-numbers" %>` from _input.html.erb (CodeMirror has its own line numbers gutter)
+- Deleted unused _line-numbers.html.erb partial
+- Added failing-first test in ide_facade_snapshot.test.ts asserting `.line-numbers` is not in the DOM
+- Removed `<div class="line-numbers">` from the snapshot-test fixture DOM and regenerated stale snapshots left over from Task 1
+- Fixed the trim-on-save test to seed textarea value before CodeMirror init so its content loads as the editor's initial doc
+- Synced initial content to the hidden textarea in CodeMirrorInput's constructor so form submissions reflect the editor's initial state without requiring an edit first
+

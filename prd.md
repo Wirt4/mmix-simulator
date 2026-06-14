@@ -26,7 +26,7 @@ A task is only "done" when **all tests pass inside the dev Docker container** â€
 - [ ] In `_text-field.html.erb`: remove and `<texarea name="source>`'s visible styling 
 - [ ] remove the Stimulus action bindings `syncScroll`, `updateLineNumbers`, and `updateHighlight`. 
 - [ ] In `ide_facade_controller.ts`: add `editorContainer` to `static targets`; in `connect()`,
-- [ ] In `_text-field.html.erb`, remove the line-numbers gutter element
+- [x] In `_text-field.html.erb`, remove the line-numbers gutter element
 - [ ] In `TextFormatController`, remove the highlight and line-numbers targets
 - [ ] Migrate the listing panel to read-only CodeMirror 
 - [ ] Migrate the output panel to read-only CodeMirror && Update `setValue()` and `clear()` accordingly. Keep the `IOutputPanel` interface unchanged.
