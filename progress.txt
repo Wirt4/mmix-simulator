@@ -1,0 +1,9 @@
+## 2026-06-14
+
+### Completed: change listing toggle from plain text to a button
+
+- Added `btn--tactile` class to `_listing-button.html.erb` so the listing toggle renders as a styled tactile button instead of unstyled plain text.
+- Stripped `.listing-toggle` SCSS down to just the rotation override (`transition: transform 0.15s; min-width: auto`) — visual appearance is now handled by `btn--tactile`.
+- Fixed pre-existing test failures: `CodeMirrorOutputPanel` constructor (commit 0529458) added a `.output-body` requirement but the unit tests and snapshot fixture were never updated. Added `.output-body` to `code_mirror_output_panel.test.ts` setup and to `buildIDEDOM()` in `ide_facade_snapshot.test.ts`.
+- Added failing test `"listing toggle button has btn--tactile class"` before implementing, then updated fixture and regenerated snapshots.
+- All 218 TS tests pass; typecheck clean.
