@@ -14,16 +14,16 @@ describe("TextFormatController targets", () => {
 describe("TextFormatController methods", () => {
   it("has no updateHighlight method", () => {
     const proto = TextFormatController.prototype as unknown as Record<string, unknown>
-    expect(proto["updateHighlight"]).toBeUndefined()
+    expect(proto.updateHighlight).toBeUndefined()
   })
 
   it("has no handleKeydown method", () => {
     const proto = TextFormatController.prototype as unknown as Record<string, unknown>
-    expect(proto["handleKeydown"]).toBeUndefined()
+    expect(proto.handleKeydown).toBeUndefined()
   })
 
   it("has no updateLineNumbers method", () => {
     const proto = TextFormatController.prototype as unknown as Record<string, unknown>
-    expect(proto["updateLineNumbers"]).toBeUndefined()
+    expect(proto.updateLineNumbers).toBeUndefined()
   })
 })
