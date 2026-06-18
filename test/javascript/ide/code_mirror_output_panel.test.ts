@@ -77,7 +77,7 @@ describe("CodeMirrorOutputPanel", () => {
 
       panel.clear()
 
-      expect(container.querySelector(".cm-content").textContent.trim()).toBe("")
+      expect(container.querySelector(".cm-content")?.textContent.trim()).toBe("")
     })
 
     it("hides the container", () => {
