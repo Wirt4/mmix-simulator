@@ -1,42 +1,25 @@
-import { EditorState } from "@codemirror/state"
-import { EditorView } from "@codemirror/view"
+import { CodemirrorAdapter } from "./codemirror_adapter"
 import type { IListing } from "./listing.interface"
 
 export class Listing implements IListing {
-  private readonly _view: EditorView
   private readonly _btn: HTMLButtonElement
   private readonly _panel: HTMLElement
   private readonly _collapsed = "listing-panel--collapsed"
+  private _codemirror: CodemirrorAdapter
 
   constructor(container: HTMLElement, btn: HTMLButtonElement, panel: HTMLElement) {
     this._btn = btn
     this._panel = panel
-
-    this._view = new EditorView({
-      state: EditorState.create({
-        doc: "",
-        extensions: [
-          EditorView.editable.of(false),
-          EditorView.theme({
-            "&": { height: "100%" },
-            ".cm-scroller": { overflow: "auto" },
-          }),
-        ],
-      }),
-      parent: container,
-    })
-
+    this._codemirror = new CodemirrorAdapter(container, "", [])
     this.default()
   }
 
   setContents(contents: string): void {
-    this._view.dispatch({
-      changes: { from: 0, to: this._view.state.doc.length, insert: contents },
-    })
+    this._codemirror.contents = contents
   }
 
   getContents(): string {
-    return this._view.state.doc.toString()
+    return this._codemirror.contents
   }
 
   get isOpen(): boolean {
