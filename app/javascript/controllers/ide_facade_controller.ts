@@ -57,7 +57,6 @@ export default class IDEFacadeController extends Controller {
     this.outputPanel = new OutputPanel(this.outputTarget)
     this.inputFrame = new Input(
       this.editorContainerTarget,
-      this.textareaTarget.value,
       this.textareaTarget
     )
     this.listingFrame = new Listing(this.listingTarget, this.listingToggleTarget, this.panelTarget)

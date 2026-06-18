@@ -15,13 +15,10 @@ export class Input implements IInput {
 
   constructor(
     container: HTMLElement,
-    initialContent = "",
     hiddenInput: HTMLInputElement | HTMLTextAreaElement | null = null,
   ) {
     this.hiddenInput = hiddenInput
-    if (this.hiddenInput) {
-      this.hiddenInput.value = initialContent
-    }
+    const initialContent = hiddenInput?.value ?? ""
 
     this.view = new EditorView({
       state: EditorState.create({
