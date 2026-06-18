@@ -4677,6 +4677,9 @@ var _get_listing_size = Module['_get_listing_size'] = createExportWrapper('get_l
 var _is_halted = Module['_is_halted'] = createExportWrapper('is_halted', 0);
 var _arg_size = Module['_arg_size'] = createExportWrapper('arg_size', 0);
 var _get_program_counter = Module['_get_program_counter'] = createExportWrapper('get_program_counter', 1);
+var _get_breakpoint = Module['_get_breakpoint'] = createExportWrapper('get_breakpoint', 2);
+var _update_breakpoint_count = Module['_update_breakpoint_count'] = createExportWrapper('update_breakpoint_count', 1);
+var _set_breakpoint = Module['_set_breakpoint'] = createExportWrapper('set_breakpoint', 3);
 var _fflush = createExportWrapper('fflush', 1);
 var _emscripten_stack_get_end = wasmExports['emscripten_stack_get_end']
 var _emscripten_stack_get_base = wasmExports['emscripten_stack_get_base']
