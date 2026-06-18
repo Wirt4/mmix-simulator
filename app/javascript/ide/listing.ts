@@ -39,10 +39,6 @@ export class Listing implements IListing {
     return this.view.state.doc.toString()
   }
 
-  get size(): number {
-    return this.view.state.doc.toString().replace(/\n+$/, "").split("\n").length
-  }
-
   get isOpen(): boolean {
     return !this._panel.classList.contains(this._collapsed)
   }
