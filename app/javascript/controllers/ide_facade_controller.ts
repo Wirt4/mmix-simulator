@@ -3,7 +3,7 @@ import { ISimulator } from "../simulator/simulator.interface"
 import Simulator from "../simulator/simulator"
 import moduleAdapterFactory from "../moduleAdapter/factory"
 import { IOutputPanel } from "../ide/output_panel.interface"
-import OutputPanel from "../ide/output_panel"
+import { OutputPanel } from "../ide/output_panel"
 import { IInput } from "../ide/input.interface"
 import { Input } from "../ide/input"
 import { IListing } from "../ide/listing.interface"
@@ -18,6 +18,7 @@ import { Arguments } from '../ide/arguments'
 
 export default class IDEFacadeController extends Controller {
   static targets = [
+    "editorContainer",
     "textarea",
     "output",
     "runButton",
@@ -31,6 +32,7 @@ export default class IDEFacadeController extends Controller {
     "argumentsButton"
   ]
 
+  declare editorContainerTarget: HTMLElement
   declare textareaTarget: HTMLTextAreaElement
   declare outputTarget: HTMLElement
   declare runButtonTarget: HTMLButtonElement
@@ -49,11 +51,13 @@ export default class IDEFacadeController extends Controller {
   private listingFrame!: IListing
   private registers!: IRegistersPanel
   private arguments!: IArguments
-  private suppressSourceEdited = false
 
   connect(): void {
     this.outputPanel = new OutputPanel(this.outputTarget)
-    this.inputFrame = new Input(this.textareaTarget)
+    this.inputFrame = new Input(
+      this.editorContainerTarget,
+      this.textareaTarget
+    )
     this.listingFrame = new Listing(this.listingTarget, this.listingToggleTarget, this.panelTarget)
     this.arguments = new Arguments(this.argumentsTarget, this.argumentsButtonTarget)
 
@@ -88,8 +92,6 @@ export default class IDEFacadeController extends Controller {
     const result = this.simulator.assemble(source)
     if (result) {
       this.listingFrame.setContents(this.simulator.getListing())
-      //extend input frame to be same height as listing
-      this.inputFrame.pad(this.listingFrame.size - this.inputFrame.size)
       this.runButtonTarget.disabled = false
       this.arguments.show()
       // unlock listing
@@ -104,27 +106,16 @@ export default class IDEFacadeController extends Controller {
 
   toggleListingPanel(): void {
     this.listingFrame.toggle()
-    if (!this.listingFrame.isOpen) {
-      this.suppressSourceEdited = true
-      this.inputFrame.trim()
-      this.suppressSourceEdited = false
-      this.inputFrame.edited = false
-    }
+    if (this.listingFrame.isOpen) return
+    this.inputFrame.edited = false
   }
 
   sourceEdited(): void {
-    if (this.suppressSourceEdited) return
     //clear the output
     this.resetDisplay()
-
-    if (this.listingFrame.isOpen) {
-      this.inputFrame.pad(this.listingFrame.size - this.inputFrame.size)
-    }
-
-    if (!this.inputFrame.edited) {
-      this.listingFrame.unlock()
-      this.inputFrame.edited = true
-    }
+    if (this.inputFrame.edited) return
+    this.listingFrame.unlock()
+    this.inputFrame.edited = true
   }
 
   private resetDisplay(): void {
@@ -134,13 +125,6 @@ export default class IDEFacadeController extends Controller {
     this.runButtonTarget.disabled = true
     this.arguments.clear()
     this.arguments.hide()
-  }
-
-
-  beforeSave(): void {
-    this.suppressSourceEdited = true
-    this.inputFrame.trim()
-    this.suppressSourceEdited = false
   }
 
   runUserProgram(): void {

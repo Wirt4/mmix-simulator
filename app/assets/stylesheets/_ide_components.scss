@@ -123,11 +123,11 @@
   tab-size: 2;
 }
 
-.editor-highlight .hl-comment { color: var(--syntax-comment); }
-.editor-highlight .hl-label   { color: var(--syntax-label); }
-.editor-highlight .hl-opcode  { color: var(--syntax-opcode); }
-.editor-highlight .hl-directive { color: var(--syntax-directive); }
-.editor-highlight .hl-expr    { color: var(--syntax-expr); }
+.cm-editor .hl-comment { color: var(--syntax-comment); }
+.cm-editor .hl-label   { color: var(--syntax-label); }
+.cm-editor .hl-opcode  { color: var(--syntax-opcode); }
+.cm-editor .hl-directive { color: var(--syntax-directive); }
+.cm-editor .hl-expr    { color: var(--syntax-expr); }
 
 .editor-textarea,
 .output-textarea {
@@ -171,11 +171,6 @@
 }
 
 /* ── Listing (inline pane inside editor-body) ──────────── */
-.listing-divider {
-  width: 2px;
-  background: var(--border);
-  flex-shrink: 0;
-}
 
 .listing-pane {
   flex: 1;
@@ -199,15 +194,7 @@
 }
 
 .listing-toggle {
-  background: none;
-  border: none;
-  color: var(--text-on-surface);
-  font-size: 12px;
-  padding: 0 4px;
-  cursor: pointer;
   transition: transform 0.15s;
-  min-width: auto;
-  line-height: 1;
 }
 .listing-toggle:disabled {
   display: none;

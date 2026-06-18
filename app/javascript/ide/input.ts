@@ -1,74 +1,54 @@
+import { Extension } from "@codemirror/state"
+import { EditorView, keymap, lineNumbers, ViewUpdate } from "@codemirror/view"
+import { defaultKeymap, indentWithTab } from "@codemirror/commands"
+import { syntaxHighlighting, HighlightStyle } from "@codemirror/language"
+import { CodemirrorAdapter } from "./codemirror_adapter"
+
+import { mmixal, mmixalHighlightStyle } from "./mmixal_language"
 import type { IInput } from "./input.interface"
-import { highlight as highlightSyntax } from "./syntax_highlighter"
 
 export class Input implements IInput {
-
-  private _el: HTMLTextAreaElement
-  private _highlightEl: HTMLElement | null
-  private readonly _trailingNewLines = /\n{2,}$/
+  private _codemirror: CodemirrorAdapter
   public edited = true
 
-  constructor(textArea: HTMLTextAreaElement) {
-    this._el = textArea
-    this._el.disabled = true
-    this._highlightEl = this._el.parentElement?.querySelector(".editor-highlight") ?? null
-    if (this._highlightEl) {
-      this._el.classList.add("editor-textarea--highlighted")
-    }
+  constructor(
+    container: HTMLElement,
+    contents: HTMLTextAreaElement,
+  ) {
+    const extensions = this._initializeConfigExtensions(contents)
+    const initialContent = contents.value
+    this._codemirror = new CodemirrorAdapter(container, initialContent, extensions)
   }
 
-  public trim(): void {
-    const cursor = this._el.selectionStart
-    this._el.value = this._el.value.replace(this._trailingNewLines, "")
-    if (cursor < this._el.value.length) {
-      this._el.selectionStart = cursor
-      this._el.selectionEnd = cursor
-    }
-    this._dispatchInputEvent()
-  }
-
-  public getContents(): string {
-    return this._el.value
-  }
-
-  public pad(lines: number): void {
-    if (lines > 0) {
-      const padding = new Array<string>(Math.floor(lines)).fill("\n")
-      this._el.value += padding.join("")
-      this._dispatchInputEvent()
-    }
-  }
-
-  get size(): number {
-    const lines = this._el.value.split("\n").length
-    if (lines < 2) {
-      return lines
-    }
-    return lines - 2
-  }
-
-  lock(): void {
-    this._el.disabled = true
+  getContents(): string {
+    return this._codemirror.contents
   }
 
   unlock(): void {
-    this._el.disabled = false
+    this._codemirror.unlock()
+  }
+  /**
+  * Returns an array of Extentions set with a listener to source
+  */
+  private _initializeConfigExtensions(source: HTMLTextAreaElement): Extension[] {
+    const extensions: Extension[] = []
+    //push a locked state to array
+    extensions.push(this._hookUpListener(source))
+    extensions.push(keymap.of([...defaultKeymap, indentWithTab]))
+    // add the mmixal language rules and highlighting to the array 
+    extensions.push(mmixal)
+    extensions.push(syntaxHighlighting(HighlightStyle.define(mmixalHighlightStyle)))
+    extensions.push(lineNumbers())
+    return extensions
   }
 
-  highlight(): void {
-    if (this._highlightEl) {
-      this._highlightEl.innerHTML = highlightSyntax(this._el.value) + "\n"
+  private _hookUpListener(source: HTMLTextAreaElement): Extension {
+    const callback: (update: ViewUpdate) => void = (update: ViewUpdate) => {
+      if (update.docChanged) {
+        source.value = update.state.doc.toString()
+        source.dispatchEvent(new Event("input", { bubbles: true }))
+      }
     }
-  }
-
-  syncHighlightScroll(): void {
-    if (this._highlightEl) {
-      this._highlightEl.scrollTop = this._el.scrollTop
-      this._highlightEl.scrollLeft = this._el.scrollLeft
-    }
-  }
-
-  private _dispatchInputEvent(): void {
-    this._el.dispatchEvent(new Event("input", { bubbles: true }))
+    return EditorView.updateListener.of(callback)
   }
 }

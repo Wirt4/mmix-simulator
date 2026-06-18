@@ -36,14 +36,16 @@ function buildIDEDOM(): HTMLElement {
       <div class="ide-main">
         <div class="panel-header">
           <span class="panel-header-label">Source</span>
-          <button type="button" class="listing-toggle" disabled data-ide-facade-target="listingToggle">listing</button>
+          <button type="button" class="btn--tactile listing-toggle" disabled data-ide-facade-target="listingToggle">listing</button>
         </div>
         <div class="editor-container" data-ide-facade-target="panel">
           <div class="editor-body">
-            <div class="line-numbers"><span>1</span></div>
-            <textarea class="editor-textarea"
-              data-ide-facade-target="textarea"
-              spellcheck="false"></textarea>
+            <div class="editor-input-wrapper">
+              <div data-ide-facade-target="editorContainer"></div>
+              <textarea class="editor-textarea"
+                data-ide-facade-target="textarea"
+                spellcheck="false" hidden></textarea>
+            </div>
             <div class="listing-divider"></div>
             <div class="listing-pane">
               <div data-ide-facade-target="listing" class="listing-content"></div>
@@ -51,7 +53,7 @@ function buildIDEDOM(): HTMLElement {
           </div>
         </div>
         <div class="output-panel" data-ide-facade-target="output">
-          <textarea class="output-textarea" readonly></textarea>
+          <div class="output-body"></div>
         </div>
       </div>
       <div class="register-panel">
@@ -164,9 +166,20 @@ describe("IDE facade UI snapshots", () => {
     appInstance?.reset()
   })
 
+  it("listing toggle button has btn--tactile class", async () => {
+    await appInstance.init(createMockAdapter())
+    const listingToggle = appInstance.getTargetElement("listingToggle")
+    expect(listingToggle.classList.contains("btn--tactile")).toBe(true)
+  })
+
   it("initial state after connect", async () => {
     await appInstance.init(createMockAdapter())
     expect(appInstance.root.innerHTML).toMatchSnapshot()
+  })
+
+  it("does not render the deprecated line-numbers gutter element", async () => {
+    await appInstance.init(createMockAdapter())
+    expect(appInstance.root.querySelector(".line-numbers")).toBeNull()
   })
 
   it("special registers after connect", async () => {
@@ -202,15 +215,12 @@ describe("IDE facade UI snapshots", () => {
     assembleBtn.click()
 
     const output = appInstance.getTargetElement("output")
-    const outputTextarea = output.querySelector("textarea")
+    const cmContent = output.querySelector(".cm-content")
     const runBtn = appInstance.getTargetElement("runButton") as HTMLButtonElement
     const listingToggle = appInstance.getTargetElement("listingToggle") as HTMLButtonElement
     const panel = appInstance.getTargetElement("panel")
-    if (outputTextarea === null) {
-      expect(outputTextarea).not.toBeNull()
-      return
-    }
-    expect(outputTextarea.value).toMatchSnapshot()
+    expect(cmContent).not.toBeNull()
+    expect(cmContent?.textContent).toMatchSnapshot()
     expect(runBtn.disabled).toBe(true)
     expect(listingToggle.disabled).toBe(true)
     expect(panel.outerHTML).toMatchSnapshot()
@@ -239,17 +249,6 @@ describe("IDE facade UI snapshots", () => {
     expect(panel.outerHTML).toMatchSnapshot()
   })
 
-  it("saving code trims trailing newlines", async () => {
-    await appInstance.init(createMockAdapter())
-    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
-    textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n\n\n\n"
-    const ctrl = appInstance.stimulusApp?.getControllerForElementAndIdentifier(appInstance.root, "ide-facade") as IDEFacadeController
-
-    ctrl.beforeSave()
-
-    expect(textarea.value).toMatchSnapshot()
-  })
-
   it("good code output matches snapshot", async () => {
     const listing = "001: e3ff0001  SETL $255,1\n002: 00000000  TRAP 0,Halt,0\n"
 
@@ -272,12 +271,10 @@ describe("IDE facade UI snapshots", () => {
 
     runBtn.click()
 
-    const outputTextarea = appInstance.getTargetElement("output").querySelector("textarea")
-    if (outputTextarea === null) {
-      expect(outputTextarea).not.toBeNull()
-      return
-    }
-    expect(outputTextarea.value).toMatchSnapshot()
+    const outputEl = appInstance.getTargetElement("output")
+    const cmContent = outputEl.querySelector(".cm-content")
+    expect(cmContent).not.toBeNull()
+    expect(cmContent?.textContent).toMatchSnapshot()
   })
 
   it("good code special and general register containers outputs match snapshot", async () => {
@@ -339,5 +336,22 @@ describe("IDE facade UI snapshots", () => {
     expect(
       Array.from(arrows).map(el => el.classList.contains("spin-arrow--open"))
     ).toMatchSnapshot()
+  })
+
+  it("mounts a CodeMirror editor view inside the editorContainer target", async () => {
+    await appInstance.init(createMockAdapter())
+    const editorContainer = appInstance.getTargetElement("editorContainer")
+    expect(editorContainer.querySelector(".cm-editor")).not.toBeNull()
+    expect(editorContainer.querySelector(".cm-content")).not.toBeNull()
+  })
+
+  it("seeds the CodeMirror document from the hidden textarea value", async () => {
+    const initial = " SETL $255,1\n TRAP 0,Halt,0\n"
+    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
+    textarea.value = initial
+    await appInstance.init(createMockAdapter())
+    const editorContainer = appInstance.getTargetElement("editorContainer")
+    const cmContent = editorContainer.querySelector(".cm-content")
+    expect(cmContent?.textContent).toEqual(initial.replace(/\n/g, ""))
   })
 })

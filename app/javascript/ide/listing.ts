@@ -1,29 +1,30 @@
-import { IListing } from "./listing.interface"
+import { CodemirrorAdapter } from "./codemirror_adapter"
+import type { IListing } from "./listing.interface"
 
 export class Listing implements IListing {
-  private _div: HTMLElement
-  private _collapsed: string
-  private _btn: HTMLButtonElement
-  private _panel: HTMLElement
+  private readonly _btn: HTMLButtonElement
+  private readonly _panel: HTMLElement
+  private readonly _collapsed = "listing-panel--collapsed"
+  private _codemirror: CodemirrorAdapter
 
-  constructor(div: HTMLElement, btn: HTMLButtonElement, panel: HTMLElement) {
-    this._div = div
-    this._collapsed = "listing-panel--collapsed"
+  constructor(container: HTMLElement, btn: HTMLButtonElement, panel: HTMLElement) {
     this._btn = btn
     this._panel = panel
+    this._codemirror = new CodemirrorAdapter(container)
     this.default()
   }
 
-  get isOpen(): boolean {
-    return !this._panel.classList.contains(this._collapsed)
-  }
-
   setContents(contents: string): void {
-    this._div.textContent = contents
+    this._codemirror.contents = contents
   }
 
-  get size(): number {
-    return this._div.textContent.replace(/\n+$/, "").split("\n").length
+  getContents(): string {
+    return this._codemirror.contents
+  }
+
+  get isOpen(): boolean {
+    if (this._panel.classList.contains(this._collapsed)) return false
+    return true
   }
 
   default(): void {
