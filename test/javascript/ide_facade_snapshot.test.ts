@@ -249,17 +249,6 @@ describe("IDE facade UI snapshots", () => {
     expect(panel.outerHTML).toMatchSnapshot()
   })
 
-  it("saving code trims trailing newlines", async () => {
-    const textarea = appInstance.getTargetElement("textarea") as HTMLTextAreaElement
-    textarea.value = " SETL $255,1\n TRAP 0,Halt,0\n\n\n\n"
-    await appInstance.init(createMockAdapter())
-    const ctrl = appInstance.stimulusApp?.getControllerForElementAndIdentifier(appInstance.root, "ide-facade") as IDEFacadeController
-
-    ctrl.beforeSave()
-
-    expect(textarea.value).toMatchSnapshot()
-  })
-
   it("good code output matches snapshot", async () => {
     const listing = "001: e3ff0001  SETL $255,1\n002: 00000000  TRAP 0,Halt,0\n"
 

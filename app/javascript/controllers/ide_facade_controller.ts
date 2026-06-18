@@ -51,7 +51,6 @@ export default class IDEFacadeController extends Controller {
   private listingFrame!: IListing
   private registers!: IRegistersPanel
   private arguments!: IArguments
-  private suppressSourceEdited = false
 
   connect(): void {
     this.outputPanel = new OutputPanel(this.outputTarget)
@@ -108,23 +107,16 @@ export default class IDEFacadeController extends Controller {
 
   toggleListingPanel(): void {
     this.listingFrame.toggle()
-    if (!this.listingFrame.isOpen) {
-      this.suppressSourceEdited = true
-      this.inputFrame.trim()
-      this.suppressSourceEdited = false
-      this.inputFrame.edited = false
-    }
+    if (this.listingFrame.isOpen) return
+    this.inputFrame.edited = false
   }
 
   sourceEdited(): void {
-    if (this.suppressSourceEdited) return
     //clear the output
     this.resetDisplay()
-
-    if (!this.inputFrame.edited) {
-      this.listingFrame.unlock()
-      this.inputFrame.edited = true
-    }
+    if (this.inputFrame.edited) return
+    this.listingFrame.unlock()
+    this.inputFrame.edited = true
   }
 
   private resetDisplay(): void {
@@ -134,13 +126,6 @@ export default class IDEFacadeController extends Controller {
     this.runButtonTarget.disabled = true
     this.arguments.clear()
     this.arguments.hide()
-  }
-
-
-  beforeSave(): void {
-    this.suppressSourceEdited = true
-    this.inputFrame.trim()
-    this.suppressSourceEdited = false
   }
 
   runUserProgram(): void {
