@@ -7,7 +7,7 @@ export class OutputPanel implements IOutputPanel {
   constructor(private readonly container: HTMLElement) {
     const body = container.querySelector<HTMLElement>(".output-body")
     if (!body) throw new Error("CodeMirrorOutputPanel: no .output-body found in container")
-    this._codemirror = new CodemirrorAdapter(body, "", [])
+    this._codemirror = new CodemirrorAdapter(body)
     this.hide()
   }
 

@@ -16,7 +16,7 @@ export class Input implements IInput {
     contents: HTMLTextAreaElement,
   ) {
     const extensions = this._initializeConfigExtensions(contents)
-    const initialContent = contents?.value ?? ""
+    const initialContent = contents.value
     this._codemirror = new CodemirrorAdapter(container, initialContent, extensions)
   }
 

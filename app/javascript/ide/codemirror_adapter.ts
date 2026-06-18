@@ -4,7 +4,7 @@ import { Extension, EditorState, Compartment } from "@codemirror/state"
 export class CodemirrorAdapter {
   private _view: EditorView
   private _compartment: Compartment
-  constructor(parent: HTMLElement, initialContent: string = "", additionalExtentions: Extension[]) {
+  constructor(parent: HTMLElement, initialContent = "", additionalExtentions: Extension[] = []) {
     //splice additional extensions between a locked state and styling
     this._compartment = new Compartment()
     const extensions = [

@@ -10,7 +10,7 @@ export class Listing implements IListing {
   constructor(container: HTMLElement, btn: HTMLButtonElement, panel: HTMLElement) {
     this._btn = btn
     this._panel = panel
-    this._codemirror = new CodemirrorAdapter(container, "", [])
+    this._codemirror = new CodemirrorAdapter(container)
     this.default()
   }
 
