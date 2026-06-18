@@ -3,7 +3,7 @@ import { EditorView } from "@codemirror/view"
 import type { IListing } from "./listing.interface"
 
 export class Listing implements IListing {
-  private readonly view: EditorView
+  private readonly _view: EditorView
   private readonly _btn: HTMLButtonElement
   private readonly _panel: HTMLElement
   private readonly _collapsed = "listing-panel--collapsed"
@@ -12,7 +12,7 @@ export class Listing implements IListing {
     this._btn = btn
     this._panel = panel
 
-    this.view = new EditorView({
+    this._view = new EditorView({
       state: EditorState.create({
         doc: "",
         extensions: [
@@ -30,17 +30,18 @@ export class Listing implements IListing {
   }
 
   setContents(contents: string): void {
-    this.view.dispatch({
-      changes: { from: 0, to: this.view.state.doc.length, insert: contents },
+    this._view.dispatch({
+      changes: { from: 0, to: this._view.state.doc.length, insert: contents },
     })
   }
 
   getContents(): string {
-    return this.view.state.doc.toString()
+    return this._view.state.doc.toString()
   }
 
   get isOpen(): boolean {
-    return !this._panel.classList.contains(this._collapsed)
+    if (this._panel.classList.contains(this._collapsed)) return false
+    return true
   }
 
   default(): void {

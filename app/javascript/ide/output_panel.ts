@@ -3,12 +3,13 @@ import { EditorView } from "@codemirror/view"
 import type { IOutputPanel } from "./output_panel.interface"
 
 export class OutputPanel implements IOutputPanel {
-  private readonly view: EditorView
+  private readonly _view: EditorView
 
   constructor(private readonly container: HTMLElement) {
     const body = container.querySelector<HTMLElement>(".output-body")
     if (!body) throw new Error("CodeMirrorOutputPanel: no .output-body found in container")
-    this.view = new EditorView({
+    //opportunity below to reduce duplication
+    this._view = new EditorView({
       state: EditorState.create({
         doc: "",
         extensions: [
@@ -30,23 +31,23 @@ export class OutputPanel implements IOutputPanel {
   }
 
   getValue(): string {
-    return this.view.state.doc.toString()
+    return this._view.state.doc.toString()
   }
 
   setValue(text: string): void {
-    this.view.dispatch({
-      changes: { from: 0, to: this.view.state.doc.length, insert: text },
+    this._view.dispatch({
+      changes: { from: 0, to: this._view.state.doc.length, insert: text },
     })
     if (text) {
       this.show()
-    } else {
-      this.hide()
+      return
     }
+    this.hide()
   }
 
   clear(): void {
-    this.view.dispatch({
-      changes: { from: 0, to: this.view.state.doc.length, insert: "" },
+    this._view.dispatch({
+      changes: { from: 0, to: this._view.state.doc.length, insert: "" },
     })
     this.hide()
   }
