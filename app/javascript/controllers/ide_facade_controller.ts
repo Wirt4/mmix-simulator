@@ -92,7 +92,6 @@ export default class IDEFacadeController extends Controller {
     const result = this.simulator.assemble(source)
     if (result) {
       this.listingFrame.setContents(this.simulator.getListing())
-      //extend input frame to be same height as listing
       this.runButtonTarget.disabled = false
       this.arguments.show()
       // unlock listing
