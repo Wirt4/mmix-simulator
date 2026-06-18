@@ -7,7 +7,7 @@ import { OutputPanel } from "../ide/output_panel"
 import { IInput } from "../ide/input.interface"
 import { Input } from "../ide/input"
 import { IListing } from "../ide/listing.interface"
-import { CodeMirrorListing } from "../ide/code_mirror_listing"
+import { Listing } from "../ide/listing"
 import { EnumRegisterType } from "../ide/registers.interface"
 import { IRegistersPanel } from "../ide/registers_panel.interface"
 import { RegistersPanel } from "../ide/registers_panel"
@@ -60,7 +60,7 @@ export default class IDEFacadeController extends Controller {
       this.textareaTarget.value,
       this.textareaTarget
     )
-    this.listingFrame = new CodeMirrorListing(this.listingTarget, this.listingToggleTarget, this.panelTarget)
+    this.listingFrame = new Listing(this.listingTarget, this.listingToggleTarget, this.panelTarget)
     this.arguments = new Arguments(this.argumentsTarget, this.argumentsButtonTarget)
 
     moduleAdapterFactory().then((adapter) => {
