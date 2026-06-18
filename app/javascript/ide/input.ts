@@ -8,7 +8,7 @@ import type { IInput } from "./input.interface"
 const editableComp = new Compartment()
 const highlightStyle = HighlightStyle.define(mmixalHighlightStyle)
 
-export class CodeMirrorInput implements IInput {
+export class Input implements IInput {
   private readonly view: EditorView
   private readonly hiddenInput: HTMLInputElement | HTMLTextAreaElement | null
   public edited = true

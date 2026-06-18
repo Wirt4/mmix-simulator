@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest"
-import { CodeMirrorInput } from "../../../app/javascript/ide/input"
+import { Input } from "../../../app/javascript/ide/input"
 
 function createContainer(): HTMLElement {
   return document.createElement("div")
@@ -11,7 +11,7 @@ function createHiddenInput(initialValue = ""): HTMLTextAreaElement {
   return textarea
 }
 
-describe("CodeMirrorInput", () => {
+describe("Input", () => {
   let container: HTMLElement
   let hiddenInput: HTMLTextAreaElement
 
@@ -28,7 +28,7 @@ describe("CodeMirrorInput", () => {
   describe("getContents()", () => {
     it("returns the initial content passed to constructor", () => {
       const expected = "Hello World"
-      const input = new CodeMirrorInput(container, expected, hiddenInput)
+      const input = new Input(container, expected, hiddenInput)
 
       const actual = input.getContents()
 
@@ -36,7 +36,7 @@ describe("CodeMirrorInput", () => {
     })
 
     it("returns empty string when no initial content provided", () => {
-      const input = new CodeMirrorInput(container, "", hiddenInput)
+      const input = new Input(container, "", hiddenInput)
 
       const actual = input.getContents()
 
@@ -46,7 +46,7 @@ describe("CodeMirrorInput", () => {
 
   describe("pad()", () => {
     it("adds newlines to the editor content", () => {
-      const input = new CodeMirrorInput(container, "line1", hiddenInput)
+      const input = new Input(container, "line1", hiddenInput)
 
       input.pad(3)
 
@@ -54,7 +54,7 @@ describe("CodeMirrorInput", () => {
     })
 
     it("does nothing if passed a negative number", () => {
-      const input = new CodeMirrorInput(container, "content", hiddenInput)
+      const input = new Input(container, "content", hiddenInput)
 
       input.pad(-1)
 
@@ -62,7 +62,7 @@ describe("CodeMirrorInput", () => {
     })
 
     it("rounds down if passed a fraction", () => {
-      const input = new CodeMirrorInput(container, "stuff", hiddenInput)
+      const input = new Input(container, "stuff", hiddenInput)
 
       input.pad(3.7)
 
@@ -72,13 +72,13 @@ describe("CodeMirrorInput", () => {
 
   describe("size", () => {
     it("returns 1 for empty content", () => {
-      const input = new CodeMirrorInput(container, "", hiddenInput)
+      const input = new Input(container, "", hiddenInput)
 
       expect(input.size).toEqual(1)
     })
 
     it("returns correct line count for multi-line content", () => {
-      const input = new CodeMirrorInput(container, "line1\nline2", hiddenInput)
+      const input = new Input(container, "line1\nline2", hiddenInput)
 
       expect(input.size).toEqual(0)
     })
@@ -86,7 +86,7 @@ describe("CodeMirrorInput", () => {
 
   describe("trim()", () => {
     it("removes trailing newlines", () => {
-      const input = new CodeMirrorInput(container, "content\n\n\n", hiddenInput)
+      const input = new Input(container, "content\n\n\n", hiddenInput)
 
       input.trim()
 
@@ -94,7 +94,7 @@ describe("CodeMirrorInput", () => {
     })
 
     it("does not remove single trailing newline", () => {
-      const input = new CodeMirrorInput(container, "content\n", hiddenInput)
+      const input = new Input(container, "content\n", hiddenInput)
 
       input.trim()
 
@@ -104,13 +104,13 @@ describe("CodeMirrorInput", () => {
 
   describe("lock/unlock", () => {
     it("defaults to NOT editable (read-only)", () => {
-      const input = new CodeMirrorInput(container, "test", hiddenInput)
+      const input = new Input(container, "test", hiddenInput)
 
       expect(input.getContents()).toEqual("test")
     })
 
     it("lock() keeps the editor read-only", () => {
-      const input = new CodeMirrorInput(container, "test", hiddenInput)
+      const input = new Input(container, "test", hiddenInput)
 
       input.lock()
 
@@ -118,7 +118,7 @@ describe("CodeMirrorInput", () => {
     })
 
     it("unlock() makes the editor editable", () => {
-      const input = new CodeMirrorInput(container, "test", hiddenInput)
+      const input = new Input(container, "test", hiddenInput)
 
       input.unlock()
 
@@ -128,7 +128,7 @@ describe("CodeMirrorInput", () => {
 
   describe("edited property", () => {
     it("can be set and read", () => {
-      const input = new CodeMirrorInput(container, "test", hiddenInput)
+      const input = new Input(container, "test", hiddenInput)
       expect(input.edited).toEqual(true)
 
       input.edited = false
@@ -141,7 +141,7 @@ describe("CodeMirrorInput", () => {
     it("syncs content to hidden input on creation", () => {
       const content = "initial content"
 
-      new CodeMirrorInput(container, content, hiddenInput)
+      new Input(container, content, hiddenInput)
 
       expect(hiddenInput.value).toEqual(content)
     })

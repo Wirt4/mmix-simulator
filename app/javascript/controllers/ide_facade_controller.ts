@@ -5,7 +5,7 @@ import moduleAdapterFactory from "../moduleAdapter/factory"
 import { IOutputPanel } from "../ide/output_panel.interface"
 import { OutputPanel } from "../ide/output_panel"
 import { IInput } from "../ide/input.interface"
-import { CodeMirrorInput } from "../ide/input"
+import { Input } from "../ide/input"
 import { IListing } from "../ide/listing.interface"
 import { CodeMirrorListing } from "../ide/code_mirror_listing"
 import { EnumRegisterType } from "../ide/registers.interface"
@@ -55,7 +55,7 @@ export default class IDEFacadeController extends Controller {
 
   connect(): void {
     this.outputPanel = new OutputPanel(this.outputTarget)
-    this.inputFrame = new CodeMirrorInput(
+    this.inputFrame = new Input(
       this.editorContainerTarget,
       this.textareaTarget.value,
       this.textareaTarget
