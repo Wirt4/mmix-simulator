@@ -96,7 +96,7 @@ export class Input implements IInput {
       effects: editableComp.reconfigure(EditorView.editable.of(false)),
     })
   }
-
+  // TODO: extract and test
   unlock(): void {
     this.view.dispatch({
       effects: editableComp.reconfigure(EditorView.editable.of(true)),

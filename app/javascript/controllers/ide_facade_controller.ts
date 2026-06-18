@@ -94,7 +94,6 @@ export default class IDEFacadeController extends Controller {
     if (result) {
       this.listingFrame.setContents(this.simulator.getListing())
       //extend input frame to be same height as listing
-      this.inputFrame.pad(this.listingFrame.size - this.inputFrame.size)
       this.runButtonTarget.disabled = false
       this.arguments.show()
       // unlock listing
@@ -121,10 +120,6 @@ export default class IDEFacadeController extends Controller {
     if (this.suppressSourceEdited) return
     //clear the output
     this.resetDisplay()
-
-    if (this.listingFrame.isOpen) {
-      this.inputFrame.pad(this.listingFrame.size - this.inputFrame.size)
-    }
 
     if (!this.inputFrame.edited) {
       this.listingFrame.unlock()
