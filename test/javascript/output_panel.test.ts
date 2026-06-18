@@ -1,66 +1,72 @@
-import { describe, it, expect } from 'vitest'
-import OutputPanel from '../../app/javascript/ide/output_panel'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { OutputPanel } from '../../app/javascript/ide/output_panel'
 
-function makeContainer(initial = ""): { container: HTMLElement; textarea: HTMLTextAreaElement } {
+function makeContainer(): HTMLElement {
   const container = document.createElement("div")
-  const textarea = document.createElement("textarea")
-  textarea.value = initial
-  container.appendChild(textarea)
-  return { container, textarea }
+  const body = document.createElement("div")
+  body.classList.add("output-body")
+  container.appendChild(body)
+  document.body.appendChild(container)
+  return container
 }
 
 describe("OutputPanel", () => {
-  it("outputPanel creates with no text content", () => {
-    const { container, textarea } = makeContainer("stale output")
-    new OutputPanel(container)
-    expect(textarea.value).toBe("")
+  let container: HTMLElement
+
+  beforeEach(() => {
+    container = makeContainer()
   })
-  it("setValue sets the textarea value", () => {
-    const { container, textarea } = makeContainer()
+
+  afterEach(() => {
+    document.body.removeChild(container)
+  })
+
+  it("outputPanel creates with no text content", () => {
+    const panel = new OutputPanel(container)
+    expect(panel.getValue()).toBe("")
+  })
+
+  it("setValue sets the value", () => {
     const panel = new OutputPanel(container)
     panel.setValue("hello world")
-    expect(textarea.value).toBe("hello world")
+    expect(panel.getValue()).toBe("hello world")
   })
 
   it("setValue overwrites an existing value", () => {
-    const { container, textarea } = makeContainer("old text")
     const panel = new OutputPanel(container)
+    panel.setValue("old text")
     panel.setValue("new text")
-    expect(textarea.value).toBe("new text")
+    expect(panel.getValue()).toBe("new text")
   })
 
   it("setValue accepts an empty string", () => {
-    const { container, textarea } = makeContainer("some text")
     const panel = new OutputPanel(container)
+    panel.setValue("some text")
     panel.setValue("")
-    expect(textarea.value).toBe("")
+    expect(panel.getValue()).toBe("")
   })
 
   it("setValue with text shows the panel", () => {
-    const { container } = makeContainer()
     const panel = new OutputPanel(container)
     panel.setValue("hello world")
     expect(container.hidden).toEqual(false)
   })
 
   it("setValue with empty string hides the panel", () => {
-    const { container } = makeContainer()
     const panel = new OutputPanel(container)
     panel.show()
     panel.setValue("")
     expect(container.hidden).toEqual(true)
   })
 
-  it("clear removes text from element", () => {
-    const { container, textarea } = makeContainer()
+  it("clear removes text", () => {
     const panel = new OutputPanel(container)
     panel.setValue("Some output")
     panel.clear()
-    expect(textarea.value).toBe("")
+    expect(panel.getValue()).toBe("")
   })
 
   it("clear hides the panel", () => {
-    const { container } = makeContainer()
     const panel = new OutputPanel(container)
     panel.setValue("Some output")
     panel.clear()
@@ -68,29 +74,21 @@ describe("OutputPanel", () => {
   })
 
   it("constructor hides the output panel", () => {
-    const { container } = makeContainer()
     container.hidden = false
     new OutputPanel(container)
-
     expect(container.hidden).toEqual(true)
   })
 
   it("hide hides the output panel", () => {
-    const { container } = makeContainer()
     container.hidden = false
     const panel = new OutputPanel(container)
-
     panel.hide()
-
     expect(container.hidden).toEqual(true)
   })
 
   it("show reveals a hidden output panel", () => {
-    const { container } = makeContainer()
     const panel = new OutputPanel(container)
-
     panel.show()
-
     expect(container.hidden).toEqual(false)
   })
 })

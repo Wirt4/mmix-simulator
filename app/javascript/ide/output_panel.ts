@@ -1,26 +1,54 @@
-import { IOutputPanel } from './output_panel.interface'
+import { EditorState } from "@codemirror/state"
+import { EditorView } from "@codemirror/view"
+import type { IOutputPanel } from "./output_panel.interface"
 
-export default class OutputPanel implements IOutputPanel {
-  private textarea: HTMLTextAreaElement
+export class OutputPanel implements IOutputPanel {
+  private readonly view: EditorView
 
-  constructor(private container: HTMLElement) {
-    const parsedTextarea = container.querySelector<HTMLTextAreaElement>("textarea")
-    if (!parsedTextarea) throw new Error("OutputPanel: no textarea found in container")
-    this.textarea = parsedTextarea
-    this.textarea.value = ""
+  constructor(private readonly container: HTMLElement) {
+    const body = container.querySelector<HTMLElement>(".output-body")
+    if (!body) throw new Error("CodeMirrorOutputPanel: no .output-body found in container")
+    this.view = new EditorView({
+      state: EditorState.create({
+        doc: "",
+        extensions: [
+          EditorView.editable.of(false),
+          EditorView.theme({
+            "&": { height: "100%" },
+            ".cm-scroller": {
+              overflow: "auto",
+              "line-height": "1.2",
+              "font-size": "var(--font-size-sm)"
+            },
+            ".cm-content": { color: "var(--tan)" },
+          }),
+        ],
+      }),
+      parent: body,
+    })
     this.hide()
   }
-  clear(): void {
-    this.textarea.value = ""
-    this.hide()
+
+  getValue(): string {
+    return this.view.state.doc.toString()
   }
+
   setValue(text: string): void {
-    this.textarea.value = text
+    this.view.dispatch({
+      changes: { from: 0, to: this.view.state.doc.length, insert: text },
+    })
     if (text) {
       this.show()
     } else {
       this.hide()
     }
+  }
+
+  clear(): void {
+    this.view.dispatch({
+      changes: { from: 0, to: this.view.state.doc.length, insert: "" },
+    })
+    this.hide()
   }
 
   hide(): void {
