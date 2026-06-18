@@ -1,74 +1,108 @@
+import { EditorState, Compartment } from "@codemirror/state"
+import { EditorView, keymap, lineNumbers } from "@codemirror/view"
+import { defaultKeymap, indentWithTab } from "@codemirror/commands"
+import { syntaxHighlighting, HighlightStyle } from "@codemirror/language"
+import { mmixal, mmixalHighlightStyle } from "./mmixal_language"
 import type { IInput } from "./input.interface"
-import { highlight as highlightSyntax } from "./syntax_highlighter"
 
-export class Input implements IInput {
+const editableComp = new Compartment()
+const highlightStyle = HighlightStyle.define(mmixalHighlightStyle)
 
-  private _el: HTMLTextAreaElement
-  private _highlightEl: HTMLElement | null
-  private readonly _trailingNewLines = /\n{2,}$/
+export class CodeMirrorInput implements IInput {
+  private readonly view: EditorView
+  private readonly hiddenInput: HTMLInputElement | HTMLTextAreaElement | null
   public edited = true
 
-  constructor(textArea: HTMLTextAreaElement) {
-    this._el = textArea
-    this._el.disabled = true
-    this._highlightEl = this._el.parentElement?.querySelector(".editor-highlight") ?? null
-    if (this._highlightEl) {
-      this._el.classList.add("editor-textarea--highlighted")
+  constructor(
+    container: HTMLElement,
+    initialContent = "",
+    hiddenInput: HTMLInputElement | HTMLTextAreaElement | null = null,
+  ) {
+    this.hiddenInput = hiddenInput
+    if (this.hiddenInput) {
+      this.hiddenInput.value = initialContent
     }
+
+    this.view = new EditorView({
+      state: EditorState.create({
+        doc: initialContent,
+        extensions: [
+          lineNumbers(),
+          keymap.of([...defaultKeymap, indentWithTab]),
+          editableComp.of(EditorView.editable.of(false)),
+          mmixal,
+          syntaxHighlighting(highlightStyle),
+          EditorView.updateListener.of((update) => {
+            if (update.docChanged && this.hiddenInput) {
+              this.hiddenInput.value = this.view.state.doc.toString()
+              this.hiddenInput.dispatchEvent(new Event("input", { bubbles: true }))
+            }
+          }),
+          EditorView.theme({
+            "&": { height: "100%" },
+            ".cm-scroller": {
+              overflow: "auto",
+              "line-height": "1.2",
+              "font-size": "var(--font-size-sm)"
+            },
+            ".cm-content": { color: "var(--tan)" },
+            ".cm-gutters": {
+              background: "var(--gutter-bg)",
+              border: "none",
+            },
+            ".cm-lineNumbers .cm-gutterElement": {
+              color: "var(--syntax-comment)",
+            },
+          }),
+        ],
+      }),
+      parent: container,
+    })
   }
 
-  public trim(): void {
-    const cursor = this._el.selectionStart
-    this._el.value = this._el.value.replace(this._trailingNewLines, "")
-    if (cursor < this._el.value.length) {
-      this._el.selectionStart = cursor
-      this._el.selectionEnd = cursor
-    }
-    this._dispatchInputEvent()
+  getContents(): string {
+    return this.view.state.doc.toString()
   }
 
-  public getContents(): string {
-    return this._el.value
-  }
-
-  public pad(lines: number): void {
+  pad(lines: number): void {
     if (lines > 0) {
-      const padding = new Array<string>(Math.floor(lines)).fill("\n")
-      this._el.value += padding.join("")
-      this._dispatchInputEvent()
+      const padding = "\n".repeat(Math.floor(lines))
+      const end = this.view.state.doc.length
+      this.view.dispatch({ changes: { from: end, insert: padding } })
+      if (this.hiddenInput) {
+        this.hiddenInput.dispatchEvent(new Event("input", { bubbles: true }))
+      }
+    }
+  }
+
+  trim(): void {
+    const content = this.view.state.doc.toString()
+    const trimmed = content.replace(/\n{2,}$/, "")
+    if (trimmed !== content) {
+      this.view.dispatch({
+        changes: { from: 0, to: this.view.state.doc.length, insert: trimmed },
+      })
+      if (this.hiddenInput) {
+        this.hiddenInput.dispatchEvent(new Event("input", { bubbles: true }))
+      }
     }
   }
 
   get size(): number {
-    const lines = this._el.value.split("\n").length
-    if (lines < 2) {
-      return lines
-    }
+    const lines = this.view.state.doc.toString().split("\n").length
+    if (lines < 2) return lines
     return lines - 2
   }
 
   lock(): void {
-    this._el.disabled = true
+    this.view.dispatch({
+      effects: editableComp.reconfigure(EditorView.editable.of(false)),
+    })
   }
 
   unlock(): void {
-    this._el.disabled = false
-  }
-
-  highlight(): void {
-    if (this._highlightEl) {
-      this._highlightEl.innerHTML = highlightSyntax(this._el.value) + "\n"
-    }
-  }
-
-  syncHighlightScroll(): void {
-    if (this._highlightEl) {
-      this._highlightEl.scrollTop = this._el.scrollTop
-      this._highlightEl.scrollLeft = this._el.scrollLeft
-    }
-  }
-
-  private _dispatchInputEvent(): void {
-    this._el.dispatchEvent(new Event("input", { bubbles: true }))
+    this.view.dispatch({
+      effects: editableComp.reconfigure(EditorView.editable.of(true)),
+    })
   }
 }

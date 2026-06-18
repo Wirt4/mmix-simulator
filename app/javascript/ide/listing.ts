@@ -1,29 +1,50 @@
-import { IListing } from "./listing.interface"
+import { EditorState } from "@codemirror/state"
+import { EditorView } from "@codemirror/view"
+import type { IListing } from "./listing.interface"
 
 export class Listing implements IListing {
-  private _div: HTMLElement
-  private _collapsed: string
-  private _btn: HTMLButtonElement
-  private _panel: HTMLElement
+  private readonly view: EditorView
+  private readonly _btn: HTMLButtonElement
+  private readonly _panel: HTMLElement
+  private readonly _collapsed = "listing-panel--collapsed"
 
-  constructor(div: HTMLElement, btn: HTMLButtonElement, panel: HTMLElement) {
-    this._div = div
-    this._collapsed = "listing-panel--collapsed"
+  constructor(container: HTMLElement, btn: HTMLButtonElement, panel: HTMLElement) {
     this._btn = btn
     this._panel = panel
+
+    this.view = new EditorView({
+      state: EditorState.create({
+        doc: "",
+        extensions: [
+          EditorView.editable.of(false),
+          EditorView.theme({
+            "&": { height: "100%" },
+            ".cm-scroller": { overflow: "auto" },
+          }),
+        ],
+      }),
+      parent: container,
+    })
+
     this.default()
+  }
+
+  setContents(contents: string): void {
+    this.view.dispatch({
+      changes: { from: 0, to: this.view.state.doc.length, insert: contents },
+    })
+  }
+
+  getContents(): string {
+    return this.view.state.doc.toString()
+  }
+
+  get size(): number {
+    return this.view.state.doc.toString().replace(/\n+$/, "").split("\n").length
   }
 
   get isOpen(): boolean {
     return !this._panel.classList.contains(this._collapsed)
-  }
-
-  setContents(contents: string): void {
-    this._div.textContent = contents
-  }
-
-  get size(): number {
-    return this._div.textContent.replace(/\n+$/, "").split("\n").length
   }
 
   default(): void {
