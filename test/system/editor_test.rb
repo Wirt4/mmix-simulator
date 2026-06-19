@@ -47,4 +47,43 @@ class EditorTest < ApplicationSystemTestCase
 
     assert_no_selector ".cm-breakpoint-gutter .cm-gutterElement .cm-breakpoint-marker"
   end
+
+  test "Run and Debug button is only enabled when both a breakpoint is set and assembly succeeds" do
+    visit new_session_url
+    fill_in "Email address", with: @user.email_address
+    fill_in "Password", with: "password"
+    click_on "Sign in"
+
+    visit mmixal_program_url(@program)
+    assert_selector ".cm-editor", wait: 5
+
+    debug_button = "[data-ide-facade-target='runAndDebugButton']"
+
+    # No breakpoint, not assembled -> hidden.
+    assert_selector "#{debug_button}[hidden]", visible: :all
+
+    # Assembly succeeds but still no breakpoint -> remains hidden.
+    click_on "Assemble"
+    assert_selector "[data-ide-facade-target='runButton']:not([disabled])", wait: 5
+    assert_selector "#{debug_button}[hidden]", visible: :all
+
+    # Breakpoint set AND assembly succeeded -> visible and enabled.
+    find(".cm-breakpoint-gutter .cm-gutterElement", match: :first).click
+    assert_selector "#{debug_button}:not([hidden]):not([disabled])"
+
+    # Editing the source resets the assembled state -> visible but disabled.
+    editor = find("[data-ide-facade-target='editorContainer'] .cm-content")
+    editor.click
+    editor.send_keys [ :control, :end ], "\n\tBADOP\t\"x\""
+    assert_selector "#{debug_button}:not([hidden])[disabled]"
+
+    # Re-assembling broken source fails -> still visible but disabled.
+    click_on "Assemble"
+    assert_selector "[data-ide-facade-target='runButton'][disabled]", wait: 5
+    assert_selector "#{debug_button}:not([hidden])[disabled]"
+
+    # Removing the only breakpoint -> hidden again.
+    find(".cm-breakpoint-gutter .cm-gutterElement .cm-breakpoint-marker").click
+    assert_selector "#{debug_button}[hidden]", visible: :all
+  end
 end
