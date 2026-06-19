@@ -53,15 +53,17 @@ export default class IDEFacadeController extends Controller {
   private listingFrame!: IListing
   private registers!: IRegistersPanel
   private arguments!: IArguments
-  private _assembled = false
-  private _breakpointCount = 0
+  private _hasBreakpoint = false
 
   connect(): void {
     this.outputPanel = new OutputPanel(this.outputTarget)
     this.inputFrame = new Input(
       this.editorContainerTarget,
       this.textareaTarget,
-      (count) => { this.onBreakpointsChanged(count) }
+      (hasBreakpoints) => {
+        this._hasBreakpoint = hasBreakpoints
+        this._updateRunAndDebugButton()
+      }
     )
     this.listingFrame = new Listing(this.listingTarget, this.listingToggleTarget, this.panelTarget)
     this.arguments = new Arguments(this.argumentsTarget, this.argumentsButtonTarget)
@@ -95,10 +97,9 @@ export default class IDEFacadeController extends Controller {
     this.outputPanel.clear()
     const source = this.inputFrame.getContents()
     const result = this.simulator.assemble(source)
-    this._assembled = result
+    this.runButtonTarget.disabled = !result
     if (result) {
       this.listingFrame.setContents(this.simulator.getListing())
-      this.runButtonTarget.disabled = false
       this.arguments.show()
       // unlock listing
       this.listingFrame.unlock()
@@ -106,7 +107,6 @@ export default class IDEFacadeController extends Controller {
     } else {
       this.listingFrame.default()
       this.outputPanel.setValue(this.simulator.getStdOut())
-      this.runButtonTarget.disabled = true
     }
     this._updateRunAndDebugButton()
   }
@@ -130,20 +130,14 @@ export default class IDEFacadeController extends Controller {
     this.outputPanel.clear()
     this.outputPanel.hide()
     this.runButtonTarget.disabled = true
-    this._assembled = false
     this._updateRunAndDebugButton()
     this.arguments.clear()
     this.arguments.hide()
   }
 
-  private onBreakpointsChanged(count: number): void {
-    this._breakpointCount = count
-    this._updateRunAndDebugButton()
-  }
-
   private _updateRunAndDebugButton(): void {
-    this.runAndDebugButtonTarget.hidden = this._breakpointCount === 0
-    this.runAndDebugButtonTarget.disabled = !this._assembled || this._breakpointCount === 0
+    this.runAndDebugButtonTarget.hidden = !this._hasBreakpoint
+    this.runAndDebugButtonTarget.disabled = this.runButtonTarget.disabled
   }
 
   runUserProgram(): void {

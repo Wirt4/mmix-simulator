@@ -1,5 +1,5 @@
 import { Extension, RangeSet, StateEffect, StateField } from "@codemirror/state"
-import { EditorView, GutterMarker, gutter } from "@codemirror/view"
+import { GutterMarker, gutter } from "@codemirror/view"
 
 class BreakpointMarker extends GutterMarker {
   toDOM(): HTMLElement {
@@ -10,75 +10,45 @@ class BreakpointMarker extends GutterMarker {
   }
 }
 
-export type BreakpointChangeListener = (count: number) => void
+export function breakpointGutter(onChange?: (hasBreakpoints: boolean) => void): Extension {
+  const marker = new BreakpointMarker()
+  const toggle = StateEffect.define<number>()
+  let lastHas = false
 
-class BreakpointGutter {
-  private readonly _marker = new BreakpointMarker()
-  private readonly _toggleEffect =
-    StateEffect.define<{ pos: number; on: boolean }>()
-  private readonly _state: StateField<RangeSet<GutterMarker>>
-  private readonly _onChange?: BreakpointChangeListener
-  private _lastCount = 0
+  const field = StateField.define<RangeSet<GutterMarker>>({
+    create: () => RangeSet.empty,
+    update: (set, tr) => {
+      let next = set.map(tr.changes)
+      for (const effect of tr.effects) {
+        if (!effect.is(toggle)) continue
+        const pos = effect.value
+        let has = false
+        next.between(pos, pos, () => { has = true; return false })
+        next = has
+          ? next.update({ filter: (from) => from !== pos })
+          : next.update({ add: [marker.range(pos)] })
+      }
+      const hasAny = next.size > 0
+      if (hasAny !== lastHas) {
+        lastHas = hasAny
+        onChange?.(hasAny)
+      }
+      return next
+    },
+  })
 
-  constructor(onChange?: BreakpointChangeListener) {
-    this._onChange = onChange
-    this._state = StateField.define<RangeSet<GutterMarker>>({
-      create: () => RangeSet.empty,
-      update: (set, transaction) => {
-        let next = set.map(transaction.changes)
-        for (const effect of transaction.effects) {
-          if (effect.is(this._toggleEffect)) {
-            next = effect.value.on
-              ? next.update({ add: [this._marker.range(effect.value.pos)] })
-              : next.update({ filter: (from) => from !== effect.value.pos })
-          }
-        }
-        this._notifyIfChanged(next)
-        return next
-      },
-    })
-  }
-
-  get extension(): Extension {
-    return [
-      this._state,
-      gutter({
-        class: "cm-breakpoint-gutter",
-        markers: (view) => view.state.field(this._state),
-        initialSpacer: () => this._marker,
-        domEventHandlers: {
-          mousedown: (view, line) => {
-            view.dispatch({
-              effects: this._toggleEffect.of({
-                pos: line.from,
-                on: !this._hasBreakpointAt(view, line.from),
-              }),
-            })
-            return true
-          },
+  return [
+    field,
+    gutter({
+      class: "cm-breakpoint-gutter",
+      markers: (view) => view.state.field(field),
+      initialSpacer: () => marker,
+      domEventHandlers: {
+        mousedown: (view, line) => {
+          view.dispatch({ effects: toggle.of(line.from) })
+          return true
         },
-      }),
-    ]
-  }
-
-  private _hasBreakpointAt(view: EditorView, pos: number): boolean {
-    let found = false
-    view.state.field(this._state).between(pos, pos, () => {
-      found = true
-      return false
-    })
-    return found
-  }
-
-  private _notifyIfChanged(set: RangeSet<GutterMarker>): void {
-    let count = 0
-    set.between(0, Number.MAX_SAFE_INTEGER, () => { count++ })
-    if (count === this._lastCount) return
-    this._lastCount = count
-    this._onChange?.(count)
-  }
-}
-
-export function breakpointGutter(onChange?: BreakpointChangeListener): Extension {
-  return new BreakpointGutter(onChange).extension
+      },
+    }),
+  ]
 }
