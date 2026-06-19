@@ -3,19 +3,22 @@ import { EditorView, keymap, lineNumbers, ViewUpdate } from "@codemirror/view"
 import { defaultKeymap, indentWithTab } from "@codemirror/commands"
 import { syntaxHighlighting, HighlightStyle } from "@codemirror/language"
 import { CodemirrorAdapter } from "./codemirror_adapter"
-import { breakpointGutter } from "./breakpoint_gutter"
+import { breakpointGutter, BreakpointChangeListener } from "./breakpoint_gutter"
 
 import { mmixal, mmixalHighlightStyle } from "./mmixal_language"
 import type { IInput } from "./input.interface"
 
 export class Input implements IInput {
   private _codemirror: CodemirrorAdapter
+  private _onBreakpointChange?: BreakpointChangeListener
   public edited = true
 
   constructor(
     container: HTMLElement,
     contents: HTMLTextAreaElement,
+    onBreakpointChange?: BreakpointChangeListener,
   ) {
+    this._onBreakpointChange = onBreakpointChange
     const extensions = this._initializeConfigExtensions(contents)
     const initialContent = contents.value
     this._codemirror = new CodemirrorAdapter(container, initialContent, extensions)
@@ -39,7 +42,7 @@ export class Input implements IInput {
     // add the mmixal language rules and highlighting to the array
     extensions.push(mmixal)
     extensions.push(syntaxHighlighting(HighlightStyle.define(mmixalHighlightStyle)))
-    extensions.push(breakpointGutter)
+    extensions.push(breakpointGutter(this._onBreakpointChange))
     extensions.push(lineNumbers())
     return extensions
   }

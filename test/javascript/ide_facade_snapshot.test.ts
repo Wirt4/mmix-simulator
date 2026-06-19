@@ -86,6 +86,7 @@ function buildIDEDOM(): HTMLElement {
     <div class="editor-actions ide-layout-actions">
       <button type="button" class="btn--tactile" data-ide-facade-target="assembleButton" data-action="click->ide-facade#assembleUserProgram">Assemble</button>
       <button type="button" class="btn--tactile btn--tactile--alert" data-ide-facade-target="runButton" data-action="click->ide-facade#runUserProgram">Run</button>
+      <button type="button" hidden class="btn--tactile btn--tactile--alert" data-ide-facade-target="runAndDebugButton" data-action="click->ide-facade#runAndDebugUserProgram">Run and Debug</button>
       <input type="text" data-ide-facade-target="arguments">
       <button type="button" data-ide-facade-target="argumentsButton">Args</button>
       <input type="submit" class="btn--tactile" value="Save" data-action="click->ide-facade#beforeSave">

@@ -10,13 +10,18 @@ class BreakpointMarker extends GutterMarker {
   }
 }
 
+export type BreakpointChangeListener = (count: number) => void
+
 class BreakpointGutter {
   private readonly _marker = new BreakpointMarker()
   private readonly _toggleEffect =
     StateEffect.define<{ pos: number; on: boolean }>()
   private readonly _state: StateField<RangeSet<GutterMarker>>
+  private readonly _onChange?: BreakpointChangeListener
+  private _lastCount = 0
 
-  constructor() {
+  constructor(onChange?: BreakpointChangeListener) {
+    this._onChange = onChange
     this._state = StateField.define<RangeSet<GutterMarker>>({
       create: () => RangeSet.empty,
       update: (set, transaction) => {
@@ -28,6 +33,7 @@ class BreakpointGutter {
               : next.update({ filter: (from) => from !== effect.value.pos })
           }
         }
+        this._notifyIfChanged(next)
         return next
       },
     })
@@ -63,6 +69,16 @@ class BreakpointGutter {
     })
     return found
   }
+
+  private _notifyIfChanged(set: RangeSet<GutterMarker>): void {
+    let count = 0
+    set.between(0, Number.MAX_SAFE_INTEGER, () => { count++ })
+    if (count === this._lastCount) return
+    this._lastCount = count
+    this._onChange?.(count)
+  }
 }
 
-export const breakpointGutter: Extension = new BreakpointGutter().extension
+export function breakpointGutter(onChange?: BreakpointChangeListener): Extension {
+  return new BreakpointGutter(onChange).extension
+}

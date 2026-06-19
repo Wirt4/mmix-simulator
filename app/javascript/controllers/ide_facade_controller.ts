@@ -22,6 +22,7 @@ export default class IDEFacadeController extends Controller {
     "textarea",
     "output",
     "runButton",
+    "runAndDebugButton",
     "specialContainer",
     "generalContainer",
     "groupSelect",
@@ -36,6 +37,7 @@ export default class IDEFacadeController extends Controller {
   declare textareaTarget: HTMLTextAreaElement
   declare outputTarget: HTMLElement
   declare runButtonTarget: HTMLButtonElement
+  declare runAndDebugButtonTarget: HTMLButtonElement
   declare specialContainerTarget: HTMLElement
   declare generalContainerTarget: HTMLElement
   declare groupSelectTarget: HTMLSelectElement
@@ -51,12 +53,15 @@ export default class IDEFacadeController extends Controller {
   private listingFrame!: IListing
   private registers!: IRegistersPanel
   private arguments!: IArguments
+  private _assembled = false
+  private _breakpointCount = 0
 
   connect(): void {
     this.outputPanel = new OutputPanel(this.outputTarget)
     this.inputFrame = new Input(
       this.editorContainerTarget,
-      this.textareaTarget
+      this.textareaTarget,
+      (count) => { this.onBreakpointsChanged(count) }
     )
     this.listingFrame = new Listing(this.listingTarget, this.listingToggleTarget, this.panelTarget)
     this.arguments = new Arguments(this.argumentsTarget, this.argumentsButtonTarget)
@@ -90,6 +95,7 @@ export default class IDEFacadeController extends Controller {
     this.outputPanel.clear()
     const source = this.inputFrame.getContents()
     const result = this.simulator.assemble(source)
+    this._assembled = result
     if (result) {
       this.listingFrame.setContents(this.simulator.getListing())
       this.runButtonTarget.disabled = false
@@ -102,6 +108,7 @@ export default class IDEFacadeController extends Controller {
       this.outputPanel.setValue(this.simulator.getStdOut())
       this.runButtonTarget.disabled = true
     }
+    this._updateRunAndDebugButton()
   }
 
   toggleListingPanel(): void {
@@ -123,8 +130,20 @@ export default class IDEFacadeController extends Controller {
     this.outputPanel.clear()
     this.outputPanel.hide()
     this.runButtonTarget.disabled = true
+    this._assembled = false
+    this._updateRunAndDebugButton()
     this.arguments.clear()
     this.arguments.hide()
+  }
+
+  private onBreakpointsChanged(count: number): void {
+    this._breakpointCount = count
+    this._updateRunAndDebugButton()
+  }
+
+  private _updateRunAndDebugButton(): void {
+    this.runAndDebugButtonTarget.hidden = this._breakpointCount === 0
+    this.runAndDebugButtonTarget.disabled = !this._assembled || this._breakpointCount === 0
   }
 
   runUserProgram(): void {
@@ -133,6 +152,10 @@ export default class IDEFacadeController extends Controller {
     this.outputPanel.show()
     this.registers.render(this.simulator.getRegisters(EnumRegisterType.SPECIAL), this.simulator.getRegisters(EnumRegisterType.GENERAL))
     this.registers.openAll()
+  }
+
+  runAndDebugUserProgram(): void {
+    // stub: debug runtime not yet wired up
   }
 
   toggleSubpanel(event: Event): void {
