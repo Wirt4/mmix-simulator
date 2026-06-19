@@ -25,6 +25,17 @@ export class CodemirrorAdapter {
         ".cm-lineNumbers .cm-gutterElement": {
           color: "var(--syntax-comment)",
         },
+        ".cm-breakpoint-gutter": {
+          width: "1.2em",
+          cursor: "pointer",
+        },
+        ".cm-breakpoint-marker": {
+          color: "var(--red)",
+          display: "inline-block",
+          width: "100%",
+          textAlign: "center",
+          lineHeight: "1",
+        },
       })
     ]
     //create a state from initial content and extensions

@@ -3,6 +3,7 @@ import { EditorView, keymap, lineNumbers, ViewUpdate } from "@codemirror/view"
 import { defaultKeymap, indentWithTab } from "@codemirror/commands"
 import { syntaxHighlighting, HighlightStyle } from "@codemirror/language"
 import { CodemirrorAdapter } from "./codemirror_adapter"
+import { breakpointGutter } from "./breakpoint_gutter"
 
 import { mmixal, mmixalHighlightStyle } from "./mmixal_language"
 import type { IInput } from "./input.interface"
@@ -35,9 +36,10 @@ export class Input implements IInput {
     //push a locked state to array
     extensions.push(this._hookUpListener(source))
     extensions.push(keymap.of([...defaultKeymap, indentWithTab]))
-    // add the mmixal language rules and highlighting to the array 
+    // add the mmixal language rules and highlighting to the array
     extensions.push(mmixal)
     extensions.push(syntaxHighlighting(HighlightStyle.define(mmixalHighlightStyle)))
+    extensions.push(breakpointGutter)
     extensions.push(lineNumbers())
     return extensions
   }
