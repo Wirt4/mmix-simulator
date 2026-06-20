@@ -105,6 +105,10 @@ export default class Simulator implements ISimulator {
     return this._moduleAdapter.generalRegisterCount
   }
 
+  get specialRegisterCount(): number {
+    return this._moduleAdapter.specialRegisterCount
+  }
+
   getRegisters(type: EnumRegisterType): IRegisterData[] {
     switch (type) {
       case EnumRegisterType.GENERAL:
@@ -125,18 +129,17 @@ export default class Simulator implements ISimulator {
   }
 
   private allSpecialRegisters(): IRegisterData[] {
+    const count = this._moduleAdapter.specialRegisterCount
     const regKeys = Array.from(this._specialRegisterMap.keys())
-    const result = new Array<IRegisterData>(regKeys.length)
-    for (let i = 0; i < regKeys.length; i++) {
+    const result = new Array<IRegisterData>(count)
+    for (let i = 0; i < count; i++) {
       const regName = regKeys[i]
-      //get the register value
       const data = this._specialRegisterMap.get(regName)
       if (!data) continue
       const ndx = data.code
       const description = data.description
       const id = `$${regName}`
       const value = this._moduleAdapter.getSpecialRegisterValue(ndx)
-      //    set it in the return array
       result[i] = { id, value, description }
     }
     return result

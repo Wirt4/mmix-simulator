@@ -42,10 +42,6 @@ describe("Module Adapter", () => {
       _get_listing_size: vi.fn(),
       _get_args_pointer: vi.fn(),
       _arg_size: vi.fn(),
-      _get_program_counter: vi.fn(),
-      _get_breakpoint: vi.fn(),
-      _update_breakpoint_count: vi.fn(),
-      _set_breakpoint: vi.fn()
     }
   })
 
@@ -344,5 +340,11 @@ describe("Module Adapter", () => {
     expect(heapSpy.mock.calls.length).toEqual(0)
     //assert the module has been called
     expect(initSpy).toHaveBeenCalledWith(0)
+  })
+
+  it("specialRegisterCount returns the value from _special_register_count", () => {
+    vi.spyOn(mockModule, '_special_register_count').mockReturnValue(32)
+    const adapter = new ModuleAdapter(mockModule)
+    expect(adapter.specialRegisterCount).toBe(32)
   })
 })

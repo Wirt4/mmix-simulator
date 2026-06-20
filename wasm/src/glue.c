@@ -151,35 +151,10 @@ int arg_size(void){
 	return ARG_SIZE;
 }
 
-unsigned int get_program_counter(int partition){
-	return get_instruction_pointer(partition);
+int set_execution_breakpoint(unsigned int high, unsigned int low){
+	return set_exec_breakpoint(high, low);
 }
 
-
-unsigned int get_breakpoint(int ndx, int partition){
-	//assert ndx must non-negative
-	if (!ASSERT( 0 <= ndx)){
-		return 0;
-	}
-	// return call from simulator
-	return get_breakpoint_data(ndx, partition);
-}
-
-int update_breakpoint_count(int count){
-	// assert count is non-negative
-	ASSERT(count >=0);
-	if (!ASSERT(0 <= count)){
-		return -1;
-	}
-	// call simulator
-	return set_breakpoint_count(count);
-}
-
-int set_breakpoint(int ndx, unsigned int high, unsigned int low){
-	//assert index is non-negative
-	if (!ASSERT( 0 <= ndx)){
-		return 0;
-	}
-	//call simulator
-	return set_breakpoint(ndx, high, low);
+int breakpoint_hit(void){
+	return sim_breakpoint_hit();
 }

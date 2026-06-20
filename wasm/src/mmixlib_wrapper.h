@@ -146,11 +146,24 @@ int get_local_ring_mask(void);
 void mmix_commandline_w(int argc, char *argv[]);
 
 /**
- * Returns one 32-bit half of the instruction pointer (address of the next
- * instruction to be fetched).
- * inputs: partition: 0 for the high 32 bits, 1 for the low 32 bits
- * preconditions: simulator is initialized with a valid program loaded
+ * Looks up the mem_tetra at address (high:low), allocating a chunk if needed.
+ * Returns NULL on allocation failure.
  */
-unsigned int get_inst_ptr(int partition);
+mem_tetra *mem_find_w(unsigned int high, unsigned int low);
+
+/**
+ * Sets the execution breakpoint flag (exec_bit) on the given mem_tetra.
+ */
+void set_exec_breakpoint_w(mem_tetra *mt);
+
+/**
+ * Returns 1 if the global breakpoint flag has exec_bit set, 0 otherwise.
+ */
+int get_breakpoint_w(void);
+
+/**
+ * Clears the global breakpoint flag.
+ */
+void clear_breakpoint_w(void);
 
 #endif

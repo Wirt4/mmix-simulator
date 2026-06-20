@@ -33,10 +33,8 @@ interface WasmModule {
   _get_listing_size(): number;
   _is_halted(): number;
   _arg_size(): number;
-  _get_program_counter(_0: number): number;
-  _get_breakpoint(_0: number, _1: number): number;
-  _update_breakpoint_count(_0: number): number;
-  _set_breakpoint(_0: number, _1: number, _2: number): number;
+  _set_execution_breakpoint(_0: number, _1: number): number;
+  _breakpoint_hit(): number;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports;

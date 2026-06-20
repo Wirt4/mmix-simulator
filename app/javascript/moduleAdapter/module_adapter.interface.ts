@@ -20,6 +20,8 @@ export interface IModuleAdapter {
   getSpecialRegisterValue(index: number): string
   /** returns number of general registers*/
   generalRegisterCount: number
+  /** returns number of special registers */
+  specialRegisterCount: number
   /** returns string representation of assembled code */
   getListing(): string
 }

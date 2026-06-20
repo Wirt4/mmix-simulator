@@ -127,43 +127,16 @@ WASM_EXPORT unsigned char* get_args_pointer(void);
 */
 WASM_EXPORT int arg_size(void);
 
-/*
- * Returns the address of the next instruction
- * @param partition: 0 to access higher tetra, 1 to access lower tetra
- * @return unsigned int containing 32 bits of data, 0 on failure
+/**
+ * Sets an execution breakpoint at address (high:low).
+ * Must be called after mmix_initialize_simulator.
+ * @return 0 on success, non-zero on failure.
  */
-WASM_EXPORT unsigned int get_program_counter(int partition);
+WASM_EXPORT int set_execution_breakpoint(unsigned int high, unsigned int low);
 
-/*
- * Returns a partition of the address stored at breakpoints[ndx]
- * @param ndx: stored breakpoint to access
- * @param partition: 0 to access higher tetra, 1 to access lower tetra
- * @pre ndx is non-negative
- * @pre ndx is less than breakpoint count
- * @return unsigned int containing 32 bits of data, 0 on failure
+/**
+ * Returns 1 if an execution breakpoint was hit during the last mmix_perform_instructions call.
  */
-WASM_EXPORT unsigned int get_breakpoint(int ndx, int partition);
-
-/*
- * Updates state of breakpoint buffer
- * @param count: the new size of of the breakpoint buffer
- * @pre count is non-negative
- * @pre count <= maximum allowable breakpoints (C config)
- * @post size of allocated breakpoints is adjusted
- * @return 0 on success, -1 on failure
- */
-WASM_EXPORT int update_breakpoint_count(int count);
-
-/*
- * Stores an octa in the breakpoint buffer
- * @param ndx: the position on the buffer to write to
- * @param high: the upper tetra to write
- * @param low: the lower tetra to write
- * @return 0 on success: -1 on failure
- * @pre: ndx is non-negative
- * @pre: ndx is less than current breakpoint count
- * @post the full octa is written to the breakpoint buffer
- * */
-WASM_EXPORT int set_breakpoint(int ndx, unsigned int high, unsigned int low);
+WASM_EXPORT int breakpoint_hit(void);
 
 #endif /*GLUE_H */

@@ -341,6 +341,32 @@ static void test_commandline_args_different_data(void){
     TEST_ASSERT_EQUAL_STRING(expected, result);
 }
 
+static void test_execution_breakpoint_pauses_before_halt(void){
+    // load src code and assemble simulator 
+    int len = (int)strlen(add_two_numbers_source);
+    memcpy(get_source_code_pointer(), add_two_numbers_source, len + 1);
+    assemble_mmixal(len);
+    mmix_initialize_simulator(0);
+
+    unsigned int address_high = 0;
+    // set breakpoint at  "ADD $0,$1,$2" 
+    // (#108 is the address of the assembled code, per listing)
+    unsigned int address_low = 0x108;
+    int set_result = set_execution_breakpoint(address_high, address_low);
+    // NOTE:: Knuth breakpoints are a break-after primitive, as opposed to most IDE conventions
+    TEST_ASSERT_EQUAL_INT(0, set_result);
+
+    mmix_perform_instructions(50);
+
+    TEST_ASSERT_EQUAL_INT_MESSAGE(1, breakpoint_hit(),
+        "execution should have paused at the breakpoint");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(0, is_halted(),
+        "HALT must not have executed; pause should precede it");
+    TEST_ASSERT_EQUAL_UINT(42, get_register_data(0, 0, 1));
+
+    mmix_finalize_simulator();
+}
+
 static void test_run_twice_without_reassembling(void){
     // Assemble once
     int len = (int)strlen(one_arg_program_source);
@@ -392,6 +418,7 @@ int main(void) {
     RUN_TEST(test_commandline_args);
     RUN_TEST(test_commandline_one_arg);
     RUN_TEST(test_commandline_args_different_data);
+    RUN_TEST(test_execution_breakpoint_pauses_before_halt);
     RUN_TEST(test_run_twice_without_reassembling);
     return UNITY_END();
 }

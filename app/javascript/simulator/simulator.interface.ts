@@ -13,6 +13,8 @@ export interface ISimulator {
   specialRegisters: string[]
   /** The total number of general-purpose registers (0–255). */
   generalRegisterCount: number
+  /** The total number of MMIX special registers. */
+  specialRegisterCount: number
   /** Returns the current hex value of the given register. */
   getRegisterValue(register: string): string
   /** Returns a brief description of the given register */

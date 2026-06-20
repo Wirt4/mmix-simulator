@@ -22,6 +22,7 @@ function createMockAdapter(overrides: Partial<IModuleAdapter> = {}): IModuleAdap
     getGeneralRegisterValue: vi.fn().mockReturnValue("0x0000000000000000"),
     getSpecialRegisterValue: vi.fn().mockReturnValue("0x0000000000000000"),
     generalRegisterCount: 256,
+    specialRegisterCount: 32,
     getListing: vi.fn().mockReturnValue(""),
     ...overrides,
   }
