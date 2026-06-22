@@ -73,6 +73,20 @@ static const char *hello_world_source =
     "\tTRAP\t0,Fputs,StdOut\n"
     "\tTRAP\t0,Halt,0\n";
 
+// Lines 6, 7 emit at #100, #104; line 10 emits at #200 after a second LOC.
+// Exercises multiple LOC directives, blank lines, and non-contiguous addresses.
+static const char *multi_loc_source =
+    "\tLOC\tData_Segment\n"
+    "\tGREG\t@\n"
+    "Greeting\tBYTE\t\"Hi\",10,0\n"
+    "\n"
+    "\tLOC\t#100\n"
+    "Main\tLDA\t$255,Greeting\n"
+    "\tTRAP\t0,Fputs,StdOut\n"
+    "\n"
+    "\tLOC\t#200\n"
+    "\tTRAP\t0,Halt,0\n";
+
 static const char *expected_output = "Hello world!\n";
 static const char *expected_stderr ="Error message!\n";
 
@@ -367,6 +381,49 @@ static void test_execution_breakpoint_pauses_before_halt(void){
     mmix_finalize_simulator();
 }
 
+static void test_address_map_for_hello_world(void){
+    int len = (int)strlen(hello_world_source);
+    memcpy(get_source_code_pointer(), hello_world_source, len + 1);
+    int assembled = assemble_mmixal(len);
+    TEST_ASSERT_EQUAL_INT(0, assembled);
+
+    TEST_ASSERT_EQUAL_INT_MESSAGE(1, address_map_has_line(6), "line 6 should be mapped");
+    TEST_ASSERT_EQUAL_UINT(0,     get_address_for_line(6, 0));
+    TEST_ASSERT_EQUAL_UINT(0x100, get_address_for_line(6, 1));
+
+    TEST_ASSERT_EQUAL_INT_MESSAGE(1, address_map_has_line(7), "line 7 should be mapped");
+    TEST_ASSERT_EQUAL_UINT(0,     get_address_for_line(7, 0));
+    TEST_ASSERT_EQUAL_UINT(0x104, get_address_for_line(7, 1));
+
+    TEST_ASSERT_EQUAL_INT_MESSAGE(1, address_map_has_line(8), "line 8 should be mapped");
+    TEST_ASSERT_EQUAL_UINT(0,     get_address_for_line(8, 0));
+    TEST_ASSERT_EQUAL_UINT(0x108, get_address_for_line(8, 1));
+}
+
+static void test_address_map_with_multiple_loc_directives(void){
+    int len = (int)strlen(multi_loc_source);
+    memcpy(get_source_code_pointer(), multi_loc_source, len + 1);
+    int assembled = assemble_mmixal(len);
+    TEST_ASSERT_EQUAL_INT(0, assembled);
+
+    TEST_ASSERT_EQUAL_INT_MESSAGE(1, address_map_has_line(6), "line 6 should be mapped");
+    TEST_ASSERT_EQUAL_UINT(0,     get_address_for_line(6, 0));
+    TEST_ASSERT_EQUAL_UINT(0x100, get_address_for_line(6, 1));
+
+    TEST_ASSERT_EQUAL_INT_MESSAGE(1, address_map_has_line(7), "line 7 should be mapped");
+    TEST_ASSERT_EQUAL_UINT(0,     get_address_for_line(7, 0));
+    TEST_ASSERT_EQUAL_UINT(0x104, get_address_for_line(7, 1));
+
+    TEST_ASSERT_EQUAL_INT_MESSAGE(1, address_map_has_line(10), "line 10 should be mapped");
+    TEST_ASSERT_EQUAL_UINT(0,     get_address_for_line(10, 0));
+    TEST_ASSERT_EQUAL_UINT(0x200, get_address_for_line(10, 1));
+
+    TEST_ASSERT_EQUAL_INT_MESSAGE(0, address_map_has_line(5),
+        "line 5 (LOC directive) should not be mapped");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(0, address_map_has_line(8),
+        "line 8 (blank) should not be mapped");
+}
+
 static void test_run_twice_without_reassembling(void){
     // Assemble once
     int len = (int)strlen(one_arg_program_source);
@@ -419,6 +476,8 @@ int main(void) {
     RUN_TEST(test_commandline_one_arg);
     RUN_TEST(test_commandline_args_different_data);
     RUN_TEST(test_execution_breakpoint_pauses_before_halt);
+    RUN_TEST(test_address_map_for_hello_world);
+    RUN_TEST(test_address_map_with_multiple_loc_directives);
     RUN_TEST(test_run_twice_without_reassembling);
     return UNITY_END();
 }

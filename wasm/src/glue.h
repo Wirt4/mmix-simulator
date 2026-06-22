@@ -139,4 +139,18 @@ WASM_EXPORT int set_execution_breakpoint(unsigned int high, unsigned int low);
  */
 WASM_EXPORT int breakpoint_hit(void);
 
+/**
+ * Returns 1 if source @p line emitted an instruction during the last successful assembly,
+ * 0 otherwise (LOC directives, blank lines, comment-only lines, or lines outside the source).
+ * Callers should probe with this before calling get_address_for_line().
+ */
+WASM_EXPORT int address_map_has_line(unsigned int line);
+
+/**
+ * Returns one tetra (32 bits) of the address that source @p line was assembled to.
+ * @param partition 0 = high tetra, 1 = low tetra (matches get_register_data convention).
+ * @return the requested tetra, or 0 if the line is not mapped — probe with address_map_has_line first.
+ */
+WASM_EXPORT unsigned int get_address_for_line(unsigned int line, int partition);
+
 #endif /*GLUE_H */

@@ -61,7 +61,7 @@ MMIXLIB_HDRS = $(MMIXLIB_BUILD)/abstime.h $(MMIXLIB_BUILD)/mmixlib.h \
                $(MMIXLIB_BUILD)/libname.h $(MMIXLIB_BUILD)/libbase.h \
                $(LIBH_FILES) $(MMIXLIB_BUILD)/libconfig.h
 
-.PHONY: all test wasm analyze clean
+.PHONY: all test test_unit_assembler test_integration wasm analyze clean
 
 all: test
 
@@ -134,7 +134,7 @@ src/glue.o: src/glue.c src/glue.h $(MMIXLIB_HDRS)
 
 # --- Assembler stub ---
 
-src/assembler.o: src/assembler.c src/assembler.h
+src/assembler.o: src/assembler.c src/assembler.h $(MMIXLIB_BUILD)/mmixlib.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 src/simulator.o: src/simulator.c src/simulator.h $(MMIXLIB_BUILD)/mmixlib.h
@@ -146,7 +146,7 @@ src/assert.o: src/assert.c src/assert.h
 src/io_utils.o: src/io_utils.c src/io_utils.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-src/mmixlib_wrapper.o: src/mmixlib_wrapper.c src/mmixlib_wrapper.h
+src/mmixlib_wrapper.o: src/mmixlib_wrapper.c src/mmixlib_wrapper.h $(MMIXLIB_BUILD)/mmixlib.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 src/type_utils.o: src/type_utils.c src/type_utils.h $(MMIXLIB_BUILD)/mmixlib.h
@@ -154,7 +154,9 @@ src/type_utils.o: src/type_utils.c src/type_utils.h $(MMIXLIB_BUILD)/mmixlib.h
 
 # --- Tests ---
 
-test: $(SRC_OBJS) $(LIBMMIX)
+test: test_unit_assembler test_integration
+
+test_integration: $(SRC_OBJS) $(LIBMMIX)
 	$(CC) $(CFLAGS) $(UNITY_INC) -Isrc/ \
 		test/integration/test_glue_real.c \
 		$(UNITY_SRC) \
@@ -162,6 +164,31 @@ test: $(SRC_OBJS) $(LIBMMIX)
 		-L$(MMIXLIB_BUILD) -lmmix \
 		-o test_integration
 	./test_integration
+
+# CMock-generated mocks. Regenerated from src/ headers whenever they change.
+CMOCK_DIR = vendor/cmock
+MOCKS_DIR = test/unit/mocks
+MOCK_HEADERS = io_utils mmixlib_wrapper
+MOCK_SRCS = $(addprefix $(MOCKS_DIR)/mock_,$(addsuffix .c,$(MOCK_HEADERS)))
+MOCK_HDRS = $(addprefix $(MOCKS_DIR)/mock_,$(addsuffix .h,$(MOCK_HEADERS)))
+
+$(MOCKS_DIR)/mock_%.c $(MOCKS_DIR)/mock_%.h: src/%.h $(CMOCK_DIR)/scripts/create_mock.rb
+	CMOCK_DIR="$(CURDIR)/$(CMOCK_DIR)" MOCK_OUT="$(CURDIR)/$(MOCKS_DIR)" \
+		ruby $(CMOCK_DIR)/scripts/create_mock.rb $<
+
+# Unit tests: link real assembler.c against CMock-generated mocks for io_utils
+# and mmixlib_wrapper. Red-phase test_assembler.c will fail to link until
+# address_map_buffer/address_map_size are implemented.
+test_unit_assembler: src/assembler.o src/assert.o $(MMIXLIB_HDRS) $(MOCK_SRCS) $(MOCK_HDRS)
+	$(CC) $(CFLAGS_VENDOR) $(UNITY_INC) -Ivendor/cmock/src \
+		-I$(MOCKS_DIR) \
+		test/unit/test_assembler.c \
+		$(MOCK_SRCS) \
+		$(UNITY_SRC) \
+		vendor/cmock/src/cmock.c \
+		src/assembler.o src/assert.o \
+		-o test_unit_assembler
+	./test_unit_assembler
 
 # --- WASM target ---
 

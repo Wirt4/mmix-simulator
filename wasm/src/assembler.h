@@ -26,4 +26,10 @@ unsigned char* listing_buffer(void);
 
 /** Returns the size in bytes of the last listing, or (size_t)-1 if no assembly has run. */
 size_t listing_size(void);
+
+/** Returns a pointer to the address map buffer populated by a successful assembly. */
+unsigned char* address_map_buffer(void);
+
+/** Returns the size in bytes of the last address map, or (size_t)-1 if no assembly has run. */
+size_t address_map_size(void);
 #endif

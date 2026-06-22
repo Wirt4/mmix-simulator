@@ -18,6 +18,8 @@
 static unsigned char g_source_code_pointer[MAX_SRC_SIZE];
 static unsigned char g_listing_pointer[MAX_LISTING_SIZE];
 static size_t g_listing_size = (size_t)-1;
+static unsigned char g_address_map_pointer[MAX_SRC_SIZE];
+static size_t g_address_map_size = (size_t)-1;
 
 static int setup_assembly(size_t src_len){
 	if (!ASSERT(src_len <= (size_t)(MAX_SRC_SIZE))){
@@ -81,4 +83,13 @@ size_t listing_size(void){
 unsigned char* listing_buffer(void){
 	ASSERT(g_listing_pointer != NULL);
 	return g_listing_pointer;
+}
+
+size_t address_map_size(void){
+	return g_address_map_size;
+}
+
+unsigned char* address_map_buffer(void){
+	ASSERT(g_address_map_pointer != NULL);
+	return g_address_map_pointer;
 }
