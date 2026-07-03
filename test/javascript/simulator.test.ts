@@ -405,7 +405,7 @@ describe("Simulator breakpoint tests", () => {
     simulator.assemble("USER CODE")
     const result = simulator.runUserProgram([])
 
-    expect(result).toEqual({ status: "halted" })
+    expect(result).toEqual(0)
   })
 
   it("runUserProgram returns { status: 'paused', atLine } when breakpointHit returns true", () => {
@@ -420,7 +420,7 @@ describe("Simulator breakpoint tests", () => {
     simulator.setBreakpoints([6])
     const result = simulator.runUserProgram([])
 
-    expect(result).toEqual({ status: "paused", atLine: 6 })
+    expect(result).toEqual(6)
   })
 
   it("runUserProgram does not finalize when paused at a breakpoint", () => {
@@ -501,6 +501,6 @@ describe("Simulator breakpoint tests", () => {
     const result = simulator.resume()
 
     expect(mockAdapter.finalizeMMIX).toHaveBeenCalledTimes(1)
-    expect(result).toEqual({ status: "halted" })
+    expect(result).toEqual(0)
   })
 })

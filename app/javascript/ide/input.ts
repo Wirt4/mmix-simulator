@@ -7,6 +7,7 @@ import { breakpointGutter } from "./breakpoint_gutter"
 
 import { mmixal, mmixalHighlightStyle } from "./mmixal_language"
 import type { IInput } from "./input.interface"
+import type { IDebugSession } from "./debug_session.interface"
 
 export class Input implements IInput {
   private _codemirror: CodemirrorAdapter
@@ -15,9 +16,10 @@ export class Input implements IInput {
   constructor(
     container: HTMLElement,
     contents: HTMLTextAreaElement,
-    onBreakpointChange?: (lines: number[]) => void,
+    debugSession?: IDebugSession,
   ) {
-    const extensions = this._initializeConfigExtensions(contents, onBreakpointChange)
+    // Initialize codemirror then
+    const extensions = this._initializeConfigExtensions(contents, debugSession)
     const initialContent = contents.value
     this._codemirror = new CodemirrorAdapter(container, initialContent, extensions)
   }
@@ -30,11 +32,12 @@ export class Input implements IInput {
     this._codemirror.unlock()
   }
   /**
-  * Returns an array of Extentions set with a listener to source
+  * Returns an array of Extensions set with a listener to source
   */
+  //alternatively... could set this as a public static method and update the constructor to take an extensions array directly
   private _initializeConfigExtensions(
     source: HTMLTextAreaElement,
-    onBreakpointChange?: (lines: number[]) => void,
+    debugSession?: IDebugSession,
   ): Extension[] {
     const extensions: Extension[] = []
     //push a locked state to array
@@ -43,7 +46,7 @@ export class Input implements IInput {
     // add the mmixal language rules and highlighting to the array
     extensions.push(mmixal)
     extensions.push(syntaxHighlighting(HighlightStyle.define(mmixalHighlightStyle)))
-    extensions.push(breakpointGutter(onBreakpointChange))
+    extensions.push(breakpointGutter(debugSession && ((lines) => { debugSession.breakpoints = lines })))
     extensions.push(lineNumbers())
     return extensions
   }

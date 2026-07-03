@@ -1,5 +1,4 @@
 import { EnumRegisterType, IRegisterData } from "../register_types.interface"
-import { RunResult } from "./run_result"
 
 /** Controls the MMIX simulator lifecycle: assembling, running, debugging, and inspecting register state. */
 export interface ISimulator {
@@ -8,9 +7,9 @@ export interface ISimulator {
   /** Arms execution breakpoints at the given source lines. Replaces the prior set; pass [] to clear. */
   setBreakpoints(lines: number[]): void
   /** Executes the assembled program until it halts, times out, or hits a breakpoint. */
-  runUserProgram(argv: string[]): RunResult
+  runUserProgram(argv: string[]): number
   /** Continues execution after a paused result. No-op if the simulator is not paused. */
-  resume(): RunResult
+  resume(): number
   /** returns contents of both stdOut and stdErr*/
   getStdOut(): string
   /** Returns the assembly listing for the most recent successful assembly. */

@@ -1,5 +1,4 @@
 import { ISimulator } from './simulator.interface'
-import { RunResult } from './run_result'
 import { IModuleAdapter } from './../moduleAdapter/module_adapter.interface'
 import { EnumRegisterType, IRegisterData } from "../register_types.interface"
 interface IRegisterInfo {
@@ -19,7 +18,7 @@ export default class Simulator implements ISimulator {
   private _successfulAssembly: boolean
   private _out: string
   private _armedBreakpoints: IArmedBreakpoint[]
-  private _lastResult: RunResult
+  private _lastResult: number
   private readonly _timeoutMs = 800
   private readonly _instructionBatch = 1000
 
@@ -27,7 +26,7 @@ export default class Simulator implements ISimulator {
     this._successfulAssembly = false
     this._moduleAdapter = moduleAdapter
     this._armedBreakpoints = []
-    this._lastResult = { status: "halted" }
+    this._lastResult = 0; // 0 means halted
     this._specialRegisterMap = new Map([
       ["rA", { code: 21, description: "arithmetic status register" }],
       ["rB", { code: 0, description: "bootstrap register (trip)" }],
@@ -77,7 +76,7 @@ export default class Simulator implements ISimulator {
     }))
   }
 
-  public runUserProgram(argv: string[]): RunResult {
+  public runUserProgram(argv: string[]): number {
     if (!this._successfulAssembly) {
       return this._lastResult
     }
@@ -86,8 +85,9 @@ export default class Simulator implements ISimulator {
     return this._lastResult
   }
 
-  public resume(): RunResult {
-    if (this._lastResult.status !== "paused") {
+  public resume(): number {
+    //if the status is not paused at a line
+    if (this._lastResult <= 0) {
       return this._lastResult
     }
     // the C side keeps the breakpoint set and clears the hit flag on re-entry,
@@ -177,12 +177,13 @@ export default class Simulator implements ISimulator {
     return result
   }
 
-  private simulateWithTimeout(timeout: number, instructionsPerInterval: number, argv: string[]): RunResult {
+  private simulateWithTimeout(timeout: number, instructionsPerInterval: number, argv: string[]): number {
     if (!this.areActionableInputs(timeout, instructionsPerInterval)) {
       if (!this.areValidInputs(timeout, instructionsPerInterval)) {
         this.logTimeInstructionErrors(timeout, instructionsPerInterval)
       }
-      return { status: "halted" }
+      //is this correct? Intuition says timeout here, which would be -1
+      return 0;
     }
 
     try {
@@ -203,33 +204,34 @@ export default class Simulator implements ISimulator {
    * exceeds the deadline. Output accumulates in _out; the simulator is finalized
    * unless it pauses (resume() re-enters this loop).
    */
-  private runBatchLoop(timeout: number, instructionsPerInterval: number): RunResult {
+  private runBatchLoop(timeout: number, instructionsPerInterval: number): number {
     const deadline = Date.now() + timeout
     const programOutputs = new Outputs()
-    let result: RunResult = { status: "timeout" }
+    let result = -1 // timeout 
 
     while (Date.now() < deadline) {
       if (this._moduleAdapter.isHalted()) {
-        result = { status: "halted" }
+        result = 0
         break
       }
       this._moduleAdapter.performInstructions(instructionsPerInterval)
       programOutputs.append(this._moduleAdapter.getStdErr(), this._moduleAdapter.getStdOut())
       if (this._moduleAdapter.breakpointHit()) {
-        result = { status: "paused", atLine: this.pausedLine() }
+        result = this.pausedLine()
         break
       }
     }
 
     this._out += programOutputs.toString()
 
-    if (result.status === "paused") {
+    //return if result is paused
+    if (result > 0) {
       return result
     }
 
     this._moduleAdapter.finalizeMMIX()
 
-    if (result.status === "timeout") {
+    if (result < 0) {
       this._out += `ERROR: simulator timeout. Programs may not exceed ${timeout.toString()} ms of clock time\n`
     }
 
