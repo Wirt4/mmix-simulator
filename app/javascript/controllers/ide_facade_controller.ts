@@ -1,5 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { ISimulator } from "../simulator/simulator.interface"
+// basic object for getting the result of a run from the simulator: halted, paused or timedout
+import { RunResult } from "../simulator/run_result"
 import Simulator from "../simulator/simulator"
 import moduleAdapterFactory from "../moduleAdapter/factory"
 import { IOutputPanel } from "../ide/output_panel.interface"
@@ -23,6 +25,7 @@ export default class IDEFacadeController extends Controller {
     "output",
     "runButton",
     "runAndDebugButton",
+    "continueButton",
     "specialContainer",
     "generalContainer",
     "groupSelect",
@@ -38,6 +41,7 @@ export default class IDEFacadeController extends Controller {
   declare outputTarget: HTMLElement
   declare runButtonTarget: HTMLButtonElement
   declare runAndDebugButtonTarget: HTMLButtonElement
+  declare continueButtonTarget: HTMLButtonElement
   declare specialContainerTarget: HTMLElement
   declare generalContainerTarget: HTMLElement
   declare groupSelectTarget: HTMLSelectElement
@@ -53,15 +57,17 @@ export default class IDEFacadeController extends Controller {
   private listingFrame!: IListing
   private registers!: IRegistersPanel
   private arguments!: IArguments
-  private _hasBreakpoint = false
+  // source lines with a gutter marker; markers on lines that emit no code are
+  // tolerated — they arm nothing that can be hit, so the run simply never pauses there
+  private _armedLines: number[] = []
 
   connect(): void {
     this.outputPanel = new OutputPanel(this.outputTarget)
     this.inputFrame = new Input(
       this.editorContainerTarget,
       this.textareaTarget,
-      (hasBreakpoints) => {
-        this._hasBreakpoint = hasBreakpoints
+      (lines) => {
+        this._armedLines = lines
         this._updateRunAndDebugButton()
       }
     )
@@ -130,26 +136,57 @@ export default class IDEFacadeController extends Controller {
     this.outputPanel.clear()
     this.outputPanel.hide()
     this.runButtonTarget.disabled = true
+    this.continueButtonTarget.hidden = true
     this._updateRunAndDebugButton()
     this.arguments.clear()
     this.arguments.hide()
   }
 
   private _updateRunAndDebugButton(): void {
-    this.runAndDebugButtonTarget.hidden = !this._hasBreakpoint
+    this.runAndDebugButtonTarget.hidden = this._armedLines.length === 0
     this.runAndDebugButtonTarget.disabled = this.runButtonTarget.disabled
   }
 
   runUserProgram(): void {
-    this.simulator.runUserProgram(this.arguments.getContents())
-    this.outputPanel.setValue(this.simulator.getStdOut())
-    this.outputPanel.show()
-    this.registers.render(this.simulator.getRegisters(EnumRegisterType.SPECIAL), this.simulator.getRegisters(EnumRegisterType.GENERAL))
-    this.registers.openAll()
+    //opportunity to reduce duplication with below
+    this.simulator.setBreakpoints([])
+    this._displayRunResult(this.simulator.runUserProgram(this.arguments.getContents()))
   }
 
   runAndDebugUserProgram(): void {
-    // stub: debug runtime not yet wired up
+    //opportunity to reduce duplication with above
+    this.simulator.setBreakpoints(this._armedLines)
+    this._displayRunResult(this.simulator.runUserProgram(this.arguments.getContents()))
+  }
+
+  resumeUserProgram(): void {
+    this._displayRunResult(this.simulator.resume())
+  }
+
+  //information hidden: calls to register object
+  //inputs: runResult object: the exit information of a run
+  //outputs: edits to the "runAndDebugButton" display
+  //preconditions
+  //postconditions
+  private _displayRunResult(result: RunResult): void {
+    // pipe out the stdout to the display
+    this.outputPanel.setValue(this.simulator.getStdOut())
+    this.outputPanel.show()
+    // get the register state (is this duplicated work?)
+    this.registers.render(this.simulator.getRegisters(EnumRegisterType.SPECIAL), this.simulator.getRegisters(EnumRegisterType.GENERAL))
+    // pop open the regsiters
+    this.registers.openAll()
+
+    // while paused, Continue is the only way to advance the run
+    // if the result is paused, then unhide the continue button and hide the run button
+    // else, hide the continue button and hide the run button
+    const paused = result.status === "paused"
+    this.continueButtonTarget.hidden = !paused
+    //What is god's name are "runButtonTarget" and "continueButtonTarget"?
+    this.runButtonTarget.disabled = paused
+    // The naming here is unclear
+    // updating the runand DebugButton appears to be the invariant postcondition
+    this._updateRunAndDebugButton()
   }
 
   toggleSubpanel(event: Event): void {

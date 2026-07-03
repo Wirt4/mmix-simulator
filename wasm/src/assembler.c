@@ -7,6 +7,7 @@
 #include "assembler.h"
 #include "constants.h"
 #include "mmixlib_wrapper.h"
+#include "libimport.h" // add_line_loc declaration; needs octa from mmixlib.h above
 #include "io_utils.h"
 #include "assert.h"
 
@@ -20,6 +21,23 @@ static unsigned char g_listing_pointer[MAX_LISTING_SIZE];
 static size_t g_listing_size = (size_t)-1;
 static unsigned char g_address_map_pointer[MAX_SRC_SIZE];
 static size_t g_address_map_size = (size_t)-1;
+static int g_address_map_saturated = 0;
+
+// consumer for the MMIXAL_LINE_LOC hook (declared in libimport.h);
+// mmixal fires it once per source line, just before emitting that line's tetras
+void add_line_loc(int file_no, int line_no, octa loc){
+	(void)file_no;
+	if (line_no <= 0 || g_address_map_size == (size_t)-1){
+		return;
+	}
+	if (g_address_map_size + ADDRESS_MAP_ENTRY_SIZE > sizeof(g_address_map_pointer)){
+		g_address_map_saturated = 1;
+		return;
+	}
+	uint32_t entry[3] = {(uint32_t)line_no, loc.h, loc.l};
+	memcpy(g_address_map_pointer + g_address_map_size, entry, sizeof(entry));
+	g_address_map_size += sizeof(entry);
+}
 
 static int setup_assembly(size_t src_len){
 	if (!ASSERT(src_len <= (size_t)(MAX_SRC_SIZE))){
@@ -61,12 +79,16 @@ int assemble_source(size_t length){
 	if (!ASSERT (assembly_setup == 0)){
 		return -1;
 	}
+	// arm the address map so add_line_loc records this run's line/address pairs
+	g_address_map_size = 0;
+	g_address_map_saturated = 0;
 	int result = mmixal_w(MMS, MMO, LISTING);
 	if (result == 0){
 		g_listing_size = read_to_heap(LISTING, g_listing_pointer, (size_t)MAX_LISTING_SIZE);
 	}else{
-		//no success -> no listing to read
+		//no success -> no listing to read, and no trustworthy address map
 		g_listing_size = 0;
+		g_address_map_size = 0;
 	}
 	int teardown = teardown_assembly();
 	if (!ASSERT(teardown == 0)){
@@ -92,4 +114,8 @@ size_t address_map_size(void){
 unsigned char* address_map_buffer(void){
 	ASSERT(g_address_map_pointer != NULL);
 	return g_address_map_pointer;
+}
+
+int address_map_saturated(void){
+	return g_address_map_saturated;
 }

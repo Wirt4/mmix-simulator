@@ -1,4 +1,5 @@
 import { ISimulator } from './simulator.interface'
+import { RunResult } from './run_result'
 import { IModuleAdapter } from './../moduleAdapter/module_adapter.interface'
 import { EnumRegisterType, IRegisterData } from "../register_types.interface"
 interface IRegisterInfo {
@@ -6,15 +7,27 @@ interface IRegisterInfo {
   description: string
 }
 
+interface IArmedBreakpoint {
+  line: number,
+  high: number,
+  low: number
+}
+
 export default class Simulator implements ISimulator {
   private _moduleAdapter: IModuleAdapter
   private _specialRegisterMap: Map<string, IRegisterInfo>
   private _successfulAssembly: boolean
   private _out: string
+  private _armedBreakpoints: IArmedBreakpoint[]
+  private _lastResult: RunResult
+  private readonly _timeoutMs = 800
+  private readonly _instructionBatch = 1000
 
   constructor(moduleAdapter: IModuleAdapter) {
     this._successfulAssembly = false
     this._moduleAdapter = moduleAdapter
+    this._armedBreakpoints = []
+    this._lastResult = { status: "halted" }
     this._specialRegisterMap = new Map([
       ["rA", { code: 21, description: "arithmetic status register" }],
       ["rB", { code: 0, description: "bootstrap register (trip)" }],
@@ -56,12 +69,31 @@ export default class Simulator implements ISimulator {
     return this._out
   }
 
-  public runUserProgram(argv: string[]): void {
-    if (this._successfulAssembly) {
-      const timeout = 800;
-      const instructionBatch = 1000;
-      this._out = this.simulateWithTimeout(timeout, instructionBatch, argv)
+  public setBreakpoints(lines: number[]): void {
+    this._armedBreakpoints = lines.map((line) => ({
+      line,
+      high: this._moduleAdapter.getAddressForLine(line, 0),
+      low: this._moduleAdapter.getAddressForLine(line, 1),
+    }))
+  }
+
+  public runUserProgram(argv: string[]): RunResult {
+    if (!this._successfulAssembly) {
+      return this._lastResult
     }
+    this._out = ""
+    this._lastResult = this.simulateWithTimeout(this._timeoutMs, this._instructionBatch, argv)
+    return this._lastResult
+  }
+
+  public resume(): RunResult {
+    if (this._lastResult.status !== "paused") {
+      return this._lastResult
+    }
+    // the C side keeps the breakpoint set and clears the hit flag on re-entry,
+    // so resuming is just running the batch loop again — no re-init, no re-arm
+    this._lastResult = this.runBatchLoop(this._timeoutMs, this._instructionBatch)
+    return this._lastResult
   }
 
   public getRegisterValue(register: string): string {
@@ -145,12 +177,12 @@ export default class Simulator implements ISimulator {
     return result
   }
 
-  private simulateWithTimeout(timeout: number, instructionsPerInterval: number, argv: string[]): string {
+  private simulateWithTimeout(timeout: number, instructionsPerInterval: number, argv: string[]): RunResult {
     if (!this.areActionableInputs(timeout, instructionsPerInterval)) {
       if (!this.areValidInputs(timeout, instructionsPerInterval)) {
         this.logTimeInstructionErrors(timeout, instructionsPerInterval)
       }
-      return ""
+      return { status: "halted" }
     }
 
     try {
@@ -159,25 +191,60 @@ export default class Simulator implements ISimulator {
       console.error(err)
     }
 
-    let cur: number = Date.now()
-    const deadline = cur + timeout
-    let hasTimedOut = false
-    const programOutputs = new Outputs()
+    for (const breakpoint of this._armedBreakpoints) {
+      this._moduleAdapter.setExecutionBreakpoint(breakpoint.high, breakpoint.low)
+    }
 
-    while (cur < deadline && !this._moduleAdapter.isHalted()) {
-      cur = Date.now()
+    return this.runBatchLoop(timeout, instructionsPerInterval)
+  }
+
+  /**
+   * Runs instruction batches until the program halts, pauses at a breakpoint, or
+   * exceeds the deadline. Output accumulates in _out; the simulator is finalized
+   * unless it pauses (resume() re-enters this loop).
+   */
+  private runBatchLoop(timeout: number, instructionsPerInterval: number): RunResult {
+    const deadline = Date.now() + timeout
+    const programOutputs = new Outputs()
+    let result: RunResult = { status: "timeout" }
+
+    while (Date.now() < deadline) {
+      if (this._moduleAdapter.isHalted()) {
+        result = { status: "halted" }
+        break
+      }
       this._moduleAdapter.performInstructions(instructionsPerInterval)
       programOutputs.append(this._moduleAdapter.getStdErr(), this._moduleAdapter.getStdOut())
-      hasTimedOut = cur >= deadline
+      if (this._moduleAdapter.breakpointHit()) {
+        result = { status: "paused", atLine: this.pausedLine() }
+        break
+      }
+    }
+
+    this._out += programOutputs.toString()
+
+    if (result.status === "paused") {
+      return result
     }
 
     this._moduleAdapter.finalizeMMIX()
 
-    if (hasTimedOut) {
-      return `ERROR: simulator timeout. Programs may not exceed ${timeout.toString()} ms of clock time\n`
+    if (result.status === "timeout") {
+      this._out += `ERROR: simulator timeout. Programs may not exceed ${timeout.toString()} ms of clock time\n`
     }
 
-    return programOutputs.toString();
+    return result
+  }
+
+  /**
+   * The C side does not expose which address paused execution, so report the
+   * most recently armed line — exact whenever a single breakpoint is armed.
+   */
+  private pausedLine(): number {
+    if (this._armedBreakpoints.length === 0) {
+      return 0
+    }
+    return this._armedBreakpoints[this._armedBreakpoints.length - 1].line
   }
 
   private areActionableInputs(timeout: number, instructionsPerInterval: number): boolean {

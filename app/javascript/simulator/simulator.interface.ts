@@ -1,10 +1,16 @@
 import { EnumRegisterType, IRegisterData } from "../register_types.interface"
-/** Controls the MMIX simulator lifecycle: assembling, running, and inspecting register state. */
+import { RunResult } from "./run_result"
+
+/** Controls the MMIX simulator lifecycle: assembling, running, debugging, and inspecting register state. */
 export interface ISimulator {
   /** Assembles the user's MMIXAL program*/
   assemble(mmixal: string): boolean
-  /** Executes the user's MMIXAL program, writing output to the output area. */
-  runUserProgram(argv: string[]): void
+  /** Arms execution breakpoints at the given source lines. Replaces the prior set; pass [] to clear. */
+  setBreakpoints(lines: number[]): void
+  /** Executes the assembled program until it halts, times out, or hits a breakpoint. */
+  runUserProgram(argv: string[]): RunResult
+  /** Continues execution after a paused result. No-op if the simulator is not paused. */
+  resume(): RunResult
   /** returns contents of both stdOut and stdErr*/
   getStdOut(): string
   /** Returns the assembly listing for the most recent successful assembly. */
@@ -19,7 +25,6 @@ export interface ISimulator {
   getRegisterValue(register: string): string
   /** Returns a brief description of the given register */
   getRegisterDescription(register: string): string
-
+  /** Returns the register information of [type]: either General Registers or Special Registers */
   getRegisters(type: EnumRegisterType): IRegisterData[]
 }
-

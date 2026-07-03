@@ -15,7 +15,7 @@ export class Input implements IInput {
   constructor(
     container: HTMLElement,
     contents: HTMLTextAreaElement,
-    onBreakpointChange?: (hasBreakpoints: boolean) => void,
+    onBreakpointChange?: (lines: number[]) => void,
   ) {
     const extensions = this._initializeConfigExtensions(contents, onBreakpointChange)
     const initialContent = contents.value
@@ -34,7 +34,7 @@ export class Input implements IInput {
   */
   private _initializeConfigExtensions(
     source: HTMLTextAreaElement,
-    onBreakpointChange?: (hasBreakpoints: boolean) => void,
+    onBreakpointChange?: (lines: number[]) => void,
   ): Extension[] {
     const extensions: Extension[] = []
     //push a locked state to array

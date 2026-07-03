@@ -1,6 +1,12 @@
 import { Extension, RangeSet, StateEffect, StateField } from "@codemirror/state"
 import { GutterMarker, gutter } from "@codemirror/view"
 
+function hasMarkerAt(set: RangeSet<GutterMarker>, pos: number): boolean {
+  let found = false
+  set.between(pos, pos, () => { found = true; return false })
+  return found
+}
+
 class BreakpointMarker extends GutterMarker {
   toDOM(): HTMLElement {
     const el = document.createElement("span")
@@ -10,10 +16,10 @@ class BreakpointMarker extends GutterMarker {
   }
 }
 
-export function breakpointGutter(onChange?: (hasBreakpoints: boolean) => void): Extension {
+export function breakpointGutter(onChange?: (lines: number[]) => void): Extension {
   const marker = new BreakpointMarker()
   const toggle = StateEffect.define<number>()
-  let lastHas = false
+  let lastReported = ""
 
   const field = StateField.define<RangeSet<GutterMarker>>({
     create: () => RangeSet.empty,
@@ -22,16 +28,18 @@ export function breakpointGutter(onChange?: (hasBreakpoints: boolean) => void): 
       for (const effect of tr.effects) {
         if (!effect.is(toggle)) continue
         const pos = effect.value
-        let has = false
-        next.between(pos, pos, () => { has = true; return false })
-        next = has
+        next = hasMarkerAt(next, pos)
           ? next.update({ filter: (from) => from !== pos })
           : next.update({ add: [marker.range(pos)] })
       }
-      const hasAny = next.size > 0
-      if (hasAny !== lastHas) {
-        lastHas = hasAny
-        onChange?.(hasAny)
+      const lines: number[] = []
+      next.between(0, tr.newDoc.length, (from) => {
+        lines.push(tr.newDoc.lineAt(from).number)
+      })
+      const reported = lines.join(",")
+      if (reported !== lastReported) {
+        lastReported = reported
+        onChange?.(lines)
       }
       return next
     },

@@ -2,6 +2,7 @@
 #define ASSEMBLER_H
 
 #include <stddef.h>
+#include <stdint.h>
 /*
  * Returns a pointer to preallocated block of memory of size (HEAP_SIZE)
  * A compiled wasm object can't take strings as function arguments
@@ -27,9 +28,23 @@ unsigned char* listing_buffer(void);
 /** Returns the size in bytes of the last listing, or (size_t)-1 if no assembly has run. */
 size_t listing_size(void);
 
+/*
+ * Address map entry layout: three packed uint32_t fields
+ * (source_line, address_high, address_low), one entry per source line that
+ * emitted code, in assembly order.
+ */
+#define ADDRESS_MAP_ENTRY_SIZE (3 * sizeof(uint32_t))
+
 /** Returns a pointer to the address map buffer populated by a successful assembly. */
 unsigned char* address_map_buffer(void);
 
 /** Returns the size in bytes of the last address map, or (size_t)-1 if no assembly has run. */
 size_t address_map_size(void);
+
+/**
+ * Returns 1 if the last assembly emitted more line/address pairs than the
+ * buffer holds (MAX_SRC_SIZE / ADDRESS_MAP_ENTRY_SIZE entries); capture stops
+ * at the limit and later lines are unmapped.
+ */
+int address_map_saturated(void);
 #endif

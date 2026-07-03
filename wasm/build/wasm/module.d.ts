@@ -35,6 +35,8 @@ interface WasmModule {
   _arg_size(): number;
   _set_execution_breakpoint(_0: number, _1: number): number;
   _breakpoint_hit(): number;
+  _address_map_has_line(_0: number): number;
+  _get_address_for_line(_0: number, _1: number): number;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports;
