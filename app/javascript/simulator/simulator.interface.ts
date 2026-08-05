@@ -2,17 +2,20 @@ import { EnumRegisterType, IRegisterData } from "../register_types.interface"
 
 /** Controls the MMIX simulator lifecycle: assembling, running, debugging, and inspecting register state. */
 export interface ISimulator {
+  /** Clears out loaded arguments, breakpoints and assembled code*/
+  reset(): void
+
   /** Assembles the user's MMIXAL program*/
   assemble(mmixal: string): boolean
 
   /** Arms execution breakpoints at the given source lines. Replaces the prior set; pass [] to clear. */
   setBreakpoints(lines: number[]): void
 
-  /** Executes the assembled program until it halts, times out, or hits a breakpoint. */
-  runUserProgram(argv: string[]): number
+  /** Loads the argv (command-line arguments before program executes: common to both standard and debug cases)*/
+  setArguments(argv: string[]): number
 
-  /** Continues execution after a paused result. No-op if the simulator is not paused. */
-  resume(): number
+  /** runs the assembled mmix program to either successful completion, error, or a breakpoint*/
+  execute(): EnumExecutionResult
 
   /** returns contents of both stdOut and stdErr*/
   getStdOut(): string
