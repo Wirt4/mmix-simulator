@@ -134,12 +134,12 @@ export default class IDEFacadeController extends Controller {
   runUserProgram(): void {
     this.simulator.reset()
     this.simulator.setArguments(this.arguments.getContents())
-    let stopped = false;
     let result: EnumExecutionResult
-    while (!stopped) {
+    while (true) {
       result = this.simulator.executeInstruction()
       this.outputPanel.setValue(this.simulator.getStdOut())
       this.outputPanel.show()
+      if (result !== EnumExecutionResult.CONTINUE) break;
     }
   }
 

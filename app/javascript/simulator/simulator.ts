@@ -67,18 +67,22 @@ export default class Simulator implements ISimulator {
   }
 
   public reset(): void {
-    throw new Error("Not yet implemented")
+    this._moduleAdapter.finalizeMMIX()
   }
 
   public getStdOut(): string {
     return this._out
   }
+
   setArguments(argv: string[]): number {
-    throw new Error("not yet implemented")
+    this._moduleAdapter.initializeMMIX(argv);
+    return 0;
   }
   //executes a single instruction
   public executeInstruction(): EnumExecutionResult {
-    throw new Error("not implemented")
+    this._moduleAdapter.performInstructions(1)
+    if (this._moduleAdapter.isHalted()) return EnumExecutionResult.HALTED
+    return EnumExecutionResult.CONTINUE
   }
 
   public setBreakpoints(lines: number[]): void {

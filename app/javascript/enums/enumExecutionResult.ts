@@ -1,3 +1,4 @@
 export enum EnumExecutionResult {
-	CONTINUE
+	CONTINUE,
+	HALTED
 }
