@@ -67,4 +67,5 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
   gem "minitest-mock"
+  gem "ruby-vips"
 end
