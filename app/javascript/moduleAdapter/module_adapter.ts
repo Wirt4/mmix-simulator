@@ -118,6 +118,29 @@ export default class ModuleAdapter implements IModuleAdapter {
     return this._module._general_register_count()
   }
 
+  get specialRegisterCount(): number {
+    return this._module._special_register_count()
+  }
+
+  public setExecutionBreakpoint(high: number, low: number): void {
+    if (this._module._set_execution_breakpoint(high, low) !== 0) {
+      console.error("could not set execution breakpoint")
+    }
+  }
+
+  public breakpointHit(): boolean {
+    return this._module._breakpoint_hit() !== 0
+  }
+
+  public addressMapHasLine(line: number): boolean {
+    return this._module._address_map_has_line(line) !== 0
+  }
+
+  public getAddressForLine(line: number, partition: 0 | 1): number {
+    //  little unsigned right shift to coerce the return from the module
+    return this._module._get_address_for_line(line, partition) >>> 0
+  }
+
   //PRIVATE METHODS
   private getRegisterValue(registerType: RegisterType, index: number): string {
     const high = this.getUnsignedRegisterValue(registerType, index, Partition.HIGH)

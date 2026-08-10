@@ -88,7 +88,7 @@ extern int mmix_fputc(int c, FILE *f);
 #define MMIX_FILE_NO(file_no) (file_no)
 
 /* define this to record file line and location associations while assembling */
-#define MMIXAL_LINE_LOC(file_no,line_no,cur_loc)
+#define MMIXAL_LINE_LOC(file_no,line_no,cur_loc) add_line_loc(file_no,line_no,cur_loc)
 /* define this to record file line and location associations while loading mmo files
    undefine to get the default behaviour of storing file_no and line_no in the mem_tetra */
 /* MMIX_LOAD_LINE_LOC not defined — use default mem_tetra storage */

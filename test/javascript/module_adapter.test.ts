@@ -42,10 +42,10 @@ describe("Module Adapter", () => {
       _get_listing_size: vi.fn(),
       _get_args_pointer: vi.fn(),
       _arg_size: vi.fn(),
-      _get_program_counter: vi.fn(),
-      _get_breakpoint: vi.fn(),
-      _update_breakpoint_count: vi.fn(),
-      _set_breakpoint: vi.fn()
+      _set_execution_breakpoint: vi.fn(),
+      _breakpoint_hit: vi.fn(),
+      _address_map_has_line: vi.fn(),
+      _get_address_for_line: vi.fn(),
     }
   })
 
@@ -344,5 +344,47 @@ describe("Module Adapter", () => {
     expect(heapSpy.mock.calls.length).toEqual(0)
     //assert the module has been called
     expect(initSpy).toHaveBeenCalledWith(0)
+  })
+
+  it("specialRegisterCount returns the value from _special_register_count", () => {
+    vi.spyOn(mockModule, '_special_register_count').mockReturnValue(32)
+    const adapter = new ModuleAdapter(mockModule)
+    expect(adapter.specialRegisterCount).toBe(32)
+  })
+
+  it("setExecutionBreakpoint forwards the high and low tetras to the module", () => {
+    const spy = vi.spyOn(mockModule, '_set_execution_breakpoint').mockReturnValue(0)
+    const adapter = new ModuleAdapter(mockModule)
+
+    adapter.setExecutionBreakpoint(0, 0x108)
+
+    expect(spy).toHaveBeenCalledWith(0, 0x108)
+  })
+
+  it("breakpointHit coerces the module's int to a boolean", () => {
+    vi.spyOn(mockModule, '_breakpoint_hit').mockReturnValueOnce(1).mockReturnValue(0)
+    const adapter = new ModuleAdapter(mockModule)
+
+    expect(adapter.breakpointHit()).toBe(true)
+    expect(adapter.breakpointHit()).toBe(false)
+  })
+
+  it("addressMapHasLine coerces the module's int to a boolean", () => {
+    const spy = vi.spyOn(mockModule, '_address_map_has_line').mockReturnValueOnce(1).mockReturnValue(0)
+    const adapter = new ModuleAdapter(mockModule)
+
+    expect(adapter.addressMapHasLine(6)).toBe(true)
+    expect(spy).toHaveBeenCalledWith(6)
+    expect(adapter.addressMapHasLine(5)).toBe(false)
+  })
+
+  it("getAddressForLine forwards line and partition and coerces the result to unsigned", () => {
+    const spy = vi.spyOn(mockModule, '_get_address_for_line').mockReturnValue(-1)
+    const adapter = new ModuleAdapter(mockModule)
+
+    const result = adapter.getAddressForLine(6, 1)
+
+    expect(spy).toHaveBeenCalledWith(6, 1)
+    expect(result).toBe(0xffffffff)
   })
 })

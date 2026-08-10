@@ -151,35 +151,42 @@ int arg_size(void){
 	return ARG_SIZE;
 }
 
-unsigned int get_program_counter(int partition){
-	return get_instruction_pointer(partition);
+int set_execution_breakpoint(unsigned int high, unsigned int low){
+	return set_exec_breakpoint(high, low);
 }
 
+int breakpoint_hit(void){
+	return sim_breakpoint_hit();
+}
 
-unsigned int get_breakpoint(int ndx, int partition){
-	//assert ndx must non-negative
-	if (!ASSERT( 0 <= ndx)){
+static const unsigned char* find_address_map_entry(unsigned int line){
+	size_t size = address_map_size();
+	if (size == (size_t)-1){
+		// no assembly has run yet
+		return NULL;
+	}
+	const unsigned char *buf = address_map_buffer();
+	for (size_t offset = 0; offset + ADDRESS_MAP_ENTRY_SIZE <= size; offset += ADDRESS_MAP_ENTRY_SIZE){
+		uint32_t entry_line;
+		memcpy(&entry_line, buf + offset, sizeof(entry_line));
+		if (entry_line == line){
+			return buf + offset;
+		}
+	}
+	return NULL;
+}
+
+int address_map_has_line(unsigned int line){
+	return find_address_map_entry(line) != NULL;
+}
+
+unsigned int get_address_for_line(unsigned int line, int partition){
+	const unsigned char *entry = find_address_map_entry(line);
+	if (entry == NULL){
 		return 0;
 	}
-	// return call from simulator
-	return get_breakpoint_data(ndx, partition);
-}
-
-int update_breakpoint_count(int count){
-	// assert count is non-negative
-	ASSERT(count >=0);
-	if (!ASSERT(0 <= count)){
-		return -1;
-	}
-	// call simulator
-	return set_breakpoint_count(count);
-}
-
-int set_breakpoint(int ndx, unsigned int high, unsigned int low){
-	//assert index is non-negative
-	if (!ASSERT( 0 <= ndx)){
-		return 0;
-	}
-	//call simulator
-	return set_breakpoint(ndx, high, low);
+	// entry layout: (source_line, address_high, address_low); partition 0 = high, 1 = low
+	uint32_t tetra;
+	memcpy(&tetra, entry + (sizeof(uint32_t) * (partition == 0 ? 1U : 2U)), sizeof(tetra));
+	return tetra;
 }

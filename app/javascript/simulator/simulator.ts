@@ -1,9 +1,17 @@
 import { ISimulator } from './simulator.interface'
 import { IModuleAdapter } from './../moduleAdapter/module_adapter.interface'
 import { EnumRegisterType, IRegisterData } from "../register_types.interface"
+import { EnumExecutionResult } from "../enums/enumExecutionResult"
+
 interface IRegisterInfo {
   code: number,
   description: string
+}
+
+interface IArmedBreakpoint {
+  line: number,
+  high: number,
+  low: number
 }
 
 export default class Simulator implements ISimulator {
@@ -11,10 +19,16 @@ export default class Simulator implements ISimulator {
   private _specialRegisterMap: Map<string, IRegisterInfo>
   private _successfulAssembly: boolean
   private _out: string
+  private _armedBreakpoints: IArmedBreakpoint[]
+  private _lastResult: number
+  private readonly _timeoutMs = 800
+  private readonly _instructionBatch = 1000
 
   constructor(moduleAdapter: IModuleAdapter) {
     this._successfulAssembly = false
     this._moduleAdapter = moduleAdapter
+    this._armedBreakpoints = []
+    this._lastResult = 0; // 0 means halted
     this._specialRegisterMap = new Map([
       ["rA", { code: 21, description: "arithmetic status register" }],
       ["rB", { code: 0, description: "bootstrap register (trip)" }],
@@ -52,16 +66,51 @@ export default class Simulator implements ISimulator {
     this._out = ""
   }
 
+  public reset(): void {
+    this._moduleAdapter.finalizeMMIX()
+  }
+
   public getStdOut(): string {
     return this._out
   }
 
-  public runUserProgram(argv: string[]): void {
-    if (this._successfulAssembly) {
-      const timeout = 800;
-      const instructionBatch = 1000;
-      this._out = this.simulateWithTimeout(timeout, instructionBatch, argv)
+  setArguments(argv: string[]): number {
+    this._moduleAdapter.initializeMMIX(argv);
+    return 0;
+  }
+  //executes a single instruction
+  public executeInstruction(): EnumExecutionResult {
+    this._moduleAdapter.performInstructions(1)
+    if (this._moduleAdapter.isHalted()) return EnumExecutionResult.HALTED
+    return EnumExecutionResult.CONTINUE
+  }
+
+  public setBreakpoints(lines: number[]): void {
+    this._armedBreakpoints = lines.map((line) => ({
+      line,
+      high: this._moduleAdapter.getAddressForLine(line, 0),
+      low: this._moduleAdapter.getAddressForLine(line, 1),
+    }))
+  }
+
+  public runUserProgram(argv: string[]): number {
+    if (!this._successfulAssembly) {
+      return this._lastResult
     }
+    this._out = ""
+    this._lastResult = this.simulateWithTimeout(this._timeoutMs, this._instructionBatch, argv)
+    return this._lastResult
+  }
+
+  public resume(): number {
+    //if the status is not paused at a line
+    if (this._lastResult <= 0) {
+      return this._lastResult
+    }
+    // the C side keeps the breakpoint set and clears the hit flag on re-entry,
+    // so resuming is just running the batch loop again — no re-init, no re-arm
+    this._lastResult = this.runBatchLoop(this._timeoutMs, this._instructionBatch)
+    return this._lastResult
   }
 
   public getRegisterValue(register: string): string {
@@ -105,6 +154,10 @@ export default class Simulator implements ISimulator {
     return this._moduleAdapter.generalRegisterCount
   }
 
+  get specialRegisterCount(): number {
+    return this._moduleAdapter.specialRegisterCount
+  }
+
   getRegisters(type: EnumRegisterType): IRegisterData[] {
     switch (type) {
       case EnumRegisterType.GENERAL:
@@ -125,29 +178,29 @@ export default class Simulator implements ISimulator {
   }
 
   private allSpecialRegisters(): IRegisterData[] {
+    const count = this._moduleAdapter.specialRegisterCount
     const regKeys = Array.from(this._specialRegisterMap.keys())
-    const result = new Array<IRegisterData>(regKeys.length)
-    for (let i = 0; i < regKeys.length; i++) {
+    const result = new Array<IRegisterData>(count)
+    for (let i = 0; i < count; i++) {
       const regName = regKeys[i]
-      //get the register value
       const data = this._specialRegisterMap.get(regName)
       if (!data) continue
       const ndx = data.code
       const description = data.description
       const id = `$${regName}`
       const value = this._moduleAdapter.getSpecialRegisterValue(ndx)
-      //    set it in the return array
       result[i] = { id, value, description }
     }
     return result
   }
 
-  private simulateWithTimeout(timeout: number, instructionsPerInterval: number, argv: string[]): string {
+  private simulateWithTimeout(timeout: number, instructionsPerInterval: number, argv: string[]): number {
     if (!this.areActionableInputs(timeout, instructionsPerInterval)) {
       if (!this.areValidInputs(timeout, instructionsPerInterval)) {
         this.logTimeInstructionErrors(timeout, instructionsPerInterval)
       }
-      return ""
+      //is this correct? Intuition says timeout here, which would be -1
+      return 0;
     }
 
     try {
@@ -156,25 +209,61 @@ export default class Simulator implements ISimulator {
       console.error(err)
     }
 
-    let cur: number = Date.now()
-    const deadline = cur + timeout
-    let hasTimedOut = false
-    const programOutputs = new Outputs()
+    for (const breakpoint of this._armedBreakpoints) {
+      this._moduleAdapter.setExecutionBreakpoint(breakpoint.high, breakpoint.low)
+    }
 
-    while (cur < deadline && !this._moduleAdapter.isHalted()) {
-      cur = Date.now()
+    return this.runBatchLoop(timeout, instructionsPerInterval)
+  }
+
+  /**
+   * Runs instruction batches until the program halts, pauses at a breakpoint, or
+   * exceeds the deadline. Output accumulates in _out; the simulator is finalized
+   * unless it pauses (resume() re-enters this loop).
+   */
+  private runBatchLoop(timeout: number, instructionsPerInterval: number): number {
+    const deadline = Date.now() + timeout
+    const programOutputs = new Outputs()
+    let result = -1 // timeout 
+
+    while (Date.now() < deadline) {
+      if (this._moduleAdapter.isHalted()) {
+        result = 0
+        break
+      }
       this._moduleAdapter.performInstructions(instructionsPerInterval)
       programOutputs.append(this._moduleAdapter.getStdErr(), this._moduleAdapter.getStdOut())
-      hasTimedOut = cur >= deadline
+      if (this._moduleAdapter.breakpointHit()) {
+        result = this.pausedLine()
+        break
+      }
+    }
+
+    this._out += programOutputs.toString()
+
+    //return if result is paused
+    if (result > 0) {
+      return result
     }
 
     this._moduleAdapter.finalizeMMIX()
 
-    if (hasTimedOut) {
-      return `ERROR: simulator timeout. Programs may not exceed ${timeout.toString()} ms of clock time\n`
+    if (result < 0) {
+      this._out += `ERROR: simulator timeout. Programs may not exceed ${timeout.toString()} ms of clock time\n`
     }
 
-    return programOutputs.toString();
+    return result
+  }
+
+  /**
+   * The C side does not expose which address paused execution, so report the
+   * most recently armed line — exact whenever a single breakpoint is armed.
+   */
+  private pausedLine(): number {
+    if (this._armedBreakpoints.length === 0) {
+      return 0
+    }
+    return this._armedBreakpoints[this._armedBreakpoints.length - 1].line
   }
 
   private areActionableInputs(timeout: number, instructionsPerInterval: number): boolean {

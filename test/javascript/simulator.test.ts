@@ -16,11 +16,17 @@ function createMockAdapter(): IModuleAdapter {
     getGeneralRegisterValue: vi.fn(),
     getSpecialRegisterValue: vi.fn(),
     generalRegisterCount: 256,
-    getListing: vi.fn()
+    specialRegisterCount: 32,
+    getListing: vi.fn(),
+    setExecutionBreakpoint: vi.fn(),
+    breakpointHit: vi.fn(),
+    addressMapHasLine: vi.fn(),
+    getAddressForLine: vi.fn()
   }
 }
 
 describe("Simulator tests", () => {
+
   it("assemble calls assembleMMIXAL", () => {
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'assembleMMIXAL')
@@ -326,5 +332,176 @@ describe("long register list tests", () => {
     expect(actual[expectedNdxA]).toEqual(expect.objectContaining({ description: expectedDescriptionA }))
     expect(actual[expectedNdxB]).toEqual(expect.objectContaining({ description: expectedDescriptionB }))
     expect(actual[expectedNdxC]).toEqual(expect.objectContaining({ description: expectedDescriptionC }))
+  })
+})
+
+type DebugAdapter = IModuleAdapter & {
+  setExecutionBreakpoint: (high: number, low: number) => void
+  breakpointHit: () => boolean
+  getAddressForLine: (line: number, partition: 0 | 1) => number
+}
+
+function createMockDebugAdapter(): DebugAdapter {
+  return {
+    ...createMockAdapter(),
+    setExecutionBreakpoint: vi.fn(),
+    breakpointHit: vi.fn(),
+    getAddressForLine: vi.fn().mockReturnValue(0),
+  }
+}
+
+describe("Simulator breakpoint tests", () => {
+  it("setBreakpoints reads the high and low tetra of each line via getAddressForLine", () => {
+    const mockAdapter = createMockDebugAdapter()
+    const simulator = new Simulator(mockAdapter)
+
+    simulator.setBreakpoints([6, 7])
+
+    expect(mockAdapter.getAddressForLine).toHaveBeenCalledWith(6, 0)
+    expect(mockAdapter.getAddressForLine).toHaveBeenCalledWith(6, 1)
+    expect(mockAdapter.getAddressForLine).toHaveBeenCalledWith(7, 0)
+    expect(mockAdapter.getAddressForLine).toHaveBeenCalledWith(7, 1)
+  })
+
+  it("if assembly is not successful, runUserProgram does not initialize and does not arm breakpoints", () => {
+    const mockAdapter = createMockDebugAdapter()
+    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(false)
+    const simulator = new Simulator(mockAdapter)
+
+    simulator.assemble("bad code")
+    simulator.setBreakpoints([6])
+    simulator.runUserProgram([])
+
+    expect(mockAdapter.initializeMMIX).not.toHaveBeenCalled()
+    expect(mockAdapter.setExecutionBreakpoint).not.toHaveBeenCalled()
+  })
+
+  it("on successful assembly, runUserProgram arms each breakpoint after initialization", () => {
+    const mockAdapter = createMockDebugAdapter()
+    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
+    vi.spyOn(mockAdapter, 'isHalted').mockReturnValue(true)
+    vi.spyOn(mockAdapter, 'getAddressForLine').mockImplementation((line: number, partition: 0 | 1) => {
+      if (line === 6) return partition === 0 ? 0 : 0x100
+      if (line === 7) return partition === 0 ? 0 : 0x108
+      return 0
+    })
+    const simulator = new Simulator(mockAdapter)
+
+    simulator.assemble("USER CODE")
+    simulator.setBreakpoints([6, 7])
+    simulator.runUserProgram([])
+
+    expect(mockAdapter.setExecutionBreakpoint).toHaveBeenCalledTimes(2)
+    expect(mockAdapter.setExecutionBreakpoint).toHaveBeenCalledWith(0, 0x100)
+    expect(mockAdapter.setExecutionBreakpoint).toHaveBeenCalledWith(0, 0x108)
+  })
+
+  it("runUserProgram returns { status: 'halted' } when the program halts with no breakpoint hit", () => {
+    const mockAdapter = createMockDebugAdapter()
+    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
+    vi.spyOn(mockAdapter, 'isHalted').mockReturnValueOnce(false).mockReturnValue(true)
+    vi.spyOn(mockAdapter, 'breakpointHit').mockReturnValue(false)
+    const simulator = new Simulator(mockAdapter)
+
+    simulator.assemble("USER CODE")
+    const result = simulator.runUserProgram([])
+
+    expect(result).toEqual(0)
+  })
+
+  it("runUserProgram returns { status: 'paused', atLine } when breakpointHit returns true", () => {
+    const mockAdapter = createMockDebugAdapter()
+    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
+    vi.spyOn(mockAdapter, 'isHalted').mockReturnValue(false)
+    vi.spyOn(mockAdapter, 'breakpointHit').mockReturnValue(true)
+    vi.spyOn(mockAdapter, 'getAddressForLine').mockReturnValue(0x100)
+    const simulator = new Simulator(mockAdapter)
+
+    simulator.assemble("USER CODE")
+    simulator.setBreakpoints([6])
+    const result = simulator.runUserProgram([])
+
+    expect(result).toEqual(6)
+  })
+
+  it("runUserProgram does not finalize when paused at a breakpoint", () => {
+    const mockAdapter = createMockDebugAdapter()
+    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
+    vi.spyOn(mockAdapter, 'isHalted').mockReturnValue(false)
+    vi.spyOn(mockAdapter, 'breakpointHit').mockReturnValue(true)
+    const simulator = new Simulator(mockAdapter)
+
+    simulator.assemble("USER CODE")
+    simulator.setBreakpoints([6])
+    simulator.runUserProgram([])
+
+    expect(mockAdapter.finalizeMMIX).not.toHaveBeenCalled()
+  })
+
+  it("runUserProgram finalizes when the program halts before any breakpoint hits", () => {
+    const mockAdapter = createMockDebugAdapter()
+    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
+    vi.spyOn(mockAdapter, 'isHalted').mockReturnValueOnce(false).mockReturnValue(true)
+    vi.spyOn(mockAdapter, 'breakpointHit').mockReturnValue(false)
+    const simulator = new Simulator(mockAdapter)
+
+    simulator.assemble("USER CODE")
+    simulator.setBreakpoints([6])
+    simulator.runUserProgram([])
+
+    expect(mockAdapter.finalizeMMIX).toHaveBeenCalledTimes(1)
+  })
+
+  it("resume does not re-initialize the simulator", () => {
+    const mockAdapter = createMockDebugAdapter()
+    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
+    vi.spyOn(mockAdapter, 'isHalted').mockReturnValue(false)
+    vi.spyOn(mockAdapter, 'breakpointHit').mockReturnValue(true)
+    const simulator = new Simulator(mockAdapter)
+
+    simulator.assemble("USER CODE")
+    simulator.setBreakpoints([6])
+    simulator.runUserProgram([])
+    const initCallsAfterPause = (mockAdapter.initializeMMIX as ReturnType<typeof vi.fn>).mock.calls.length
+
+    simulator.resume()
+
+    expect((mockAdapter.initializeMMIX as ReturnType<typeof vi.fn>).mock.calls.length).toBe(initCallsAfterPause)
+  })
+
+  it("resume does not re-arm breakpoints (the C side keeps them set)", () => {
+    const mockAdapter = createMockDebugAdapter()
+    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
+    vi.spyOn(mockAdapter, 'isHalted').mockReturnValue(false)
+    vi.spyOn(mockAdapter, 'breakpointHit').mockReturnValue(true)
+    const simulator = new Simulator(mockAdapter)
+
+    simulator.assemble("USER CODE")
+    simulator.setBreakpoints([6])
+    simulator.runUserProgram([])
+    const breakpointCallsAfterPause = (mockAdapter.setExecutionBreakpoint as ReturnType<typeof vi.fn>).mock.calls.length
+
+    simulator.resume()
+
+    expect((mockAdapter.setExecutionBreakpoint as ReturnType<typeof vi.fn>).mock.calls.length).toBe(breakpointCallsAfterPause)
+  })
+
+  it("resume runs the batch loop and finalizes once the program halts", () => {
+    const mockAdapter = createMockDebugAdapter()
+    vi.spyOn(mockAdapter, 'assembleMMIXAL').mockReturnValue(true)
+    let pausedAtBreakpoint = true
+    vi.spyOn(mockAdapter, 'isHalted').mockImplementation(() => !pausedAtBreakpoint)
+    vi.spyOn(mockAdapter, 'breakpointHit').mockImplementation(() => pausedAtBreakpoint)
+    const simulator = new Simulator(mockAdapter)
+
+    simulator.assemble("USER CODE")
+    simulator.setBreakpoints([6])
+    simulator.runUserProgram([])
+
+    pausedAtBreakpoint = false
+    const result = simulator.resume()
+
+    expect(mockAdapter.finalizeMMIX).toHaveBeenCalledTimes(1)
+    expect(result).toEqual(0)
   })
 })

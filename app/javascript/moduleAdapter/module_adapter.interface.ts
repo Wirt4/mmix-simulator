@@ -20,6 +20,16 @@ export interface IModuleAdapter {
   getSpecialRegisterValue(index: number): string
   /** returns number of general registers*/
   generalRegisterCount: number
+  /** returns number of special registers */
+  specialRegisterCount: number
   /** returns string representation of assembled code */
   getListing(): string
+  /** Arms an execution breakpoint at address (high:low). Call after initializeMMIX. */
+  setExecutionBreakpoint(high: number, low: number): void
+  /** Returns true if an execution breakpoint was hit during the last performInstructions call. */
+  breakpointHit(): boolean
+  /** Returns true if the given source line emitted code during the last successful assembly. */
+  addressMapHasLine(line: number): boolean
+  /** Returns one tetra of the address a source line assembled to; partition 0 = high, 1 = low. Returns 0 for unmapped lines — probe with addressMapHasLine first. */
+  getAddressForLine(line: number, partition: 0 | 1): number
 }
