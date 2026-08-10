@@ -4676,10 +4676,10 @@ var _get_listing_pointer = Module['_get_listing_pointer'] = createExportWrapper(
 var _get_listing_size = Module['_get_listing_size'] = createExportWrapper('get_listing_size', 0);
 var _is_halted = Module['_is_halted'] = createExportWrapper('is_halted', 0);
 var _arg_size = Module['_arg_size'] = createExportWrapper('arg_size', 0);
-var _get_program_counter = Module['_get_program_counter'] = createExportWrapper('get_program_counter', 1);
-var _get_breakpoint = Module['_get_breakpoint'] = createExportWrapper('get_breakpoint', 2);
-var _update_breakpoint_count = Module['_update_breakpoint_count'] = createExportWrapper('update_breakpoint_count', 1);
-var _set_breakpoint = Module['_set_breakpoint'] = createExportWrapper('set_breakpoint', 3);
+var _set_execution_breakpoint = Module['_set_execution_breakpoint'] = createExportWrapper('set_execution_breakpoint', 2);
+var _breakpoint_hit = Module['_breakpoint_hit'] = createExportWrapper('breakpoint_hit', 0);
+var _address_map_has_line = Module['_address_map_has_line'] = createExportWrapper('address_map_has_line', 1);
+var _get_address_for_line = Module['_get_address_for_line'] = createExportWrapper('get_address_for_line', 2);
 var _fflush = createExportWrapper('fflush', 1);
 var _emscripten_stack_get_end = wasmExports['emscripten_stack_get_end']
 var _emscripten_stack_get_base = wasmExports['emscripten_stack_get_base']
