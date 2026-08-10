@@ -19,6 +19,7 @@ import { Registers } from "../ide/registers"
 import { TabbedRegisters } from "../ide/tabbed_registers"
 import { IArguments } from '../ide/arguments.interface'
 import { Arguments } from '../ide/arguments'
+import { EnumExecutionResult } from '../enums/enumExecutionResult'
 
 export default class IDEFacadeController extends Controller {
   static targets = [
@@ -131,19 +132,23 @@ export default class IDEFacadeController extends Controller {
   }
 
   runUserProgram(): void {
-    //opportunity to reduce duplication with below
-    this.simulator.setBreakpoints([])
-    this._displayRunResult(this.simulator.runUserProgram(this.arguments.getContents()))
+    this.simulator.reset()
+    this.simulator.setArguments(this.arguments.getContents())
+    let stopped = false;
+    let result: EnumExecutionResult
+    while (!stopped) {
+      result = this.simulator.executeInstruction()
+      this.outputPanel.setValue(this.simulator.getStdOut())
+      this.outputPanel.show()
+    }
   }
 
   runAndDebugUserProgram(): void {
-    //opportunity to reduce duplication with above
-    this.simulator.setBreakpoints(this.debugSession.breakpoints)
-    this._displayRunResult(this.simulator.runUserProgram(this.arguments.getContents()))
+    throw new Error("not implemented")
   }
 
   resumeUserProgram(): void {
-    this._displayRunResult(this.simulator.resume())
+    throw new Error("not implemented")
   }
 
   toggleSubpanel(event: Event): void {

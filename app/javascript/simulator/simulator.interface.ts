@@ -1,5 +1,5 @@
 import { EnumRegisterType, IRegisterData } from "../register_types.interface"
-
+import { EnumExecutionResult } from "../enums/enumExecutionResult"
 /** Controls the MMIX simulator lifecycle: assembling, running, debugging, and inspecting register state. */
 export interface ISimulator {
   /** Clears out loaded arguments, breakpoints and assembled code*/
@@ -14,8 +14,8 @@ export interface ISimulator {
   /** Loads the argv (command-line arguments before program executes: common to both standard and debug cases)*/
   setArguments(argv: string[]): number
 
-  /** runs the assembled mmix program to either successful completion, error, or a breakpoint*/
-  execute(): EnumExecutionResult
+  /** executes a single MMIX instruction*/
+  executeInstruction(): EnumExecutionResult
 
   /** returns contents of both stdOut and stdErr*/
   getStdOut(): string

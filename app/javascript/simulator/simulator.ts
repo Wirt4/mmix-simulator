@@ -1,6 +1,8 @@
 import { ISimulator } from './simulator.interface'
 import { IModuleAdapter } from './../moduleAdapter/module_adapter.interface'
 import { EnumRegisterType, IRegisterData } from "../register_types.interface"
+import { EnumExecutionResult } from "../enums/enumExecutionResult"
+
 interface IRegisterInfo {
   code: number,
   description: string
@@ -64,8 +66,19 @@ export default class Simulator implements ISimulator {
     this._out = ""
   }
 
+  public reset(): void {
+    throw new Error("Not yet implemented")
+  }
+
   public getStdOut(): string {
     return this._out
+  }
+  setArguments(argv: string[]): number {
+    throw new Error("not yet implemented")
+  }
+  //executes a single instruction
+  public executeInstruction(): EnumExecutionResult {
+    throw new Error("not implemented")
   }
 
   public setBreakpoints(lines: number[]): void {

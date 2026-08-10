@@ -26,6 +26,7 @@ function createMockAdapter(): IModuleAdapter {
 }
 
 describe("Simulator tests", () => {
+
   it("assemble calls assembleMMIXAL", () => {
     const mockAdapter = createMockAdapter()
     vi.spyOn(mockAdapter, 'assembleMMIXAL')
