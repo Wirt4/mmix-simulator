@@ -64,6 +64,9 @@ void execute_instructions(unsigned int n){
 			break;
 		}
 		if (!get_resuming()){
+			if (has_exec_breakpoint_w(get_inst_ptr(0), get_inst_ptr(1))){
+				break;
+			}
 			mmix_fetch_instruction_w();
 		}
 		mmix_perform_instruction_w();

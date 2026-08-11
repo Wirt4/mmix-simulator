@@ -28,7 +28,8 @@ void mmix_lib_initialize_w(void);
  * postconditions: MMIX simulator state is reset to initial values
  */
 void mmix_initialize_w(void);
-
+void set_execution_breakpoint_w(unsigned int addr_high, unsigned int addr_low);
+void clear_execution_breakpoint_w(unsigned int addr_high, unsigned int addr_low);
 /**
  * Boots the MMIX simulator, setting the program counter to the entry point.
  * preconditions: mmix_initialize_w() has been called
@@ -153,4 +154,11 @@ void mmix_commandline_w(int argc, char *argv[]);
  */
 unsigned int get_inst_ptr(int partition);
 
+void set_execution_breakpoint_w(unsigned int addr_high, unsigned int addr_low);
+
+void clear_execution_breakpoint_w(unsigned int addr_high, unsigned int addr_low);
+
+int has_exec_breakpoint_w(unsigned int addr_high, unsigned int addr_low);
+
 #endif
+

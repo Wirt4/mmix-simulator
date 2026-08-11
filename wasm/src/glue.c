@@ -1,5 +1,6 @@
 #include <string.h>
 #include "glue.h"
+#include "mmixlib_wrapper.h"
 #include "simulator.h"
 #include "constants.h"
 #include "io_utils.h"
@@ -46,6 +47,14 @@ int assemble_mmixal(size_t len){
 	}
 
 	return result;
+}
+
+void set_breakpoint(unsigned int addr_high, unsigned int addr_low){
+	set_execution_breakpoint_w(addr_high, addr_low);
+}
+
+void clear_breakpoint(unsigned int addr_high, unsigned int addr_low){
+	clear_execution_breakpoint_w(addr_high, addr_low);
 }
 
 size_t get_stdout_size(void){
@@ -173,13 +182,4 @@ int update_breakpoint_count(int count){
 	}
 	// call simulator
 	return set_breakpoint_count(count);
-}
-
-int set_breakpoint(int ndx, unsigned int high, unsigned int low){
-	//assert index is non-negative
-	if (!ASSERT( 0 <= ndx)){
-		return 0;
-	}
-	//call simulator
-	return set_breakpoint(ndx, high, low);
 }

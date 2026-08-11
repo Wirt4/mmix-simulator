@@ -341,6 +341,48 @@ static void test_commandline_args_different_data(void){
     TEST_ASSERT_EQUAL_STRING(expected, result);
 }
 
+// static void test_set_breakpoint_stops_execution_at_address(void) {
+//     // add_two_numbers has instructions at 0x100, 0x104, 0x108, 0x10c
+//     int len = (int)strlen(add_two_numbers_source);
+//     memcpy(get_source_code_pointer(), add_two_numbers_source, len + 1);
+//     int assembled = assemble_mmixal(len);
+//     TEST_ASSERT_EQUAL_INT(0, assembled);
+//
+//     mmix_initialize_simulator(0);
+//
+//     set_breakpoint(0x00000000, 0x00000104);
+//     mmix_perform_instructions(50);
+//
+//     // should have stopped at the breakpoint, not run to Halt
+//     TEST_ASSERT_EQUAL_INT(0, is_halted());
+//     TEST_ASSERT_EQUAL_HEX32(0x00000104, get_program_counter(1));
+//
+//     mmix_finalize_simulator();
+// }
+
+static void test_clear_breakpoint_resumes_execution_past_address(void) {
+    int len = (int)strlen(add_two_numbers_source);
+    memcpy(get_source_code_pointer(), add_two_numbers_source, len + 1);
+    int assembled = assemble_mmixal(len);
+    TEST_ASSERT_EQUAL_INT(0, assembled);
+
+    mmix_initialize_simulator(0);
+
+    set_breakpoint(0x00000000, 0x00000104);
+    mmix_perform_instructions(50); // should stop at breakpoint
+
+    // stopped before Halt — breakpoint fired
+    TEST_ASSERT_EQUAL_INT(0, is_halted());
+    TEST_ASSERT_EQUAL_HEX32(0x00000104, get_program_counter(1));
+
+    clear_breakpoint(0x00000000, 0x00000104);
+    mmix_perform_instructions(50); // should now run to completion
+
+    TEST_ASSERT_EQUAL_INT(1, is_halted());
+
+    mmix_finalize_simulator();
+}
+
 static void test_run_twice_without_reassembling(void){
     // Assemble once
     int len = (int)strlen(one_arg_program_source);
@@ -393,5 +435,7 @@ int main(void) {
     RUN_TEST(test_commandline_one_arg);
     RUN_TEST(test_commandline_args_different_data);
     RUN_TEST(test_run_twice_without_reassembling);
+//    RUN_TEST(test_set_breakpoint_stops_execution_at_address);
+    RUN_TEST(test_clear_breakpoint_resumes_execution_past_address);
     return UNITY_END();
 }

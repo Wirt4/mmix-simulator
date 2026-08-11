@@ -8,6 +8,22 @@ extern bool resuming;
 int mmixal_w(char *mms_name, char *mmo_name, char *mml_name){
 	return mmixal(mms_name, mmo_name, mml_name);
 }
+mem_tetra *mem_find_by_partition(unsigned int high, unsigned int low){
+	octa addr;
+	addr.h = high;
+	addr.l = low;
+	return mem_find(addr);
+}
+void set_execution_breakpoint_w(unsigned int addr_high, unsigned int addr_low){
+	mem_find_by_partition(addr_high, addr_low)->bkpt |= exec_bit;
+}
+void clear_execution_breakpoint_w(unsigned int addr_high, unsigned int addr_low){
+	mem_find_by_partition(addr_high, addr_low)->bkpt &= ~exec_bit;
+}
+int has_exec_breakpoint_w(unsigned int addr_high, unsigned int addr_low){
+	return (mem_find_by_partition(addr_high, addr_low)->bkpt & exec_bit) ? 1 : 0;
+}
+//private method, not visible to caller
 
 void mmix_lib_initialize_w(void){
 	// lib function signature is int, but the implementation only returns zero
