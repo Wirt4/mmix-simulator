@@ -3,7 +3,6 @@
 #define GENERAL_REGISTER_COUNT 256
 #define SPECIAL_REGISTER_COUNT 32
 // mirror of mmixlib so can effectively unit test
-#include "mmixlib.h"
 
 /**
  * Assembles an MMIXAL source file into an .mmo object file.
@@ -81,13 +80,6 @@ void mmix_lib_finalize_w(void);
 void mmix_finalize_w(void);
 
 /**
- * Returns the opcode of the most recently fetched instruction.
- * outputs: mmix_opcode enum value representing the decoded instruction
- * preconditions: mmix_fetch_instruction_w() has been called at least once
- */
-mmix_opcode get_op(void);
-
-/**
  * Returns 1 if the simulator is halted, 0 if not.
  * preconditions: simulator is in an initialized state
  */
@@ -103,6 +95,12 @@ int get_resuming(void);
  * input: value: 1 for true (resume), 0 for false
  */
 void set_resuming(int value);
+
+/**
+   * returns 1 if the current opcode is RESUME
+   * else, returns 0
+   **/
+int current_opcode_is_resume(void);
 
 /**
  * Returns the number of local registers currently in use (the L register).
@@ -161,4 +159,3 @@ void clear_execution_breakpoint_w(unsigned int addr_high, unsigned int addr_low)
 int has_exec_breakpoint_w(unsigned int addr_high, unsigned int addr_low);
 
 #endif
-
