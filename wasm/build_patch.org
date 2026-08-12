@@ -1,0 +1,371 @@
+* Intro
+* Body
+** Problem areas
+*** github actions error
+#+BEGIN_EXAMPLE
+#43 [dev 13/15] RUN cd wasm && make wasm
+#43 0.058 mkdir -p build/mmixlib
+#43 0.062 cp vendor/mmixware/boilerplate.w build/mmixlib/boilerplate.w
+#43 0.064 cd build/mmixlib && ctangle ../../vendor/mmixware/abstime.w
+#43 0.069 clang -o build/mmixlib/abstime build/mmixlib/abstime.c
+#43 0.125 build/mmixlib/abstime > build/mmixlib/abstime.h
+#43 0.129 cp vendor/mmixlib/mmixlib.h build/mmixlib/mmixlib.h
+#43 0.132 cp vendor/mmixlib/libglobals.h build/mmixlib/libglobals.h
+#43 0.134 cp vendor/mmixlib/libmmixal.h build/mmixlib/libmmixal.h
+#43 0.137 cp vendor/mmixlib/libname.h build/mmixlib/libname.h
+#43 0.139 cp vendor/mmixlib/libbase.h build/mmixlib/libbase.h
+#43 0.142 cp src/libconfig.h build/mmixlib/libconfig.h
+#43 0.144 cp src/libimport.h build/mmixlib/libimport.h
+#43 0.146 cd build/mmixlib && ctangle ../../vendor/mmixware/mmix-sim.w ../../vendor/mmixlib/mmixlib.ch
+#43 0.153 mkdir -p build/wasm
+#43 0.155 emcc -Wall -Wextra -Wpedantic -Werror -Isrc/ -isystem build/mmixlib -c src/glue.c -o build/wasm/src_glue.o
+#43 0.330 shared:INFO: (Emscripten: Running sanity checks)
+#43 0.371 In file included from src/glue.c:3:
+#43 0.371 In file included from src/mmixlib_wrapper.h:6:
+#43 0.371 build/mmixlib/mmixlib.h:14:14: error: expected identifier
+#43 0.371    14 | typedef enum{false,true}bool;
+#43 0.371       |              ^
+#43 0.371 /opt/emsdk/upstream/lib/clang/21/include/stdbool.h:26:15: note: expanded from macro 'false'
+#43 0.371    26 | #define false 0
+#43 0.371       |               ^
+#43 0.371 In file included from src/glue.c:3:
+#43 0.371 In file included from src/mmixlib_wrapper.h:6:
+#43 0.371 build/mmixlib/mmixlib.h:14:20: error: expected identifier
+#43 0.371    14 | typedef enum{false,true}bool;
+#43 0.371       |                    ^
+#43 0.371 /opt/emsdk/upstream/lib/clang/21/include/stdbool.h:25:14: note: expanded from macro 'true'
+#43 0.371    25 | #define true 1
+#43 0.371       |              ^
+#43 0.372 In file included from src/glue.c:3:
+#43 0.372 In file included from src/mmixlib_wrapper.h:6:
+#43 0.372 build/mmixlib/mmixlib.h:14:25: error: expected ';' after enum
+#43 0.372    14 | typedef enum{false,true}bool;
+#43 0.372       |                         ^
+#43 0.374 3 errors generated.
+#43 0.376 make: *** [Makefile:180: build/wasm/src_glue.o] Error 1
+#43 ERROR: process "/bin/sh -c cd wasm && make wasm" did not complete successfully: exit code: 2
+------
+ > [dev 13/15] RUN cd wasm && make wasm:
+0.371 /opt/emsdk/upstream/lib/clang/21/include/stdbool.h:25:14: note: expanded from macro 'true'
+0.371    25 | #define true 1
+0.371       |              ^
+0.372 In file included from src/glue.c:3:
+0.372 In file included from src/mmixlib_wrapper.h:6:
+0.372 build/mmixlib/mmixlib.h:14:25: error: expected ';' after enum
+0.372    14 | typedef enum{false,true}bool;
+0.372       |                         ^
+0.374 3 errors generated.
+0.376 make: *** [Makefile:180: build/wasm/src_glue.o] Error 1
+------
+ERROR: failed to build: failed to solve: process "/bin/sh -c cd wasm && make wasm" did not complete successfully: exit code: 2
+Reference
+Check build summary support
+Error: buildx failed with: ERROR: failed to build: failed to solve: process "/bin/sh -c cd wasm && make wasm" did not complete successfully: exit code: 2
+#+END_EXAMPLE
+*** description of error
+Comes from the WASM build command on line 580:
+=#43 [dev 13/15] RUN cd wasm && make wasm= 
+
+What appears to be throwing are typedefs from =mmixlib.h=
+a vendor file as it's included in =mmixlib_wrapper.h= line 6.
+=#include "mmixlib.h"=
+Why is that included in the header and not the implmentation?
+It's not a breaking change, since mmixlib.h inclusion itself goes back 4 months.
+It could be a build issue.
+
+Note: so far have been running ==make clean== and  ==make wasm== from inside the mac environment, not the docker container.
+Trying the docker stuff...
+cleaned with ==make clean== switched on the docker dev mode using the script in the top-level =sh= directory. make wasm again. no dice.
+
+Gonna ask the clanker...
+Clanker suggests adding
+=#undef True= and =#undef false= above =#include mmixlib.h=
+Teachable moment here: =#undef= is appearantely the way to undo a macro
+** Patches
+Add this to the top of the wrapper header.
+#+NAME fix
+#+BEGIN_SRC C
+  #undef true
+  #undef false
+#+END_SRC
+
+Like so:
+#+BEGIN_EXAMPLE
+  #ifndef MMIXLIB_WRAPPER_H
+  #define MMIXLIB_WRAPPER_H
+  #define GENERAL_REGISTER_COUNT 256
+  #define SPECIAL_REGISTER_COUNT 32
+  // mirror of mmixlib so can effectively unit test
+  <<fix>>
+  #include "mmixlib.h"
+#+END_EXAMPLE
+
+Run the following to patch:
+#+BEGIN_SRC bash
+emacs --batch --eval "(require 'org)" --eval '(org-babel-tangle-file "build_patch.org")'
+#+END_SRC
+
+Clean
+#+BEGIN_SRC bash
+  make clean
+#+END_SRC
+
+#+RESULTS:
+| rm | -rf | build/mmixlib | build/wasm      |                 |              |                |                       |                  |                  |                     |
+| rm | -f  | src/glue.o    | src/assembler.o | src/simulator.o | src/assert.o | src/io_utils.o | src/mmixlib_wrapper.o | src/type_utils.o | test_integration | test_unit_assembler |
+| rm | -f  | program.mmo   |                 |                 |              |                |                       |                  |                  |                     |
+
+and build again
+#+BEGIN_SRC bash
+  make wasm
+#+END_SRC
+
+#+RESULTS:
+| mkdir                                     | -p                            | build/mmixlib               |                         |                                  |                                 |          |               |    |            |    |                       |
+| cp                                        | vendor/mmixware/boilerplate.w | build/mmixlib/boilerplate.w |                         |                                  |                                 |          |               |    |            |    |                       |
+| cd                                        | build/mmixlib                 | &&                          | ctangle                 | ../../vendor/mmixware/abstime.w  |                                 |          |               |    |            |    |                       |
+| This                                      | is                            | CTANGLE                     | (Version                | 4.12.2)                          |                                 |          |               |    |            |    |                       |
+| *1                                        |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| Writing                                   | the                           | output                      | file                    | (abstime.c):                     |                                 |          |               |    |            |    |                       |
+| Done.                                     |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (No                                       | errors                        | were                        | found.)                 |                                  |                                 |          |               |    |            |    |                       |
+| clang                                     | -o                            | build/mmixlib/abstime       | build/mmixlib/abstime.c |                                  |                                 |          |               |    |            |    |                       |
+| build/mmixlib/abstime                     | >                             | build/mmixlib/abstime.h     |                         |                                  |                                 |          |               |    |            |    |                       |
+| cp                                        | vendor/mmixlib/mmixlib.h      | build/mmixlib/mmixlib.h     |                         |                                  |                                 |          |               |    |            |    |                       |
+| cp                                        | vendor/mmixlib/libglobals.h   | build/mmixlib/libglobals.h  |                         |                                  |                                 |          |               |    |            |    |                       |
+| cp                                        | vendor/mmixlib/libmmixal.h    | build/mmixlib/libmmixal.h   |                         |                                  |                                 |          |               |    |            |    |                       |
+| cp                                        | vendor/mmixlib/libname.h      | build/mmixlib/libname.h     |                         |                                  |                                 |          |               |    |            |    |                       |
+| cp                                        | vendor/mmixlib/libbase.h      | build/mmixlib/libbase.h     |                         |                                  |                                 |          |               |    |            |    |                       |
+| cp                                        | src/libconfig.h               | build/mmixlib/libconfig.h   |                         |                                  |                                 |          |               |    |            |    |                       |
+| cp                                        | src/libimport.h               | build/mmixlib/libimport.h   |                         |                                  |                                 |          |               |    |            |    |                       |
+| cd                                        | build/mmixlib                 | &&                          | ctangle                 | ../../vendor/mmixware/mmix-sim.w | ../../vendor/mmixlib/mmixlib.ch |          |               |    |            |    |                       |
+| This                                      | is                            | CTANGLE                     | (Version                | 4.12.2)                          |                                 |          |               |    |            |    |                       |
+| *1*4*10*17*24*41*57*63*92*117*142*155*195 |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| Writing                                   | the                           | output                      | files:                  | (mmix-sim.c)                     |                                 |          |               |    |            |    |                       |
+| (libtype.h).                              |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libprint.c)                              |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libarith.h)                              |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libmem.c)                                |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libload.c)..                             |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libshowline.c)                           |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libprofile.c)                            |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (mmix-io.h)                               |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libmmget.c)                              |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libmmput.c)                              |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libstdin.c)                              |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libtrace.c).                             |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libstats.c)                              |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (liblibinit.c)                            |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libinit.c)                               |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libboot.c)                               |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libcommand.c)                            |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libinteract.c)..                         |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libfetch.c)                              |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libperform.c).....500...                 |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libdtrap.c)                              |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libfinal.c)                              |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (liblibfinal.c)                           |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libglobals.c)....                        |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libsoption.c)                            |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libshowbreaks.c)                         |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (libdump.c)                               |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| Done.                                     |                               |                             |                         |                                  |                                 |          |               |    |            |    |                       |
+| (No                                       | errors                        | were                        | found.)                 |                                  |                                 |          |               |    |            |    |                       |
+| mkdir                                     | -p                            | build/wasm                  |                         |                                  |                                 |          |               |    |            |    |                       |
+| emcc                                      | -Wall                         | -Wextra                     | -Wpedantic              | -Werror                          | -Isrc/                          | -isystem | build/mmixlib | -c | src/glue.c | -o | build/wasm/src_glue.o |
+
+New error:
+In file included from src/glue.c:3:
+In file included from src/mmixlib_wrapper.h:7:
+build/mmixlib/mmixlib.h:14:14: error: expected identifier
+   14 | typedef enum{false,true}bool;
+      |              ^
+/opt/homebrew/Cellar/emscripten/5.0.6/libexec/cache/sysroot/include/emscripten/em_js.h:90:15: note: expanded from macro 'false'
+   90 | #define false (!!0)
+      |               ^
+In file included from src/glue.c:3:
+In file included from src/mmixlib_wrapper.h:7:
+build/mmixlib/mmixlib.h:14:20: error: expected identifier
+   14 | typedef enum{false,true}bool;
+      |                    ^
+/opt/homebrew/Cellar/emscripten/5.0.6/libexec/cache/sysroot/include/emscripten/em_js.h:89:14: note: expanded from macro 'true'
+   89 | #define true (!!1)
+      |              ^
+In file included from src/glue.c:3:
+In file included from src/mmixlib_wrapper.h:7:
+build/mmixlib/mmixlib.h:14:25: error: expected ';' after enum
+   14 | typedef enum{false,true}bool;
+      |                         ^
+3 errors generated.
+make: *** [build/wasm/src_glue.o] Error 1
+[ Babel evaluation exited with code 2 ]
+
+*** the wrapper header
+#+BEGIN_SRC C :tangle src/mmixlib_wrapper.h :noweb yes
+  #ifndef MMIXLIB_WRAPPER_H
+  #define MMIXLIB_WRAPPER_H
+  #define GENERAL_REGISTER_COUNT 256
+  #define SPECIAL_REGISTER_COUNT 32
+  // mirror of mmixlib so can effectively unit test
+  <<fix>>
+  #include "mmixlib.h"
+
+  /**
+   ,* Assembles an MMIXAL source file into an .mmo object file.
+   ,* inputs: mms_name: path to the source file,
+   ,*         mmo_name: path for the output .mmo file,
+   ,*         mml_name: path for the listing file (may be NULL)
+   ,* outputs: 0 on success, negative on fatal errors,
+   ,*          positive value = number of errors found in the input
+   ,*/
+  int mmixal_w(char *mms_name, char *mmo_name, char *mml_name);
+
+  /**
+   ,* Initializes the mmixlib library.
+   ,* preconditions: none
+   ,* postconditions: mmixlib is initialized and ready for use
+   ,*/
+  void mmix_lib_initialize_w(void);
+
+  /**
+   ,* Initializes the MMIX simulator state (registers, memory, CPU).
+   ,* preconditions: mmix_lib_initialize_w() has been called
+   ,* postconditions: MMIX simulator state is reset to initial values
+   ,*/
+  void mmix_initialize_w(void);
+  void set_execution_breakpoint_w(unsigned int addr_high, unsigned int addr_low);
+  void clear_execution_breakpoint_w(unsigned int addr_high, unsigned int addr_low);
+  /**
+   ,* Boots the MMIX simulator, setting the program counter to the entry point.
+   ,* preconditions: mmix_initialize_w() has been called
+   ,* postconditions: program counter is set to boot location, simulator is ready for execution
+   ,*/
+  void mmix_boot_w(void);
+
+  /**
+   ,* Loads a compiled .mmo object file into the simulator's memory.
+   ,* input: mmo_file_name: path to the .mmo file
+   ,* preconditions: mmix_boot_w() has been called; the file must exist and be valid .mmo format
+   ,* postconditions: program code is loaded into simulated memory
+   ,*/
+  void mmix_load_file_w(char *mmo_file_name);
+
+  /**
+   ,* Fetches the next instruction from simulated memory at the program counter.
+   ,* preconditions: simulator is initialized with a valid program loaded
+   ,* postconditions: global opcode and instruction fields are updated
+   ,*/
+  void mmix_fetch_instruction_w(void);
+
+  /**
+   ,* Executes the most recently fetched instruction, modifying registers and memory.
+   ,* preconditions: mmix_fetch_instruction_w() has been called
+   ,* postconditions: simulator state is updated; halted flag may be set if HALT was executed
+   ,*/
+  void mmix_perform_instruction_w(void);
+
+  /**
+   ,* Handles dynamic traps triggered during instruction execution (e.g. division by zero).
+   ,* preconditions: simulator is in a state where a dynamic trap has occurred
+   ,* postconditions: trap is handled; resuming flag may be set
+   ,*/
+  void mmix_dynamic_trap_w(void);
+
+  /**
+   ,* Finalizes the mmixlib library and releases library resources.
+   ,* preconditions: mmix_lib_initialize_w() was called
+   ,* postconditions: library resources are released
+   ,*/
+  void mmix_lib_finalize_w(void);
+
+  /**
+   ,* Finalizes the MMIX simulator and cleans up simulator state.
+   ,* preconditions: simulator was initialized
+   ,* postconditions: simulator state is cleaned up and memory is freed
+   ,*/
+  void mmix_finalize_w(void);
+
+  /**
+   ,* Returns the opcode of the most recently fetched instruction.
+   ,* outputs: mmix_opcode enum value representing the decoded instruction
+   ,* preconditions: mmix_fetch_instruction_w() has been called at least once
+   ,*/
+  mmix_opcode get_op(void);
+
+  /**
+   ,* Returns 1 if the simulator is halted, 0 if not.
+   ,* preconditions: simulator is in an initialized state
+   ,*/
+  int get_halted(void);
+
+  /**
+   ,* Returns 1 if the simulator is in a resumable state (e.g. after a resumable trap), 0 otherwise.
+   ,*/
+  int get_resuming(void);
+
+  /**
+   ,* Sets the resuming flag, controlling whether the simulator resumes after a trap.
+   ,* input: value: 1 for true (resume), 0 for false
+   ,*/
+  void set_resuming(int value);
+
+  /**
+   ,* Returns the number of local registers currently in use (the L register).
+   ,* preconditions: simulator is initialized with a valid program loaded
+   ,*/
+  int get_local_register_count(void);
+
+  /**
+   ,* Returns the index of the first global register (the G register).
+   ,* Registers from 0..G-1 are local/marginal; G..255 are global.
+   ,* preconditions: simulator is initialized with a valid program loaded
+   ,*/
+  int get_global_register_start(void);
+
+  /**
+   ,* Returns one 32-bit half of a local register's 64-bit value.
+   ,* inputs: index: local register index in the register ring,
+   ,*         partition: 0 for the high 32 bits, 1 for the low 32 bits
+   ,* preconditions: index is within the local register ring
+   ,*/
+  unsigned int get_local_register_data(int index, int partition);
+
+  /**
+   ,* Returns one 32-bit half of a global register's 64-bit value.
+   ,* inputs: index: global register index (0-based offset from g[]),
+   ,*         partition: 0 for the high 32 bits, 1 for the low 32 bits
+   ,* preconditions: index is a valid global register index
+   ,*/
+  unsigned int get_global_register_data(int index, int partition);
+
+  /**
+   ,* Returns the bitmask used to wrap indices into the local register ring.
+   ,* The ring size is lring_mask + 1 (always a power of two).
+   ,* preconditions: simulator is initialized
+   ,*/
+  int get_local_ring_mask(void);
+
+  /**
+   ,* passes commandline arguments to MMIX
+   ,* inputs: argc: the number of arguments, argv, an array strings, the commandline arguments themselves
+  ,*/
+  void mmix_commandline_w(int argc, char *argv[]);
+
+  /**
+   ,* Returns one 32-bit half of the instruction pointer (address of the next
+   ,* instruction to be fetched).
+   ,* inputs: partition: 0 for the high 32 bits, 1 for the low 32 bits
+   ,* preconditions: simulator is initialized with a valid program loaded
+   ,*/
+  unsigned int get_inst_ptr(int partition);
+
+  void set_execution_breakpoint_w(unsigned int addr_high, unsigned int addr_low);
+
+  void clear_execution_breakpoint_w(unsigned int addr_high, unsigned int addr_low);
+
+  int has_exec_breakpoint_w(unsigned int addr_high, unsigned int addr_low);
+
+  #endif
+
+#+END_SRC
+* Conclusion
