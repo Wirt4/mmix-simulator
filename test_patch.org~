@@ -463,5 +463,3 @@ describe("Module Adapter", () => {
 #+begin_src bash :results raw
   tsc --noEmit
 #+end_src
-
-#+RESULTS:
