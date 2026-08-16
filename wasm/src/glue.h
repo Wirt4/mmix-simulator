@@ -28,6 +28,10 @@
  */
 WASM_EXPORT int assemble_mmixal(size_t len);
 
+WASM_EXPORT void set_breakpoint(unsigned int addr_high, unsigned int addr_low);
+
+WASM_EXPORT void clear_breakpoint(unsigned int addr_high, unsigned int addr_low);
+
 /** Returns the size in bytes of the assembly listing */
 WASM_EXPORT size_t get_listing_size(void);
 
@@ -153,17 +157,5 @@ WASM_EXPORT unsigned int get_breakpoint(int ndx, int partition);
  * @return 0 on success, -1 on failure
  */
 WASM_EXPORT int update_breakpoint_count(int count);
-
-/*
- * Stores an octa in the breakpoint buffer
- * @param ndx: the position on the buffer to write to
- * @param high: the upper tetra to write
- * @param low: the lower tetra to write
- * @return 0 on success: -1 on failure
- * @pre: ndx is non-negative
- * @pre: ndx is less than current breakpoint count
- * @post the full octa is written to the breakpoint buffer
- * */
-WASM_EXPORT int set_breakpoint(int ndx, unsigned int high, unsigned int low);
 
 #endif /*GLUE_H */

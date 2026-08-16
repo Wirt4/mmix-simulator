@@ -20,33 +20,33 @@ describe("Module Adapter", () => {
       "\tTRAP\t0,Halt,0\n"
 
     heap = new Uint8Array(250)
-
-    mockModule = {
-      ccall: vi.fn(),
-      cwrap: vi.fn(),
-      HEAPU8: heap,
-      _get_stderr_size: vi.fn(),
-      _get_stdout_pointer: vi.fn(),
-      _get_stderr_pointer: vi.fn(),
-      _get_source_code_pointer: vi.fn(),
-      _assemble_mmixal: vi.fn(),
-      _get_stdout_size: vi.fn(),
-      _mmix_initialize_simulator: vi.fn(),
-      _mmix_finalize_simulator: vi.fn(),
-      _mmix_perform_instructions: vi.fn(),
-      _is_halted: vi.fn(),
-      _general_register_count: vi.fn(),
-      _special_register_count: vi.fn(),
-      _get_register_data: vi.fn(),
-      _get_listing_pointer: vi.fn(),
-      _get_listing_size: vi.fn(),
-      _get_args_pointer: vi.fn(),
-      _arg_size: vi.fn(),
-      _get_program_counter: vi.fn(),
-      _get_breakpoint: vi.fn(),
-      _update_breakpoint_count: vi.fn(),
-      _set_breakpoint: vi.fn()
-    }
+  mockModule = {
+    ccall: vi.fn(),
+    cwrap: vi.fn(),
+    HEAPU8: heap,
+    _clear_breakpoint: vi.fn(),
+    _get_stderr_size: vi.fn(),
+    _get_stdout_pointer: vi.fn(),
+    _get_stderr_pointer: vi.fn(),
+    _get_source_code_pointer: vi.fn(),
+    _assemble_mmixal: vi.fn(),
+    _get_stdout_size: vi.fn(),
+    _mmix_initialize_simulator: vi.fn(),
+    _mmix_finalize_simulator: vi.fn(),
+    _mmix_perform_instructions: vi.fn(),
+    _is_halted: vi.fn(),
+    _general_register_count: vi.fn(),
+    _special_register_count: vi.fn(),
+    _get_register_data: vi.fn(),
+    _get_listing_pointer: vi.fn(),
+    _get_listing_size: vi.fn(),
+    _get_args_pointer: vi.fn(),
+    _arg_size: vi.fn(),
+    _get_program_counter: vi.fn(),
+    _get_breakpoint: vi.fn(),
+    _update_breakpoint_count: vi.fn(),
+    _set_breakpoint: vi.fn()
+  }
   })
 
   it("AssembleMMIXAL writes source code to HEAP8", () => {

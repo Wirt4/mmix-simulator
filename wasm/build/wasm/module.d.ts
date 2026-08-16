@@ -20,6 +20,8 @@ interface WasmModule {
   _get_stdout_pointer(): number;
   _get_stderr_pointer(): number;
   _assemble_mmixal(_0: number): number;
+  _set_breakpoint(_0: number, _1: number): void;
+  _clear_breakpoint(_0: number, _1: number): void;
   _get_stdout_size(): number;
   _mmix_perform_instructions(_0: number): number;
   _mmix_initialize_simulator(_0: number): number;
@@ -36,7 +38,6 @@ interface WasmModule {
   _get_program_counter(_0: number): number;
   _get_breakpoint(_0: number, _1: number): number;
   _update_breakpoint_count(_0: number): number;
-  _set_breakpoint(_0: number, _1: number, _2: number): number;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports;
